@@ -2,7 +2,10 @@
 // sending the client the full state of the game every time.
 // Support for sending a delta can come later.
 
+// TODO How to describe where a tile is in relation to other tiles.
+
 syntax = "proto3";
+package types;
 
 // This is the "primary key" to each of the heisters.
 // The other two are just flavour.
@@ -13,6 +16,7 @@ enum HeisterColor {
   ORANGE = 3;
 }
 
+// The symbol of a heister. This is just used for flavour / accessibility.
 enum HeisterSymbol {
   SWORD = 0;
   VIAL = 1;
@@ -20,6 +24,7 @@ enum HeisterSymbol {
   AXE = 3;
 }
   
+// The name of a heister. This is just used for flavour / accessibility.
 enum HeisterName {
   BARBARIAN = 0;
   MAGE = 1;
@@ -30,25 +35,24 @@ enum HeisterName {
 // This is used to describe the position of a heister on a tile.
 // Should be in the range of (0,0) to (3,3).
 message Position {
-  uint32 x;
-  uint32 y;
+  uint32 x = 1;
+  uint32 y = 2;
 }
 
 // Describes a tile, which is essentially just 16 squares.
 // These squares run left to right, top to bottom.
-// TODO How to describe where a tile is in relation to other tiles.
 message Tile {
-  repeated Square squares = 16;
+  repeated Square squares = 1;
 }
 
 // Describes a square, which is 1 of 16 units of a tile.
 // A square has 4 walls and a type.
 message Square {
-  WallType north_wall;
-  WallType east_wall;
-  WallType south_wall;
-  WallType west_wall;
-  SquareType square_type = SquareType.NORMAL;
+  WallType north_wall = 1;
+  WallType east_wall = 2;
+  WallType south_wall = 3;
+  WallType west_wall = 4;
+  SquareType square_type = 5;
 }
 
 // Describes what type of square the square is.
@@ -69,7 +73,7 @@ enum SquareType {
   ESCALATOR = 13;
   TIMER_FLIP = 14;
   TIMER_FLIP_USED = 15;
-  IMPASSABLE = 16;
+  FILLED = 16;  // A block that you can't enter.
 }
 
 // Describes the type of a wall.
@@ -86,13 +90,13 @@ enum WallType {
 // four movable game tokens, not the players themselves.
 message Heister {
   // Color of the heister.
-  HeisterColor heister_color;
+  HeisterColor heister_color = 1;
   
   // Whether the heister has taken their item.
-  bool has_taken_item;
+  bool has_taken_item = 2;
 
   // Whether the heister has reached the escape.
-  bool has_escaped;
+  bool has_escaped = 3;
 }
 
 // Things a player can do
@@ -109,7 +113,7 @@ enum Ability {
 // Information about the players themselves.
 message Player {
   // Things the player can do.
-  repeated Ability abilities;
+  repeated Ability abilities = 1; 
 }
 
 // Whether the game is ongoing or has been won / lost.
@@ -123,28 +127,28 @@ enum GameStatus {
 // Captures all information related to the game.
 message GameState {
   // Word(s) that points to this game instance.
-  string game_name;
+  string game_name = 1;
 
   // A unixtime saying when the game started.
-  uint64 game_started;
+  uint64 game_started = 2;
 
   // A unixtime saying when the timer runs out.
-  uint64 timer_runs_out;
+  uint64 timer_runs_out = 3;
 
   // Captures the state of the game board.
-  repeated Tile tiles;
+  repeated Tile tiles = 4;
 
   // Captures the state of the heisters.
-  repeated Heister heisters = 4;
+  repeated Heister heisters = 5;
 
   // Whether all items have been taken.
-  bool all_items_taken;
+  bool all_items_taken = 6;
 
   // Number of tiles that remain to be revealed.
-  uint32 remaining_tiles;
+  uint32 remaining_tile = 7;
 
   // Result of the game.
-  GameStatus game_status;
+  GameStatus game_status = 8;
 }
 
 
