@@ -1,5 +1,11 @@
+// These definition work under the assumption that the server will be
+// sending the client the full state of the game every time.
+// Support for sending a delta can come later.
+
 syntax = "proto3";
 
+// This is the "primary key" to each of the heisters.
+// The other two are just flavour.
 enum HeisterColor {
   YELLOW = 0;
   PURPLE = 1;
@@ -30,6 +36,7 @@ message Position {
 
 // Describes a tile, which is essentially just 16 squares.
 // These squares run left to right, top to bottom.
+// TODO How to describe where a tile is in relation to other tiles.
 message Tile {
   repeated Square squares = 16;
 }
@@ -59,8 +66,10 @@ enum SquareType {
   PURPLE_ESCAPE = 10;
   GREEN_ESCAPE = 11;
   ORANGE_ESCAPE = 12;
-  TIMER_FLIP = 13;
-  ESCALATOR = 14;
+  ESCALATOR = 13;
+  TIMER_FLIP = 14;
+  TIMER_FLIP_USED = 15;
+  IMPASSABLE = 16;
 }
 
 // Describes the type of a wall.
@@ -73,15 +82,48 @@ enum WallType {
   ORANGE_DOOR = 5;
 }
 
-enum GameResult {
-  ONGOING = 0;
-  VICTORY = 1;
-  DEFEAT = 2; 
+// Information about each heister. A heister is one of the
+// four movable game tokens, not the players themselves.
+message Heister {
+  // Color of the heister.
+  HeisterColor heister_color;
+  
+  // Whether the heister has taken their item.
+  bool has_taken_item;
+
+  // Whether the heister has reached the escape.
+  bool has_escaped;
 }
 
+// Things a player can do
+enum Ability {
+  MOVE_NORTH = 0;
+  MOVE_EAST = 1;
+  MOVE_SOUTH = 2;
+  MOVE_WEST = 3;
+  TELEPORT = 4;
+  REVEAL_TILES = 5;
+  USE_ESCALATOR = 6;
+} 
+
+// Information about the players themselves.
+message Player {
+  // Things the player can do.
+  repeated Ability abilities;
+}
+
+// Whether the game is ongoing or has been won / lost.
+enum GameStatus {
+  STAGING = 0;
+  ONGOING = 1;
+  VICTORY = 2;
+  DEFEAT = 3; 
+}
+
+// Captures all information related to the game.
 message GameState {
-  // Captures the state of the game board.
-  repeated Tile tiles;
+  // Word(s) that points to this game instance.
+  string game_name;
 
   // A unixtime saying when the game started.
   uint64 game_started;
@@ -89,8 +131,20 @@ message GameState {
   // A unixtime saying when the timer runs out.
   uint64 timer_runs_out;
 
+  // Captures the state of the game board.
+  repeated Tile tiles;
+
+  // Captures the state of the heisters.
+  repeated Heister heisters = 4;
+
+  // Whether all items have been taken.
+  bool all_items_taken;
+
+  // Number of tiles that remain to be revealed.
+  uint32 remaining_tiles;
+
   // Result of the game.
-  GameResult game_result;
+  GameStatus game_status;
 }
 
 
