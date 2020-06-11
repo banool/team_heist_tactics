@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+enum HeisterColor {
+  YELLOW = 0;
+  PURPLE = 1;
+  GREEN = 2;
+  ORANGE = 3;
+}
+
+enum HeisterSymbol {
+  SWORD = 0;
+  VIAL = 1;
+  BOW = 2;
+  AXE = 3;
+}
+  
+enum HeisterName {
+  BARBARIAN = 0;
+  MAGE = 1;
+  ELF = 2;
+  DWARF = 3;
+}
+  
+// This is used to describe the position of a heister on a tile.
+// Should be in the range of (0,0) to (3,3).
+message Position {
+  uint32 x;
+  uint32 y;
+}
+
+// Describes a tile, which is essentially just 16 squares.
+// These squares run left to right, top to bottom.
+message Tile {
+  repeated Square squares = 16;
+}
+
+// Describes a square, which is 1 of 16 units of a tile.
+// A square has 4 walls and a type.
+message Square {
+  WallType north_wall;
+  WallType east_wall;
+  WallType south_wall;
+  WallType west_wall;
+  SquareType square_type = SquareType.NORMAL;
+}
+
+// Describes what type of square the square is.
+enum SquareType {
+  NORMAL = 0;
+  YELLOW_TELEPORT_PAD = 1;
+  PURPLE_TELEPORT_PAD = 2;
+  GREEN_TELEPORT_PAD = 3;
+  ORANGE_TELEPORT_PAD = 4;
+  YELLOW_ITEM = 5;
+  PURPLE_ITEM = 6;
+  GREEN_ITEM = 7;
+  ORANGE_ITEM = 8;
+  YELLOW_ESCAPE = 9;
+  PURPLE_ESCAPE = 10;
+  GREEN_ESCAPE = 11;
+  ORANGE_ESCAPE = 12;
+  TIMER_FLIP = 13;
+  ESCALATOR = 14;
+}
+
+// Describes the type of a wall.
+enum WallType {
+  CLEAR = 0;
+  IMPASSABLE = 1;
+  YELLOW_DOOR = 2;
+  PURPLE_DOOR = 3;
+  GREEN_DOOR = 4;
+  ORANGE_DOOR = 5;
+}
+
+enum GameResult {
+  ONGOING = 0;
+  VICTORY = 1;
+  DEFEAT = 2; 
+}
+
+message GameState {
+  // Captures the state of the game board.
+  repeated Tile tiles;
+
+  // A unixtime saying when the game started.
+  uint64 game_started;
+
+  // A unixtime saying when the timer runs out.
+  uint64 timer_runs_out;
+
+  // Result of the game.
+  GameResult game_result;
+}
+
+
