@@ -15,3 +15,9 @@ Use tera for the templates.
 ## Thoughts on storage
 
 I think I want to sync the state of the game to disk every 5 seconds or so. The server could have multiple active games at a time. How do I collect all their states and write to disk at once?
+
+On startup, read in the games that exist. Before starting a game, you must persist it to the storage. When making a game, confirm the name isn't already in use (have both a join and a new game option, unlike codenames).
+
+## Thoughts on internal game representation
+
+The game should be a struct with methods that are attempts to influence the state of the game. The return should either be a struct that either indicates success, or a something saying why the move was invalid. If the move was invalid, a message should be returned to the client. On a valid attempt to influence the game, a flag should be set that tells the server to tell the client the new state of the game. This of course assumes web sockets. If this was request response, you would instead return the new state in the response. The flag could be a map from game ID to this flag. The web server should also have a map from game ID to websocket, so you know which sockets you need to push a game state update to.
