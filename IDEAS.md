@@ -21,3 +21,19 @@ On startup, read in the games that exist. Before starting a game, you must persi
 ## Thoughts on internal game representation
 
 The game should be a struct with methods that are attempts to influence the state of the game. The return should either be a struct that either indicates success, or a something saying why the move was invalid. If the move was invalid, a message should be returned to the client. On a valid attempt to influence the game, a flag should be set that tells the server to tell the client the new state of the game. This of course assumes web sockets. If this was request response, you would instead return the new state in the response. The flag could be a map from game ID to this flag. The web server should also have a map from game ID to websocket, so you know which sockets you need to push a game state update to.
+
+Requests to move things should include the location where they think the piece is. If the piece is no longer at that place when the request is consumed, return "Someone else moved the piece first". Alternatively, there could be a locking mechanism, where you have to try to take the lock on a piece first, move it, and then release it. I think this would be too high overhead.
+
+The server should consume messages from the socket and then call the methods on the game representation.
+
+## Setting up a game
+
+1. Send a request to set up a game. For the first user, this should redirect you to a page like site.com/word for the game. Now we're on the game page.
+2. Whenever anyone visits the game page. If the game hasn't started, you should see a form telling you to enter a name, perhaps how many players are already in the game, etc. The server should return an ID for your player, which you need to include with any requests, so the server can validate the request.
+
+These two should just be HTTP requests.
+
+From this point, you just send requests to influence the game state and receive updates from the server, all via the web socket.
+
+## Thoughts on the frontend
+The frontend should validate whether a move is valid based on the user's abilities.

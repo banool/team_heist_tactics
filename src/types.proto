@@ -34,15 +34,22 @@ enum HeisterName {
   
 // This is used to describe the position of a heister on a tile.
 // Should be in the range of (0,0) to (3,3).
-message Position {
+message TilePosition {
   uint32 x = 1;
   uint32 y = 2;
+}
+
+// This is used to describe a position relative to the whole map.
+message MapPosition {
+  sint32 x = 1;
+  sint32 y = 2;
 }
 
 // Describes a tile, which is essentially just 16 squares.
 // These squares run left to right, top to bottom.
 message Tile {
   repeated Square squares = 1;
+  MapPosition position = 2;
 }
 
 // Describes a square, which is 1 of 16 units of a tile.
@@ -91,12 +98,15 @@ enum WallType {
 message Heister {
   // Color of the heister.
   HeisterColor heister_color = 1;
+
+  // Position of the heister.
+  MapPosition map_position = 2;
   
   // Whether the heister has taken their item.
-  bool has_taken_item = 2;
+  bool has_taken_item = 3;
 
   // Whether the heister has reached the escape.
-  bool has_escaped = 3;
+  bool has_escaped = 4;
 }
 
 // Things a player can do
@@ -112,8 +122,11 @@ enum Ability {
 
 // Information about the players themselves.
 message Player {
+  // Name of the player.
+  string name = 1;
+
   // Things the player can do.
-  repeated Ability abilities = 1; 
+  repeated Ability abilities = 2;
 }
 
 // Whether the game is ongoing or has been won / lost.
