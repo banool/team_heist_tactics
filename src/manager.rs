@@ -1,5 +1,3 @@
 // Manages all the games.
 
-pub struct GameManager {
-
-}
+pub struct GameManager {}

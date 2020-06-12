@@ -2,21 +2,17 @@
 extern crate rocket;
 
 // Generic imports.
-use std::env;
 use log::{error, info};
+use std::env;
 
 // Rocket imports.
 use rocket_contrib::templates::Template;
 
 // My imports.
-use team_heist_tactics::game::Game;
 use team_heist_tactics::manager::GameManager;
 use team_heist_tactics::web;
 
-
-const REQUIRED_ENV_VARS: &'static [&'static str] = &[
-    "STATIC_ROOT",
-];
+const REQUIRED_ENV_VARS: &'static [&'static str] = &["TODO"];
 
 fn validate_env() -> bool {
     for s in REQUIRED_ENV_VARS.iter() {
@@ -38,7 +34,7 @@ fn main() {
     rocket::ignite()
         .manage(game_manager)
         .mount("/", routes![web::index])
-        .mount("/", routes![web::play])
+        .mount("/play", routes![web::play])
         .attach(Template::fairing())
         .launch();
 }
