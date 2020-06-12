@@ -6,10 +6,12 @@ use std::collections::HashSet;
 use actix::{Actor, StreamHandler};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
+use askama::Template;
 
-#[derive(Serialize)]
-struct TemplateContext {
-    handle: String,
+#[derive(Template)]
+#[template(path = "index.html.j2")]
+struct IndexTemplate<'a> {
+    adjective: &'a str,
 }
 
 // TODO Have a thing here that calls create_game()
@@ -17,11 +19,13 @@ pub async fn index() -> impl Responder {
     // TODO Make this function take in a reference to the server object
     // and use a word from the word list in that server object that it
     // loaded at startup.
-    let context = TemplateContext {
-        handle: "hey".to_string(),
+    let index = IndexTemplate { adjective: "world" };
+    let body = match index.render() {
+        Ok(body) => body,
+        Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
     };
     // Template::render("index", &context)
-    HttpResponse::Ok().body("Index!")
+    HttpResponse::Ok().body(body)
 }
 
 // TODO have a thing here that calls play()
@@ -29,9 +33,6 @@ pub async fn play() -> impl Responder {
     // TODO Make this function take in a reference to the server object
     // and use a word from the word list in that server object that it
     // loaded at startup.
-    let context = TemplateContext {
-        handle: "play".to_string(),
-    };
     HttpResponse::Ok().body("Play!")
 }
 
@@ -49,9 +50,10 @@ pub async fn create_game(game_manager_wrapper: web::Data<GameManagerWrapper>) ->
 
     // Get the handle to the game and return a redirect to play/<that page>.
     // The frontend will use the last part of the URL to build the join_game request.
-    let body = format!("play/{}", game_handle.0.to_string());
+    // TODO Use proper params builder for this.
+    let location = format!("play?handle={}", game_handle.0.to_string());
 
-    HttpResponse::SeeOther().body(body)
+    HttpResponse::SeeOther().header(actix_web::http::header::LOCATION, location).finish()
 }
 
 // TODO This is the one that returns the websocket client connection

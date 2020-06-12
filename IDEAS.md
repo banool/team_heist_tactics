@@ -10,7 +10,7 @@ The outcome was to try protobuf over websockets. Gus and Rust Foundation do _not
 
 For protobuf, I think https://github.com/danburkert/prost.
 
-Use tera for the templates.
+Use askama for the templates.
 
 ## Thoughts on storage
 
