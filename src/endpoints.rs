@@ -2,6 +2,7 @@ use crate::game::Game;
 use crate::errors::MyError;
 use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, JoinOptions};
 
+use log::debug;
 use std::collections::HashSet;
 
 use actix::{Actor, StreamHandler};
@@ -12,13 +13,13 @@ use serde::Deserialize;
 use std::sync::{Arc, RwLock};
 
 #[derive(Template)]
-#[template(path = "index.html.j2")]
+#[template(path = "index.html")]
 struct IndexTemplate<'a> {
     adjective: &'a str,
 }
 
 #[derive(Template)]
-#[template(path = "play.html.j2")]
+#[template(path = "play.html")]
 struct PlayTemplate<'a> {
     adjective: &'a str,
 }
@@ -74,7 +75,7 @@ pub struct JoinGameQuery {
 
 // TODO Make the input here a struct and use whatever actix offers for this purpose.
 // TODO This is the one that returns the websocket client connection
-pub async fn join_game(
+pub async fn play_game(
     req: HttpRequest,
     info: web::Query<JoinGameQuery>,
     stream: web::Payload,
@@ -98,6 +99,7 @@ pub async fn join_game(
         Ok(resp) => resp,
         Err(e) => return HttpResponse::from_error(e),
     };
+    debug!("Successfully upgraded to websocket for {}", info.handle);
     resp
 }
 
@@ -114,9 +116,18 @@ impl Actor for MyWs {
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         match msg {
-            Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
-            Ok(ws::Message::Text(text)) => ctx.text(text),
-            Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
+            Ok(ws::Message::Ping(msg)) => {
+                debug!("Echoing ping with {:?}", msg);
+                ctx.pong(&msg)
+            },
+            Ok(ws::Message::Text(text)) => {
+                debug!("Echoing text with {:?}", text);
+                ctx.text(text)
+            },
+            Ok(ws::Message::Binary(bin)) => {
+                debug!("Echoing binary with {:?}", bin);
+                ctx.binary(bin)
+            },
             _ => (),
         }
         // call the method on game. if it was a valid move, put an update back in to the channel

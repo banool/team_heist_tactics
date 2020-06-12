@@ -9,7 +9,7 @@ use actix_web::{web, App, HttpServer};
 
 // My imports.
 use team_heist_tactics::endpoints;
-use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
+use team_heist_tactics::manager::{GameManager, GameManagerWrapper, GameOptions};
 
 const REQUIRED_ENV_VARS: &'static [&'static str] = &["THT_IP_ADDRESS", "THT_PORT"];
 
@@ -44,13 +44,16 @@ async fn main() -> std::io::Result<()> {
     let port = env::var("THT_PORT").unwrap();
     let ip_port = format!("{}:{}", ip, port);
 
+    // For testing.
+    game_manager_wrapper.game_manager.write().unwrap().new_game(GameOptions{}).unwrap();
+
     HttpServer::new(move || {
         App::new()
             .app_data(game_manager_wrapper.clone())
             .route("/", web::get().to(endpoints::index))
             .route("/play", web::get().to(endpoints::play))
             .route("/create_game", web::post().to(endpoints::create_game))
-            .route("/join_game", web::post().to(endpoints::join_game))
+            .route("/play_game", web::get().to(endpoints::play_game))
     })
     .bind(ip_port)?
     .run()

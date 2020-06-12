@@ -82,17 +82,18 @@ impl GameManager {
     }
 
     pub fn join_game(&mut self, join_options: JoinOptions) -> Result<Arc<RwLock<Game>>> {
-        let mut game_wrapper = match self.games.get_mut(&join_options.handle) {
+        let game_wrapper = match self.games.get_mut(&join_options.handle) {
             Some(game_wrapper) => game_wrapper,
             None => return Err(anyhow!(format!("Game with handle \"{}\" does not exist", join_options.handle.0))),
         };
 
-        game_wrapper.add_player(join_options.name)?;
+        game_wrapper.add_player(join_options.name.to_string())?;
 
         //game_wrapper.add_websocket(join_options.websocket);
 
         let game = game_wrapper.game.clone();
 
+        info!("Player {} joined game {}", join_options.name.to_string(), join_options.handle.0);
 
         Ok(game)
     }
