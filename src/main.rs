@@ -1,18 +1,17 @@
-#[macro_use]
-extern crate rocket;
-
 // Generic imports.
+use anyhow::{Error, Result};
 use log::{error, info};
 use std::env;
+use std::sync::Arc;
 
-// Rocket imports.
-use rocket_contrib::templates::Template;
+// Other crate imports.
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 
 // My imports.
 use team_heist_tactics::manager::GameManager;
-use team_heist_tactics::web;
+use team_heist_tactics::endpoints;
 
-const REQUIRED_ENV_VARS: &'static [&'static str] = &["TODO"];
+const REQUIRED_ENV_VARS: &'static [&'static str] = &["THT_IP_ADDRESS", "THT_PORT"];
 
 fn validate_env() -> bool {
     for s in REQUIRED_ENV_VARS.iter() {
@@ -24,17 +23,28 @@ fn validate_env() -> bool {
     return true;
 }
 
-fn main() {
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
     env_logger::init();
+
     if !validate_env() {
         std::process::exit(69);
     }
     info!("All environment variables set");
+
     let game_manager = GameManager {};
-    rocket::ignite()
-        .manage(game_manager)
-        .mount("/", routes![web::index])
-        .mount("/play", routes![web::play])
-        .attach(Template::fairing())
-        .launch();
+    let game_manager = web::Data::new(game_manager);
+    let ip = env::var("THT_IP_ADDRESS").unwrap();
+    let port = env::var("THT_PORT").unwrap();
+    let ip_port = format!("{}:{}", ip, port);
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(game_manager.clone())
+            .route("/", web::get().to(endpoints::index))
+            .route("/play", web::get().to(endpoints::play))
+    })
+    .bind(ip_port)?
+    .run()
+    .await
 }

@@ -1,28 +1,27 @@
-use rocket_contrib::templates::Template;
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 
 #[derive(Serialize)]
 struct TemplateContext {
     handle: String,
 }
 
-#[get("/")]
-pub fn index() -> Template {
+pub async fn index() -> impl Responder {
     // TODO Make this function take in a reference to the server object
     // and use a word from the word list in that server object that it
     // loaded at startup.
     let context = TemplateContext {
         handle: "hey".to_string(),
     };
-    Template::render("index", &context)
+    // Template::render("index", &context)
+    HttpResponse::Ok().body("Index!")
 }
 
-#[get("/play")]
-pub fn play() -> Template {
+pub async fn play() -> impl Responder {
     // TODO Make this function take in a reference to the server object
     // and use a word from the word list in that server object that it
     // loaded at startup.
     let context = TemplateContext {
         handle: "play".to_string(),
     };
-    Template::render("play", &context)
+    HttpResponse::Ok().body("Play!")
 }
