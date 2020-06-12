@@ -14,29 +14,31 @@ struct IndexTemplate<'a> {
     adjective: &'a str,
 }
 
-// TODO Have a thing here that calls create_game()
+#[derive(Template)]
+#[template(path = "play.html.j2")]
+struct PlayTemplate<'a> {
+    adjective: &'a str,
+}
+
 pub async fn index() -> impl Responder {
-    // TODO Make this function take in a reference to the server object
-    // and use a word from the word list in that server object that it
-    // loaded at startup.
-    let index = IndexTemplate { adjective: "world" };
+    // TODO Use random adjective from the adjective list on GameManager.
+    let index = IndexTemplate { adjective: "lit" };
     let body = match index.render() {
         Ok(body) => body,
         Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
     };
-    // Template::render("index", &context)
     HttpResponse::Ok().body(body)
 }
 
-// TODO have a thing here that calls play()
 pub async fn play() -> impl Responder {
-    // TODO Make this function take in a reference to the server object
-    // and use a word from the word list in that server object that it
-    // loaded at startup.
-    HttpResponse::Ok().body("Play!")
+    let play = PlayTemplate { adjective: "lit" };
+    let body = match play.render() {
+        Ok(body) => body,
+        Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
+    };
+    HttpResponse::Ok().body(body)
 }
 
-// TODO POST that redirects to play()
 pub async fn create_game(game_manager_wrapper: web::Data<GameManagerWrapper>) -> impl Responder {
     let mut game_manager = game_manager_wrapper.game_manager.write().unwrap();
 
@@ -48,7 +50,7 @@ pub async fn create_game(game_manager_wrapper: web::Data<GameManagerWrapper>) ->
         Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
     };
 
-    // Get the handle to the game and return a redirect to play/<that page>.
+    // Get the handle to the game and return a redirect to play/handle=<that page>.
     // The frontend will use the last part of the URL to build the join_game request.
     // TODO Use proper params builder for this.
     let location = format!("play?handle={}", game_handle.0.to_string());
