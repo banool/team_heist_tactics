@@ -4,6 +4,7 @@
 extern crate serde_derive;
 
 pub mod endpoints;
+pub mod errors;
 pub mod game;
 pub mod manager;
 pub mod types;

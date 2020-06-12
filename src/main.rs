@@ -1,14 +1,14 @@
 // Generic imports.
-use anyhow::{Error, Result};
 use log::{error, info};
+use std::collections::HashMap;
 use std::env;
-use std::sync::Arc;
+use std::sync::RwLock;
 
 // Other crate imports.
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
 
 // My imports.
-use team_heist_tactics::manager::GameManager;
+use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
 use team_heist_tactics::endpoints;
 
 const REQUIRED_ENV_VARS: &'static [&'static str] = &["THT_IP_ADDRESS", "THT_PORT"];
@@ -32,17 +32,25 @@ async fn main() -> std::io::Result<()> {
     }
     info!("All environment variables set");
 
-    let game_manager = GameManager {};
-    let game_manager = web::Data::new(game_manager);
+    let games = HashMap::new();
+    let words = vec!["meme", "fuck"];
+    let words = words.into_iter().map(String::from).collect();
+    let game_manager = GameManager::new(games, words);
+    let game_manager = RwLock::new(game_manager);
+    let game_manager_wrapper = GameManagerWrapper { game_manager };
+    let game_manager_wrapper = web::Data::new(game_manager_wrapper);
+
     let ip = env::var("THT_IP_ADDRESS").unwrap();
     let port = env::var("THT_PORT").unwrap();
     let ip_port = format!("{}:{}", ip, port);
 
     HttpServer::new(move || {
         App::new()
-            .app_data(game_manager.clone())
+            .app_data(game_manager_wrapper.clone())
             .route("/", web::get().to(endpoints::index))
             .route("/play", web::get().to(endpoints::play))
+            .route("/create_game", web::post().to(endpoints::create_game))
+            .route("/join_game", web::post().to(endpoints::join_game))
     })
     .bind(ip_port)?
     .run()
