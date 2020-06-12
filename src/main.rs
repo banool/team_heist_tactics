@@ -8,8 +8,8 @@ use std::sync::RwLock;
 use actix_web::{web, App, HttpServer};
 
 // My imports.
-use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
 use team_heist_tactics::endpoints;
+use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
 
 const REQUIRED_ENV_VARS: &'static [&'static str] = &["THT_IP_ADDRESS", "THT_PORT"];
 
@@ -33,7 +33,7 @@ async fn main() -> std::io::Result<()> {
     info!("All environment variables set");
 
     let games = HashMap::new();
-    let words = vec!["meme", "fuck"];
+    let words = vec!["meme", "yolo", "otherhandle", "anotherhandle"];
     let words = words.into_iter().map(String::from).collect();
     let game_manager = GameManager::new(games, words);
     let game_manager = RwLock::new(game_manager);

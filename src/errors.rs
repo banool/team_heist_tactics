@@ -1,8 +1,7 @@
-use std::fmt;
-use anyhow;
 use actix_web;
+use anyhow;
 use askama;
-
+use std::fmt;
 
 // The purpose of this error is to consume errors like the actix
 // error or the askama error and convert them into anyhow errors.
@@ -19,7 +18,7 @@ impl fmt::Display for MyError {
     }
 }
 
-impl actix_web::error::ResponseError for MyError { }
+impl actix_web::error::ResponseError for MyError {}
 
 impl From<anyhow::Error> for MyError {
     fn from(err: anyhow::Error) -> MyError {
@@ -29,6 +28,16 @@ impl From<anyhow::Error> for MyError {
 
 impl From<askama::Error> for MyError {
     fn from(err: askama::Error) -> MyError {
-        MyError { err: anyhow::Error::new(err) }
+        MyError {
+            err: anyhow::Error::new(err),
+        }
+    }
+}
+
+impl From<actix_web::error::UrlGenerationError> for MyError {
+    fn from(err: actix_web::error::UrlGenerationError) -> MyError {
+        MyError {
+            err: anyhow::anyhow!(format!("{:?}", err)),
+        }
     }
 }
