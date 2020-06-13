@@ -23,7 +23,7 @@ enum HeisterSymbol {
   BOW = 2;
   AXE = 3;
 }
-  
+
 // The name of a heister. This is just used for flavour / accessibility.
 enum HeisterName {
   BARBARIAN = 0;
@@ -31,7 +31,7 @@ enum HeisterName {
   ELF = 2;
   DWARF = 3;
 }
-  
+
 // This is used to describe the position of a heister on a tile.
 // Should be in the range of (0,0) to (3,3).
 message TilePosition {
@@ -101,7 +101,7 @@ message Heister {
 
   // Position of the heister.
   MapPosition map_position = 2;
-  
+
   // Whether the heister has taken their item.
   bool has_taken_item = 3;
 
@@ -118,7 +118,7 @@ enum Ability {
   TELEPORT = 4;
   REVEAL_TILES = 5;
   USE_ESCALATOR = 6;
-} 
+}
 
 // Information about the players themselves.
 message Player {
@@ -134,7 +134,7 @@ enum GameStatus {
   STAGING = 0;
   ONGOING = 1;
   VICTORY = 2;
-  DEFEAT = 3; 
+  DEFEAT = 3;
 }
 
 // Captures all information related to the game.
@@ -164,4 +164,21 @@ message GameState {
   GameStatus game_status = 8;
 }
 
+message Move {
+  Heister heister = 1;
+  MapPosition position = 2;
+}
 
+// The server returns this when the client tries to do something invalid.
+message InvalidRequest {
+  string reason = 1;
+}
+
+// This is the only message that should be sent back and forth across the wire.
+message MainMessage {
+  oneof body {
+    GameState game_state = 1;
+    InvalidRequest invalid_request = 2;
+    Move move = 3;
+  }
+}

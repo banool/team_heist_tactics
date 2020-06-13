@@ -2,7 +2,7 @@ use actix_web_actors::ws::WebsocketContext;
 use crate::game::Game;
 use crate::errors::MyError;
 use crate::manager::{GameHandle, GameWrapper, GameManagerWrapper, GameOptions, JoinOptions};
-use crate::serializer::WireMessage;
+use crate::serializer::InternalMessage;
 
 use log::{debug, warn};
 use std::collections::HashSet;
@@ -107,17 +107,15 @@ pub async fn play_game(
     resp
 }
 
-#[derive(Clone)]
-pub struct InternalMessage {
-    pub message: WireMessage,
-}
-
-impl Message for InternalMessage {
-    type Result = ();
-}
-
 pub struct MyWs {
     game_wrapper: Arc<RwLock<GameWrapper>>
+}
+
+impl MyWs {
+    // Convert String into rust genned protobuf type.
+    // Call function of GameWrapper.
+    // It calls function of Game. If the move was valid, it will call push_state.
+    //
 }
 
 impl Actor for MyWs {
@@ -127,15 +125,9 @@ impl Actor for MyWs {
 // This impl handles messages received from the client.
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        let should_push_state = match msg {
-            Ok(ws::Message::Text(text)) => {
-                // TODO If this is a game state update, return false.
-                debug!("Echoing text with {:?}", text);
-                ctx.text(text);
-                true
-            },
+        let valid = match msg {
             Ok(ws::Message::Binary(bin)) => {
-                debug!("Echoing binary with {:?}", bin);
+                debug!("Echoing bin with {:?}", bin);
                 ctx.binary(bin);
                 true
             },
@@ -144,12 +136,16 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
                 false
             },
         };
-        if should_push_state {
+        if valid {
             let res = self.game_wrapper.read().unwrap().push_state();
             match res {
                 Ok(_) => debug!("Pushed state to all actors successfully"),
                 Err(e) => warn!("Failed to push state to all actors: {:?}", e),
             }
+        } else {
+            let reason = "invalid reason TBA".to_string();
+            let response = InternalMessage::from_invalid_reason(reason);
+            ctx.binary(response.to_bytes());
         }
     }
 }
@@ -159,7 +155,7 @@ impl Handler<InternalMessage> for MyWs {
     type Result = ();
 
     fn handle(&mut self, msg: InternalMessage, ctx: &mut Self::Context) {
-        ctx.text(msg.message.0);
+        ctx.binary(msg.to_bytes());
     }
 }
 

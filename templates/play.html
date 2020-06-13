@@ -50,13 +50,17 @@ function connect() {
     console.log("***ONMESSAGE");
     var f = document.getElementById("chatbox").contentDocument;
     var text = "";
-    var msg = JSON.parse(evt.data);
-    console.log("Message received: ");
+    var msg = evt.data;
+    console.log("Message received: ", msg);
     console.dir(msg);
     var time = new Date(msg.date);
     var timeStr = time.toLocaleTimeString();
 
-    switch(msg.type) {
+    var mytype = "blob";
+    switch(mytype) {
+      case "blob":
+        text = "(" + timeStr + ") <b>" + bleep + "</b>: " + msg.text + "<br>";
+        break;
       case "id":
         clientID = msg.id;
         setUsername();
@@ -97,7 +101,9 @@ function send() {
     id: clientID,
     date: Date.now()
   };
-  connection.send(JSON.stringify(msg));
+  msg = JSON.stringify(msg);
+  var msg = new Uint8Array([21, 31]);
+  connection.send(msg);
   document.getElementById("text").value = "";
 }
 
