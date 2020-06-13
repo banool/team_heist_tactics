@@ -3,10 +3,12 @@
 use crate::endpoints::MyWs;
 use crate::game::Game;
 
+use actix::Addr;
 use anyhow::{anyhow, Result};
 use log::info;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
+
 
 #[derive(Clone, Default, Debug, Eq, Hash, PartialEq)]
 pub struct GameHandle(pub String);
@@ -16,12 +18,11 @@ pub struct GameOptions {}
 pub struct JoinOptions {
     pub name: String,
     pub handle: GameHandle,
-    //websocket: Arc<MyWs>,
 }
 
 pub struct GameWrapper {
     game: Game,
-    websockets: Vec<Arc<MyWs>>,
+    actors: Vec<Addr<MyWs>>,
 }
 
 impl GameWrapper {
@@ -29,17 +30,25 @@ impl GameWrapper {
         let game = Game::new(game_handle, game_options);
         GameWrapper {
             game,
-            websockets: vec![],
+            actors: vec![],
         }
     }
 
     pub fn add_player(&mut self, name: String) -> Result<()> {
-        // add_websocket
         self.game.add_player(name)
     }
 
-    pub fn add_websocket(&mut self, my_ws: Arc<MyWs>) {
-        self.websockets.push(my_ws);
+    pub fn add_actor(&mut self, actor: Addr<MyWs>) {
+        self.actors.push(actor);
+    }
+
+    pub fn push_state(&self) -> Result<()> {
+        let game_state = self.game.get_game_state();
+        //let game_state_message =
+        for a in self.actors.iter() {
+           // a.send()
+        }
+        Ok(())
     }
 
     // TODO a function that pushes the game state to all websockets
@@ -95,11 +104,11 @@ impl GameManager {
         Ok(game_wrapper.clone())
     }
 
-    pub fn register_websocket(&mut self, game_handle: GameHandle, websocket: Arc<MyWs>) {
+    pub fn register_actor(&mut self, game_handle: GameHandle, actor: Addr<MyWs>) {
         let game_wrapper = match self.games.get_mut(&game_handle) {
             Some(game_wrapper) => game_wrapper,
             None => panic!("Game we just made doesn't exist"),
         };
-        game_wrapper.write().unwrap().add_websocket(websocket);
+        game_wrapper.write().unwrap().add_actor(actor);
     }
 }

@@ -1,8 +1,9 @@
+use actix_web_actors::ws::WebsocketContext;
 use crate::game::Game;
 use crate::errors::MyError;
 use crate::manager::{GameHandle, GameWrapper, GameManagerWrapper, GameOptions, JoinOptions};
 
-use log::debug;
+use log::{debug, warn};
 use std::collections::HashSet;
 
 use actix::{Actor, StreamHandler};
@@ -85,7 +86,7 @@ pub async fn play_game(
     let handle = GameHandle(info.handle.to_string());
     let join_options = JoinOptions {
         name: info.name.to_string(),
-        handle,
+        handle: handle.clone(),
     };
     let game_wrapper = game_manager.join_game(join_options);
     let game_wrapper = match game_wrapper {
@@ -94,19 +95,17 @@ pub async fn play_game(
     };
 
     let my_ws = MyWs { game_wrapper };
-    // let my_ws = Arc::new(MyWs { game_wrapper });
-    // game_manager.register_websocket(handle, my_ws.clone());
 
-    let resp = ws::start(my_ws, &req, stream);
-    let resp = match resp {
-        Ok(resp) => resp,
+    let res = ws::start_with_addr(my_ws, &req, stream);
+    let (addr, resp) = match res {
+        Ok(res) => res,
         Err(e) => return HttpResponse::from_error(e),
     };
+    game_manager.register_actor(handle, addr);
     debug!("Successfully upgraded to websocket for {}", info.handle);
     resp
 }
 
-/// Define http actor
 pub struct MyWs {
     game_wrapper: Arc<RwLock<GameWrapper>>
 }
@@ -115,25 +114,27 @@ impl Actor for MyWs {
     type Context = ws::WebsocketContext<Self>;
 }
 
-/// Handler for ws::Message message
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
-
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        match msg {
-            Ok(ws::Message::Ping(msg)) => {
-                debug!("Echoing ping with {:?}", msg);
-                ctx.pong(&msg)
-            },
+        let valid = match msg {
             Ok(ws::Message::Text(text)) => {
                 debug!("Echoing text with {:?}", text);
-                ctx.text(text)
+                ctx.text(text);
+                true
             },
             Ok(ws::Message::Binary(bin)) => {
                 debug!("Echoing binary with {:?}", bin);
-                ctx.binary(bin)
+                ctx.binary(bin);
+                true
             },
-            _ => (),
-        }
+            wildcard => {
+                warn!("Unexpected message received: {:?}", wildcard);
+                false
+            },
+        };
+        //if valid {
+        //    self.game_wrapper.read().
+        //}
         // call the method on game. if it was a valid move, put an update back in to the channel
     }
 }

@@ -7,4 +7,5 @@ pub mod endpoints;
 pub mod errors;
 pub mod game;
 pub mod manager;
+pub mod serializer;
 pub mod types;

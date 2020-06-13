@@ -31,4 +31,8 @@ impl Game {
         self.players.push(Player {name});
         Ok(())
     }
+
+    pub fn get_game_state(&self) -> GameState {
+        self.game_state.clone()
+    }
 }
