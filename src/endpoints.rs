@@ -2,11 +2,12 @@ use actix_web_actors::ws::WebsocketContext;
 use crate::game::Game;
 use crate::errors::MyError;
 use crate::manager::{GameHandle, GameWrapper, GameManagerWrapper, GameOptions, JoinOptions};
+use crate::serializer::WireMessage;
 
 use log::{debug, warn};
 use std::collections::HashSet;
 
-use actix::{Actor, StreamHandler};
+use actix::{Actor, Handler, StreamHandler, Message};
 use actix_web::{http::header, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
 use askama::Template;
@@ -106,6 +107,15 @@ pub async fn play_game(
     resp
 }
 
+#[derive(Clone)]
+pub struct InternalMessage {
+    pub message: WireMessage,
+}
+
+impl Message for InternalMessage {
+    type Result = ();
+}
+
 pub struct MyWs {
     game_wrapper: Arc<RwLock<GameWrapper>>
 }
@@ -114,10 +124,12 @@ impl Actor for MyWs {
     type Context = ws::WebsocketContext<Self>;
 }
 
+// This impl handles messages received from the client.
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        let valid = match msg {
+        let should_push_state = match msg {
             Ok(ws::Message::Text(text)) => {
+                // TODO If this is a game state update, return false.
                 debug!("Echoing text with {:?}", text);
                 ctx.text(text);
                 true
@@ -132,10 +144,22 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
                 false
             },
         };
-        //if valid {
-        //    self.game_wrapper.read().
-        //}
-        // call the method on game. if it was a valid move, put an update back in to the channel
+        if should_push_state {
+            let res = self.game_wrapper.read().unwrap().push_state();
+            match res {
+                Ok(_) => debug!("Pushed state to all actors successfully"),
+                Err(e) => warn!("Failed to push state to all actors: {:?}", e),
+            }
+        }
+    }
+}
+
+// This impl handles messages being sent between actors internally.
+impl Handler<InternalMessage> for MyWs {
+    type Result = ();
+
+    fn handle(&mut self, msg: InternalMessage, ctx: &mut Self::Context) {
+        ctx.text(msg.message.0);
     }
 }
 

@@ -1,9 +1,11 @@
 // Manages all the games.
 
-use crate::endpoints::MyWs;
+use crate::endpoints::{MyWs, InternalMessage};
 use crate::game::Game;
+use crate::serializer::get_message;
 
 use actix::Addr;
+use actix_web_actors::ws;
 use anyhow::{anyhow, Result};
 use log::info;
 use std::collections::{HashMap, HashSet};
@@ -44,9 +46,11 @@ impl GameWrapper {
 
     pub fn push_state(&self) -> Result<()> {
         let game_state = self.game.get_game_state();
-        //let game_state_message =
+        let game_state_message = get_message(game_state);
+        let message = InternalMessage { message: game_state_message };
         for a in self.actors.iter() {
-           // a.send()
+            // TODO Consider using send instead.
+            let res = a.do_send(message.clone());
         }
         Ok(())
     }
