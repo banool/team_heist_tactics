@@ -1,6 +1,6 @@
 use crate::game::Game;
 use crate::errors::MyError;
-use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, JoinOptions};
+use crate::manager::{GameHandle, GameWrapper, GameManagerWrapper, GameOptions, JoinOptions};
 
 use log::debug;
 use std::collections::HashSet;
@@ -82,17 +82,20 @@ pub async fn play_game(
     game_manager_wrapper: web::Data<GameManagerWrapper>,
 ) -> impl Responder {
     let mut game_manager = game_manager_wrapper.game_manager.write().unwrap();
+    let handle = GameHandle(info.handle.to_string());
     let join_options = JoinOptions {
         name: info.name.to_string(),
-        handle: GameHandle(info.handle.to_string()),
-        // websocket: my_ws.clone(),
+        handle,
     };
-    let game = game_manager.join_game(join_options);
-    let game = match game {
-        Ok(game) => game,
+    let game_wrapper = game_manager.join_game(join_options);
+    let game_wrapper = match game_wrapper {
+        Ok(game_wrapper) => game_wrapper,
         Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
     };
-    let my_ws = MyWs { game };
+
+    let my_ws = MyWs { game_wrapper };
+    // let my_ws = Arc::new(MyWs { game_wrapper });
+    // game_manager.register_websocket(handle, my_ws.clone());
 
     let resp = ws::start(my_ws, &req, stream);
     let resp = match resp {
@@ -105,7 +108,7 @@ pub async fn play_game(
 
 /// Define http actor
 pub struct MyWs {
-    game: Arc<RwLock<Game>>
+    game_wrapper: Arc<RwLock<GameWrapper>>
 }
 
 impl Actor for MyWs {
@@ -114,6 +117,7 @@ impl Actor for MyWs {
 
 /// Handler for ws::Message message
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
+
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         match msg {
             Ok(ws::Message::Ping(msg)) => {
