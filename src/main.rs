@@ -45,7 +45,12 @@ async fn main() -> std::io::Result<()> {
     let ip_port = format!("{}:{}", ip, port);
 
     // For testing.
-    game_manager_wrapper.game_manager.write().unwrap().new_game(GameOptions{}).unwrap();
+    game_manager_wrapper
+        .game_manager
+        .write()
+        .unwrap()
+        .new_game(GameOptions {})
+        .unwrap();
 
     HttpServer::new(move || {
         App::new()

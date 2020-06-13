@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 
 use crate::manager::{GameHandle, GameOptions};
-use crate::types::{GameStatus, GameState};
+use crate::types::{GameState, GameStatus};
 use crate::utils::get_current_time_secs;
 
 pub struct Player {
@@ -31,7 +31,7 @@ impl Game {
         if GameStatus::from_i32(self.game_state.game_status) != Some(GameStatus::Staging) {
             return Err(anyhow!("Cannot join game that is already in progress"));
         }
-        self.players.push(Player {name});
+        self.players.push(Player { name });
         Ok(())
     }
 

@@ -1,13 +1,13 @@
-use actix_web_actors::ws::WebsocketContext;
-use crate::game::Game;
 use crate::errors::MyError;
-use crate::manager::{GameHandle, GameWrapper, GameManagerWrapper, GameOptions, JoinOptions};
+use crate::game::Game;
+use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
+use actix_web_actors::ws::WebsocketContext;
 
 use log::{debug, warn};
 use std::collections::HashSet;
 
-use actix::{Actor, Handler, StreamHandler, Message};
+use actix::{Actor, Handler, Message, StreamHandler};
 use actix_web::{http::header, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
 use askama::Template;
@@ -108,7 +108,7 @@ pub async fn play_game(
 }
 
 pub struct MyWs {
-    game_wrapper: Arc<RwLock<GameWrapper>>
+    game_wrapper: Arc<RwLock<GameWrapper>>,
 }
 
 impl MyWs {
@@ -130,11 +130,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
                 debug!("Echoing bin with {:?}", bin);
                 ctx.binary(bin);
                 true
-            },
+            }
             wildcard => {
                 warn!("Unexpected message received: {:?}", wildcard);
                 false
-            },
+            }
         };
         if valid {
             let res = self.game_wrapper.read().unwrap().push_state();

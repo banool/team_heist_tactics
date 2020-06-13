@@ -1,6 +1,6 @@
 // Manages all the games.
 
-use crate::endpoints::{MyWs};
+use crate::endpoints::MyWs;
 use crate::game::Game;
 use crate::serializer::InternalMessage;
 
@@ -10,7 +10,6 @@ use anyhow::{anyhow, Result};
 use log::info;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
-
 
 #[derive(Clone, Default, Debug, Eq, Hash, PartialEq)]
 pub struct GameHandle(pub String);
@@ -67,7 +66,10 @@ pub struct GameManager {
 }
 
 impl GameManager {
-    pub fn new(games: HashMap<GameHandle, Arc<RwLock<GameWrapper>>>, words: HashSet<String>) -> Self {
+    pub fn new(
+        games: HashMap<GameHandle, Arc<RwLock<GameWrapper>>>,
+        words: HashSet<String>,
+    ) -> Self {
         GameManager { games, words }
     }
 
@@ -85,7 +87,10 @@ impl GameManager {
         };
         let game_handle = GameHandle(handle.to_string());
 
-        let game_wrapper = Arc::new(RwLock::new(GameWrapper::new(game_handle.clone(), game_options)));
+        let game_wrapper = Arc::new(RwLock::new(GameWrapper::new(
+            game_handle.clone(),
+            game_options,
+        )));
 
         self.games.insert(game_handle.clone(), game_wrapper);
 
@@ -97,12 +102,24 @@ impl GameManager {
     pub fn join_game(&mut self, join_options: JoinOptions) -> Result<Arc<RwLock<GameWrapper>>> {
         let game_wrapper = match self.games.get_mut(&join_options.handle) {
             Some(game_wrapper) => game_wrapper,
-            None => return Err(anyhow!(format!("Game with handle \"{}\" does not exist", join_options.handle.0))),
+            None => {
+                return Err(anyhow!(format!(
+                    "Game with handle \"{}\" does not exist",
+                    join_options.handle.0
+                )))
+            }
         };
 
-        game_wrapper.write().unwrap().add_player(join_options.name.to_string())?;
+        game_wrapper
+            .write()
+            .unwrap()
+            .add_player(join_options.name.to_string())?;
 
-        info!("Player {} joined game {}", join_options.name.to_string(), join_options.handle.0);
+        info!(
+            "Player {} joined game {}",
+            join_options.name.to_string(),
+            join_options.handle.0
+        );
 
         Ok(game_wrapper.clone())
     }
