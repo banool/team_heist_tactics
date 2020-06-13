@@ -13,13 +13,11 @@ pub fn get_message(message: impl Message) -> WireMessage {
     // Cheap janky self json.
     // String key and base64 encoding of the message.
     let mut buf = Vec::new();
-    debug!("encoded length: {}", message.encoded_len());
     buf.reserve(message.encoded_len());
     message.encode(&mut buf).unwrap();
     let message_type = get_type_string(&message);
-    debug!("massagegegge: {:?}", message);
     let message_base64 = base64::encode(&buf);
     let message = format!("{{\"message_type\": \"{}\", \"body\": \"{}\"}}", message_type, message_base64);
-    debug!("Sending message: {}", message);
+    debug!("Built client response message: {}", message);
     WireMessage(message)
 }

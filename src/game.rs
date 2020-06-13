@@ -2,6 +2,7 @@ use anyhow::{anyhow, Result};
 
 use crate::manager::{GameHandle, GameOptions};
 use crate::types::{GameStatus, GameState};
+use crate::utils::get_current_time_secs;
 
 pub struct Player {
     name: String,
@@ -16,7 +17,9 @@ pub struct Game {
 impl Game {
     pub fn new(game_handle: GameHandle, game_options: GameOptions) -> Game {
         // TODO Make starting game state.
-        let game_state = GameState::default();
+        let mut game_state = GameState::default();
+        game_state.game_name = game_handle.0.to_string();
+        game_state.game_started = get_current_time_secs();
         Game {
             game_handle,
             game_state,
