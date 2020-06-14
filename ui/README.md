@@ -18,5 +18,5 @@ python3 -m http.server --directory dist
 ```
 
 ## TODO
-- Use protobuf.js for the protobuf types/.
+- Use this for the websockets: https://github.com/giantmachines/redux-websocket
 

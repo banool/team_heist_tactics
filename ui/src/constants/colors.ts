@@ -1,3 +1,3 @@
-export const background = "#a228d5";
-export const backgroundLight = "#EC33D9";
-export const foreground = "#E8FF1E";
+export const background = "#bb1341";
+export const backgroundLight = "#dd5e46";
+export const foreground = "#ccfffe";

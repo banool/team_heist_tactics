@@ -1,6 +1,6 @@
 import { StagingJoinGameThing } from "./types";
 
-import { MainMessage } from "./proto_types.js";
+import { MainMessage } from "../generated/types_pb";
 
 
 export function joinGame(scent: StagingJoinGameThing) {
