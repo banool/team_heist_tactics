@@ -200,7 +200,7 @@ impl Internal for Player {
 }
 
 pub struct Move {
-    heister: Heister,
+    heister_color: HeisterColor,
     position: MapPosition,
 }
 
@@ -209,15 +209,15 @@ impl Internal for Move {
 
     fn from_proto(proto: proto_types::Move) -> Self {
         Move {
-            heister: Heister::from_proto(proto.heister).unwrap(),
-            position: MapPosition::from_proto(proto.position).unwrap(),
+            heister_color: HeisterColor::from_i32(proto.heister_color).unwrap(),
+            position: MapPosition::from_proto(proto.position.unwrap()),
         }
     }
 
     fn to_proto(&self) -> proto_types::Move {
         proto_types::Move {
-            heister: self.heister.to_proto(),
-            position: self.position.to_proto(),
+            heister_color: i32::from(self.heister_color),
+            position: Some(self.position.to_proto()),
         }
     }
 }
