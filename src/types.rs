@@ -137,13 +137,41 @@ impl Internal for Square {
     }
 }
 
+pub struct Heister {
+    heister_color: HeisterColor,
+    map_position: MapPosition,
+    has_taken_item: bool,
+    has_escaped: bool,
+}
+
+impl Internal for Heister {
+    type P = proto_types::Heister;
+
+    fn from_proto(proto: proto_types::Heister) -> Self {
+        Heister {
+            heister_color: HeisterColor::from_i32(proto.heister_color).unwrap(),
+            map_position: MapPosition::from_proto(proto.map_position.unwrap()),
+            has_taken_item: proto.has_taken_item,
+            has_escaped: proto.has_escaped,
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Heister {
+        proto_types::Heister {
+            heister_color: i32::from(self.heister_color),
+            map_position: Some(self.map_position.to_proto()),
+            has_taken_item: self.has_taken_item,
+            has_escaped: self.has_escaped,
+        }
+    }
+}
+
 // TODO Implement the rest
-// * heister
 // * player
 // * move
 // * invalidrequest
 // * mainmessage
-//
+
 #[derive(Clone, Default)]
 pub struct GameState {
     pub game_name: String,
