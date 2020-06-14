@@ -3,14 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { JoinGameThing } from "./types";
-import { JoinGameRoute, pathFor } from "../common/routes";
 import JoinGameForm from "./JoinGameForm";
 
 
 type JoinGamePageProps = {};
 const JoinGamePage = ({ }: JoinGamePageProps) => {
 
-  // This does something on page load.
+  // This dispatches a function on page load.
   /*
   const dispatch = useDispatch();
   useEffect(() => {
@@ -20,7 +19,9 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
 
   return (
     <div>
-      <h3>Join Game</h3>
+      <h1>Team Heist Tactics</h1>
+      <h3>Let's goooooo!!!!!!!!!!!!!!!!!!!!!!!!!!</h3>
+      <p>Join Game:</p>
       <JoinGameForm />
     </div>
   );

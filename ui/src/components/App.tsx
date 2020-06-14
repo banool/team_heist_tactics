@@ -1,15 +1,12 @@
 import { hot } from "react-hot-loader/root";
 import React from "react";
 
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 
-import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import * as colors from "../constants/colors";
 
-import DefaultPage from "./DefaultPage";
-
-import routes from "../common/routes";
+import JoinGamePage from "../join_game/JoinGamePage";
 
 const styles: { [key: string]: React.CSSProperties } = {
   root: {
@@ -41,40 +38,14 @@ const styles: { [key: string]: React.CSSProperties } = {
 
 const App = ({}) => {
   return (
-    <Router>
-      <div style={styles.root}>
-        <div>
-          <div style={styles.content}>
-            <table style={styles.layoutTable}>
-              <tbody>
-                <tr>
-                  <td style={styles.sidebarCell}>
-                    <Sidebar />
-                  </td>
-                  <td style={styles.contentCell}>
-                    <Switch>
-                      {routes.map(route => {
-                        return (
-                          <Route
-                            key={route.path}
-                            path={route.path}
-                            children={<route.component />}
-                          />
-                        );
-                      })}
-                      <Route path="/">
-                        <DefaultPage />
-                      </Route>
-                    </Switch>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <Footer />
+    <div style={styles.root}>
+      <div>
+        <div style={styles.content}>
+          <JoinGamePage />
         </div>
+        <Footer />
       </div>
-    </Router>
+    </div>
   );
 };
 

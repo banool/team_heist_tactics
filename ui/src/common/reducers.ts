@@ -1,10 +1,10 @@
 import { combineReducers } from "redux";
 
 // TODO I'm keeping this for a ref for how to get data.
-import candlesReducer from "../candles/slice";
+import joinGameReducer from "../join_game/slice";
 
 const rootReducer = combineReducers({
-  candles: candlesReducer,
+  joinGame: joinGameReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

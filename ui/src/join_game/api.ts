@@ -20,4 +20,5 @@ export function joinGame(scent: StagingJoinGameThing) {
       // TODO: dispatch failure.
       console.error("failed the thing");
     }
-  };
+  }
+}
