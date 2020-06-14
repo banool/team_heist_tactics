@@ -1,7 +1,11 @@
+use crate::manager::GameHandle;
+use crate::utils::get_current_time_secs;
+
 // Import all the proto types in this private module.
 mod proto_types {
     include!(concat!(env!("OUT_DIR"), "/types.rs"));
 }
+
 
 // Re-export the enums.
 pub use proto_types::Ability;
@@ -29,6 +33,7 @@ pub trait Internal {
     fn to_proto(&self) -> Self::P;
 }
 
+#[derive(Clone, Debug, Default)]
 pub struct TilePosition {
     x: u32,
     y: u32,
@@ -52,7 +57,7 @@ impl Internal for TilePosition {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct MapPosition {
     pub x: i32,
     pub y: i32,
@@ -76,7 +81,7 @@ impl Internal for MapPosition {
     }
 }
 
-// #[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Default)]
 pub struct Tile {
     pub squares: Vec<Square>,
     pub position: MapPosition,
@@ -123,6 +128,12 @@ impl From<SerializableTile> for Tile {
     }
 }
 
+pub enum StartingTile {
+    A(Tile),
+    B(Tile),
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct Square {
     pub north_wall: WallType,
     pub east_wall: WallType,
@@ -167,6 +178,7 @@ impl From<SerializableSquare> for Square {
     }
 }
 
+#[derive(Clone, Debug, Default)]
 pub struct Heister {
     heister_color: HeisterColor,
     map_position: MapPosition,
@@ -196,6 +208,27 @@ impl Internal for Heister {
     }
 }
 
+impl Heister {
+    pub fn get_initial(heister_color: HeisterColor, starting_tile: &StartingTile) -> Self {
+        let map_position = match starting_tile {
+            StartingTile::A(_) => match heister_color {
+                HeisterColor::Yellow => MapPosition { x: 1, y: 2 },
+                HeisterColor::Purple => MapPosition { x: 1, y: 2 },
+                HeisterColor::Green => MapPosition { x: 2, y: 2 },
+                HeisterColor::Orange => MapPosition { x: 2, y: 1 },
+            }
+            _ => MapPosition { x: 0, y: 0 },  // TODO Do this for starting B side.
+        };
+        Heister {
+            heister_color,
+            map_position,
+            has_taken_item: false,
+            has_escaped: false,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct Player {
     name: String,
     abilities: Vec<Ability>,
@@ -229,6 +262,7 @@ impl Internal for Player {
     }
 }
 
+#[derive(Clone, Debug, Default)]
 pub struct Move {
     heister_color: HeisterColor,
     position: MapPosition,
@@ -252,31 +286,84 @@ impl Internal for Move {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct GameState {
-    pub game_name: String,
+    pub game_name: GameHandle,
     pub game_started: u64,
+    pub timer_runs_out: u64,
+    pub tiles: Vec<Tile>,
+    pub heisters: Vec<Heister>,
+    pub all_items_taken: bool,
+    pub remaining_tiles: u32,
     pub game_status: GameStatus,
+    pub players: Vec<Player>,
 }
 
 impl Internal for GameState {
     type P = proto_types::GameState;
 
     fn from_proto(proto: proto_types::GameState) -> Self {
+        let game_name = GameHandle(proto.game_name);
+        let tiles = proto.tiles.iter().map(|t| Tile::from_proto(t.clone())).collect();
+        let heisters = proto.heisters.iter().map(|h| Heister::from_proto(h.clone())).collect();
+        let players = proto.players.iter().map(|p| Player::from_proto(p.clone())).collect();
         let game_status = GameStatus::from_i32(proto.game_status).unwrap(); // TODO Handle this gracefully?
         GameState {
-            game_name: proto.game_name,
+            game_name,
             game_started: proto.game_started,
+            timer_runs_out: proto.timer_runs_out,
+            tiles,
+            heisters,
+            all_items_taken: proto.all_items_taken,
+            remaining_tiles: proto.remaining_tiles,
             game_status,
+            players,
         }
     }
 
     fn to_proto(&self) -> proto_types::GameState {
-        // TODO Fully specify this, get rid of default.
+        let tiles = self.tiles.iter().map(|t| t.to_proto()).collect();
+        let heisters = self.heisters.iter().map(|h| h.to_proto()).collect();
+        let players = self.players.iter().map(|p| p.to_proto()).collect();
+        let game_status = i32::from(self.game_status);
         proto_types::GameState {
-            game_name: self.game_name.to_string(),
+            game_name: self.game_name.0.to_string(),
             game_started: self.game_started,
-            ..Default::default()
+            timer_runs_out: self.timer_runs_out,
+            tiles,
+            heisters,
+            all_items_taken: self.all_items_taken,
+            remaining_tiles: self.remaining_tiles,
+            game_status,
+            players,
+        }
+    }
+}
+
+const TIMER_DURATION_SECS: u64 = 5 * 60;
+
+impl GameState {
+    pub fn new(game_name: GameHandle) -> Self {
+        let game_started = get_current_time_secs();
+        let timer_runs_out = game_started + TIMER_DURATION_SECS;
+        let starting_tile = Tile { squares: vec![], position: MapPosition {x:0, y:0} };
+        let tiles = vec![starting_tile.clone()];
+        let mut heisters = Vec::new();
+        let starting_tile_enum = StartingTile::A(starting_tile);
+        heisters.push(Heister::get_initial(HeisterColor::Yellow, &starting_tile_enum));
+        heisters.push(Heister::get_initial(HeisterColor::Purple, &starting_tile_enum));
+        heisters.push(Heister::get_initial(HeisterColor::Green, &starting_tile_enum));
+        heisters.push(Heister::get_initial(HeisterColor::Orange, &starting_tile_enum));
+        GameState {
+            game_name,
+            game_started,
+            timer_runs_out,
+            tiles,
+            heisters,
+            all_items_taken: false,
+            remaining_tiles: 8,
+            game_status: GameStatus::Staging,
+            players: vec![],
         }
     }
 }

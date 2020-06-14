@@ -1454,7 +1454,7 @@ proto.types.Player.prototype.clearAbilitiesList = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.types.GameState.repeatedFields_ = [4,5];
+proto.types.GameState.repeatedFields_ = [4,5,9];
 
 
 
@@ -1495,8 +1495,10 @@ proto.types.GameState.toObject = function(includeInstance, msg) {
     heistersList: jspb.Message.toObjectList(msg.getHeistersList(),
     proto.types.Heister.toObject, includeInstance),
     allItemsTaken: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
-    remainingTile: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    gameStatus: jspb.Message.getFieldWithDefault(msg, 8, 0)
+    remainingTiles: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    gameStatus: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    playersList: jspb.Message.toObjectList(msg.getPlayersList(),
+    proto.types.Player.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -1561,11 +1563,16 @@ proto.types.GameState.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 7:
       var value = /** @type {number} */ (reader.readUint32());
-      msg.setRemainingTile(value);
+      msg.setRemainingTiles(value);
       break;
     case 8:
       var value = /** @type {!proto.types.GameStatus} */ (reader.readEnum());
       msg.setGameStatus(value);
+      break;
+    case 9:
+      var value = new proto.types.Player;
+      reader.readMessage(value,proto.types.Player.deserializeBinaryFromReader);
+      msg.addPlayers(value);
       break;
     default:
       reader.skipField();
@@ -1640,7 +1647,7 @@ proto.types.GameState.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getRemainingTile();
+  f = message.getRemainingTiles();
   if (f !== 0) {
     writer.writeUint32(
       7,
@@ -1652,6 +1659,14 @@ proto.types.GameState.serializeBinaryToWriter = function(message, writer) {
     writer.writeEnum(
       8,
       f
+    );
+  }
+  f = message.getPlayersList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      9,
+      f,
+      proto.types.Player.serializeBinaryToWriter
     );
   }
 };
@@ -1806,10 +1821,10 @@ proto.types.GameState.prototype.setAllItemsTaken = function(value) {
 
 
 /**
- * optional uint32 remaining_tile = 7;
+ * optional uint32 remaining_tiles = 7;
  * @return {number}
  */
-proto.types.GameState.prototype.getRemainingTile = function() {
+proto.types.GameState.prototype.getRemainingTiles = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
 };
 
@@ -1818,7 +1833,7 @@ proto.types.GameState.prototype.getRemainingTile = function() {
  * @param {number} value
  * @return {!proto.types.GameState} returns this
  */
-proto.types.GameState.prototype.setRemainingTile = function(value) {
+proto.types.GameState.prototype.setRemainingTiles = function(value) {
   return jspb.Message.setProto3IntField(this, 7, value);
 };
 
@@ -1838,6 +1853,44 @@ proto.types.GameState.prototype.getGameStatus = function() {
  */
 proto.types.GameState.prototype.setGameStatus = function(value) {
   return jspb.Message.setProto3EnumField(this, 8, value);
+};
+
+
+/**
+ * repeated Player players = 9;
+ * @return {!Array<!proto.types.Player>}
+ */
+proto.types.GameState.prototype.getPlayersList = function() {
+  return /** @type{!Array<!proto.types.Player>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.types.Player, 9));
+};
+
+
+/**
+ * @param {!Array<!proto.types.Player>} value
+ * @return {!proto.types.GameState} returns this
+*/
+proto.types.GameState.prototype.setPlayersList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 9, value);
+};
+
+
+/**
+ * @param {!proto.types.Player=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.types.Player}
+ */
+proto.types.GameState.prototype.addPlayers = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 9, opt_value, proto.types.Player, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.types.GameState} returns this
+ */
+proto.types.GameState.prototype.clearPlayersList = function() {
+  return this.setPlayersList([]);
 };
 
 
