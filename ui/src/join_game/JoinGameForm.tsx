@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import store from '../common/store';
+
 import { useDispatch } from "react-redux";
 import { joinGame } from "./api";
 import { JoinGameThing, StagingJoinGameThing } from "./types";
@@ -16,19 +18,26 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
   const updating = existing !== undefined;
   const dispatch = useDispatch();
 
-  const getInitial = <T extends unknown>(
+  // TODO Make this generic again some day lol.
+  const getInitial =(
     field: string,
     defaults: StagingJoinGameThing,
     existing?: JoinGameThing
-  ): NonNullable<T> => {
+  ): NonNullable<string> => {
     if (existing !== undefined && existing[field] !== null) {
       return existing[field];
+    }
+    // Read param from URL query params if present.
+    var url = new URL(window.location.href);
+    var param = url.searchParams.get(field);
+    if (param !== null) {
+      return param;
     }
     return defaults[field];
   };
 
-  const [name, setName] = useState(getInitial<typeof defaults.name>("name", defaults, existing));
-  const [handle, setHandle] = useState(getInitial<typeof defaults.handle>("handle", defaults, existing));
+  const [name, setName] = useState(getInitial("name", defaults, existing));
+  const [handle, setHandle] = useState(getInitial("handle", defaults, existing));
 
   const stateToStagingJoinGameThing = (): StagingJoinGameThing => {
     return {

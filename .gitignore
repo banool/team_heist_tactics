@@ -1,3 +1,6 @@
+# Generated node stuff
+templates/static
+
 # Rust
 /target/
 Cargo.lock

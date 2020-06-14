@@ -1,26 +1,30 @@
 import { StagingJoinGameThing } from "./types";
 
+import store from '../common/store';
+
 import { MainMessage } from "../generated/types_pb";
 
+import { connect } from '@giantmachines/redux-websocket';
 
 export function joinGame(scent: StagingJoinGameThing) {
   return async dispatch => {
     try {
-      // TODO Make websocket
-      // Perhaps dispatch function call on root that sets websocket on root
-      const response = await fetch("/api/scent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8"
-        },
-        body: JSON.stringify(scent)
-      });
+      var scheme = "ws";
+      // If this is an HTTPS connection, we have to use a secure WebSocket
+      // connection too, so add another "s" to the scheme.
+      if (document.location.protocol === "https:") {
+        scheme += "s";
+      }
 
-      const data = await response.json();
-      console.log("CreateScent response", data);
+      var urlString = scheme + "://" + document.location.hostname + ":" + document.location.port + "/play_game";
+
+      var serverUrl = new URL(urlString);
+      serverUrl.searchParams.set("name", scent.name);
+      serverUrl.searchParams.set("handle", scent.handle);
+      store.dispatch(connect(serverUrl.toString()));
     } catch (error) {
       // TODO: dispatch failure.
-      console.error("failed to join game");
+      console.error("Failed to join game with websocket:", error);
     }
   }
 }
