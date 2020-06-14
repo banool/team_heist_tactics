@@ -175,7 +175,7 @@ impl Internal for Player {
     type P = proto_types::Player;
 
     fn from_proto(proto: proto_types::Player) -> Self {
-        let mut abilities : Vec<proto_types::Ability> = vec![];
+        let mut abilities = Vec<Ability>::new();
         for proto_ability in proto.abilities {
             let ability = Ability::from_i32(proto_ability).unwrap();
             abilities.push(ability);
