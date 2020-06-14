@@ -1,5 +1,7 @@
 import { StagingJoinGameThing } from "./types";
 
+import { MainMessage } from "./proto_types.js";
+
 
 export function joinGame(scent: StagingJoinGameThing) {
   return async dispatch => {

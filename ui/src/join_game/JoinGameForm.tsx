@@ -50,16 +50,14 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
     <div>
       <form>
         <label>
+          <b>Join Game -->&emsp;</b>
           Name:
           <input type="text" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
         </label>
-        <br />
         <label>
           Handle:
           <input type="text" placeholder="Game handle" value={handle} onChange={e => setHandle(e.target.value)} />
         </label>
-        <br />
-        <br />
         <input type="button" value="Submit" onClick={onSubmit} />
       </form>
     </div>

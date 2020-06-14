@@ -1,3 +1,5 @@
+//import { load } from "protobufjs";
+
 export interface JoinGameThing {
   name: string;
   handle: string;

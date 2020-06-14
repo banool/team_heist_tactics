@@ -21,7 +21,6 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
     <div>
       <h1>Team Heist Tactics</h1>
       <h3>Let's goooooo!!!!!!!!!!!!!!!!!!!!!!!!!!</h3>
-      <p>Join Game:</p>
       <JoinGameForm />
     </div>
   );

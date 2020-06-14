@@ -24,8 +24,8 @@ let initialState: CandlesSliceState = {
   candles: {}
 };
 
-const candlesSlice = createSlice({
-  name: "candles",
+const joinGameSlice = createSlice({
+  name: "joinGame",
   initialState,
   reducers: {
     getCandlesSuccess: (state, action: PayloadAction<GetCandlesSuccessAction>) => {
@@ -40,8 +40,8 @@ const candlesSlice = createSlice({
   }
 });
 
-export const { getCandlesSuccess, getCandleSuccess } = candlesSlice.actions;
-export const candlesSelector = (state: RootState): Candle[] => Object.values(state.candles.candles);
-export const candleSelector = (id: number) => (state: RootState): Candle => state.candles.candles[id];
+export const { getCandlesSuccess, getCandleSuccess } = joinGameSlice.actions;
+export const candlesSelector = (state: RootState): Candle[] => Object.values(state.joinGame.candles);
+export const candleSelector = (id: number) => (state: RootState): Candle => state.joinGame.candles[id];
 
-export default candlesSlice.reducer;
+export default joinGameSlice.reducer;
