@@ -178,6 +178,7 @@ impl From<SerializableSquare> for Square {
     }
 }
 
+#[derive(Clone, Debug, Default)]
 pub struct Heister {
     heister_color: HeisterColor,
     map_position: MapPosition,
