@@ -49,7 +49,101 @@ impl Internal for TilePosition {
     }
 }
 
+pub struct MapPosition {
+    x: i32,
+    y: i32,
+}
+
+impl Internal for MapPosition {
+    type P = proto_types::MapPosition;
+
+    fn from_proto(proto: proto_types::MapPosition) -> Self {
+        MapPosition {
+            x: proto.x,
+            y: proto.y,
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::MapPosition {
+        proto_types::MapPosition {
+            x: self.x,
+            y: self.y,
+        }
+    }
+}
+
+pub struct Tile {
+    squares: Vec<Square>,
+    position: MapPosition,
+}
+
+impl Internal for Tile {
+    type P = proto_types::Tile;
+
+    fn from_proto(proto: proto_types::Tile) -> Self {
+        let mut squares : Vec<Square> = vec![];
+        for proto_square in proto.squares {
+            let square = Square::from_proto(proto_square);
+            squares.push(square);
+        }
+        Tile {
+            squares,
+            position: MapPosition::from_proto(proto.position.unwrap()),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Tile {
+        let mut proto_squares : Vec<proto_types::Square> = vec![];
+        for square in &self.squares {
+            let proto_square = square.to_proto();
+            proto_squares.push(proto_square);
+        }
+        proto_types::Tile {
+            squares: proto_squares,
+            position: Some(self.position.to_proto()),
+        }
+    }
+}
+
+pub struct Square {
+    north_wall: WallType,
+    east_wall: WallType,
+    south_wall: WallType,
+    west_wall: WallType,
+    square_type: SquareType,
+}
+
+impl Internal for Square {
+    type P = proto_types::Square;
+
+    fn from_proto(proto: proto_types::Square) -> Self {
+        Square {
+            north_wall: WallType::from_i32(proto.north_wall).unwrap(),
+            east_wall: WallType::from_i32(proto.east_wall).unwrap(),
+            south_wall: WallType::from_i32(proto.south_wall).unwrap(),
+            west_wall: WallType::from_i32(proto.west_wall).unwrap(),
+            square_type: SquareType::from_i32(proto.square_type).unwrap(),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Square {
+        proto_types::Square {
+            north_wall: i32::from(self.north_wall),
+            east_wall: i32::from(self.east_wall),
+            south_wall: i32::from(self.south_wall),
+            west_wall: i32::from(self.west_wall),
+            square_type: i32::from(self.square_type),
+        }
+    }
+}
+
 // TODO Implement the rest
+// * heister
+// * player
+// * move
+// * invalidrequest
+// * mainmessage
+//
 #[derive(Clone, Default)]
 pub struct GameState {
     pub game_name: String,
