@@ -49,7 +49,179 @@ impl Internal for TilePosition {
     }
 }
 
-// TODO Implement the rest
+pub struct MapPosition {
+    x: i32,
+    y: i32,
+}
+
+impl Internal for MapPosition {
+    type P = proto_types::MapPosition;
+
+    fn from_proto(proto: proto_types::MapPosition) -> Self {
+        MapPosition {
+            x: proto.x,
+            y: proto.y,
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::MapPosition {
+        proto_types::MapPosition {
+            x: self.x,
+            y: self.y,
+        }
+    }
+}
+
+pub struct Tile {
+    squares: Vec<Square>,
+    position: MapPosition,
+}
+
+impl Internal for Tile {
+    type P = proto_types::Tile;
+
+    fn from_proto(proto: proto_types::Tile) -> Self {
+        let mut squares : Vec<Square> = vec![];
+        for proto_square in proto.squares {
+            let square = Square::from_proto(proto_square);
+            squares.push(square);
+        }
+        Tile {
+            squares,
+            position: MapPosition::from_proto(proto.position.unwrap()),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Tile {
+        let mut proto_squares : Vec<proto_types::Square> = vec![];
+        for square in &self.squares {
+            let proto_square = square.to_proto();
+            proto_squares.push(proto_square);
+        }
+        proto_types::Tile {
+            squares: proto_squares,
+            position: Some(self.position.to_proto()),
+        }
+    }
+}
+
+pub struct Square {
+    north_wall: WallType,
+    east_wall: WallType,
+    south_wall: WallType,
+    west_wall: WallType,
+    square_type: SquareType,
+}
+
+impl Internal for Square {
+    type P = proto_types::Square;
+
+    fn from_proto(proto: proto_types::Square) -> Self {
+        Square {
+            north_wall: WallType::from_i32(proto.north_wall).unwrap(),
+            east_wall: WallType::from_i32(proto.east_wall).unwrap(),
+            south_wall: WallType::from_i32(proto.south_wall).unwrap(),
+            west_wall: WallType::from_i32(proto.west_wall).unwrap(),
+            square_type: SquareType::from_i32(proto.square_type).unwrap(),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Square {
+        proto_types::Square {
+            north_wall: i32::from(self.north_wall),
+            east_wall: i32::from(self.east_wall),
+            south_wall: i32::from(self.south_wall),
+            west_wall: i32::from(self.west_wall),
+            square_type: i32::from(self.square_type),
+        }
+    }
+}
+
+pub struct Heister {
+    heister_color: HeisterColor,
+    map_position: MapPosition,
+    has_taken_item: bool,
+    has_escaped: bool,
+}
+
+impl Internal for Heister {
+    type P = proto_types::Heister;
+
+    fn from_proto(proto: proto_types::Heister) -> Self {
+        Heister {
+            heister_color: HeisterColor::from_i32(proto.heister_color).unwrap(),
+            map_position: MapPosition::from_proto(proto.map_position.unwrap()),
+            has_taken_item: proto.has_taken_item,
+            has_escaped: proto.has_escaped,
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Heister {
+        proto_types::Heister {
+            heister_color: i32::from(self.heister_color),
+            map_position: Some(self.map_position.to_proto()),
+            has_taken_item: self.has_taken_item,
+            has_escaped: self.has_escaped,
+        }
+    }
+}
+
+pub struct Player {
+    name: String,
+    abilities: Vec<Ability>,
+}
+
+impl Internal for Player {
+    type P = proto_types::Player;
+
+    fn from_proto(proto: proto_types::Player) -> Self {
+        let mut abilities : Vec<proto_types::Ability> = vec![];
+        for proto_ability in proto.abilities {
+            let ability = Ability::from_i32(proto_ability).unwrap();
+            abilities.push(ability);
+        }
+        Player {
+            name: proto.name,
+            abilities,
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Player {
+        let mut proto_abilities : Vec<i32> = vec![];
+        for ability in &self.abilities {
+            let proto_ability = i32::from(ability.clone());
+            proto_abilities.push(proto_ability);
+        }
+        proto_types::Player {
+            name: self.name.clone(),
+            abilities: proto_abilities,
+        }
+    }
+}
+
+pub struct Move {
+    heister_color: HeisterColor,
+    position: MapPosition,
+}
+
+impl Internal for Move {
+    type P = proto_types::Move;
+
+    fn from_proto(proto: proto_types::Move) -> Self {
+        Move {
+            heister_color: HeisterColor::from_i32(proto.heister_color).unwrap(),
+            position: MapPosition::from_proto(proto.position.unwrap()),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Move {
+        proto_types::Move {
+            heister_color: i32::from(self.heister_color),
+            position: Some(self.position.to_proto()),
+        }
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct GameState {
     pub game_name: String,
