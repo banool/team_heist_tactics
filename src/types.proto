@@ -4,8 +4,8 @@
 
 // TODO How to describe where a tile is in relation to other tiles.
 
-package types;
 syntax = "proto3";
+package types;
 
 // This is the "primary key" to each of the heisters.
 // The other two are just flavour.
