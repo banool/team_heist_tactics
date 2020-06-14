@@ -87,9 +87,11 @@ const reducer = (state = initialState, action) => {
 
       case WEBSOCKET_MESSAGE:
         console.log("websocket_message action:", action);
+        // TODO
         return state;
 
       case WEBSOCKET_SEND:
+        console.log("websocket_send action:", action);
         // TODO
         return state;
 
@@ -105,6 +107,7 @@ const reducer = (state = initialState, action) => {
 
 export const {  } = joinGameSlice.actions;
 export const connectionStatusSelector = (state: RootState): ConnectionStatus => state.joinGame.connection_status;
+export const gameStateSelector = (state: RootState): GameState | null => state.joinGame.game_state;
 
 //export default joinGameSlice.reducer;
 export default reducer;

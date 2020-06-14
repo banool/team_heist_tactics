@@ -1873,7 +1873,7 @@ proto.types.Move.prototype.toObject = function(opt_includeInstance) {
  */
 proto.types.Move.toObject = function(includeInstance, msg) {
   var f, obj = {
-    heister: (f = msg.getHeister()) && proto.types.Heister.toObject(includeInstance, f),
+    heisterColor: jspb.Message.getFieldWithDefault(msg, 1, 0),
     position: (f = msg.getPosition()) && proto.types.MapPosition.toObject(includeInstance, f)
   };
 
@@ -1912,9 +1912,8 @@ proto.types.Move.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new proto.types.Heister;
-      reader.readMessage(value,proto.types.Heister.deserializeBinaryFromReader);
-      msg.setHeister(value);
+      var value = /** @type {!proto.types.HeisterColor} */ (reader.readEnum());
+      msg.setHeisterColor(value);
       break;
     case 2:
       var value = new proto.types.MapPosition;
@@ -1950,12 +1949,11 @@ proto.types.Move.prototype.serializeBinary = function() {
  */
 proto.types.Move.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getHeister();
-  if (f != null) {
-    writer.writeMessage(
+  f = message.getHeisterColor();
+  if (f !== 0.0) {
+    writer.writeEnum(
       1,
-      f,
-      proto.types.Heister.serializeBinaryToWriter
+      f
     );
   }
   f = message.getPosition();
@@ -1970,39 +1968,20 @@ proto.types.Move.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional Heister heister = 1;
- * @return {?proto.types.Heister}
+ * optional HeisterColor heister_color = 1;
+ * @return {!proto.types.HeisterColor}
  */
-proto.types.Move.prototype.getHeister = function() {
-  return /** @type{?proto.types.Heister} */ (
-    jspb.Message.getWrapperField(this, proto.types.Heister, 1));
+proto.types.Move.prototype.getHeisterColor = function() {
+  return /** @type {!proto.types.HeisterColor} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
 /**
- * @param {?proto.types.Heister|undefined} value
- * @return {!proto.types.Move} returns this
-*/
-proto.types.Move.prototype.setHeister = function(value) {
-  return jspb.Message.setWrapperField(this, 1, value);
-};
-
-
-/**
- * Clears the message field making it undefined.
+ * @param {!proto.types.HeisterColor} value
  * @return {!proto.types.Move} returns this
  */
-proto.types.Move.prototype.clearHeister = function() {
-  return this.setHeister(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {boolean}
- */
-proto.types.Move.prototype.hasHeister = function() {
-  return jspb.Message.getField(this, 1) != null;
+proto.types.Move.prototype.setHeisterColor = function(value) {
+  return jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 

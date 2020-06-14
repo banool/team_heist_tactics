@@ -94,7 +94,7 @@ pub async fn play_game(
         Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
     };
 
-    let my_ws = MyWs { game_wrapper };
+    let my_ws = MyWs { game_wrapper: game_wrapper.clone() };
 
     let res = ws::start_with_addr(my_ws, &req, stream);
     let (addr, resp) = match res {
@@ -102,6 +102,8 @@ pub async fn play_game(
         Err(e) => return HttpResponse::from_error(e),
     };
     game_manager.register_actor(handle, addr);
+    // Push initial state.
+    game_wrapper.read().unwrap().push_state();
     debug!("Successfully upgraded {} to websocket for {}", info.name, info.handle);
     resp
 }

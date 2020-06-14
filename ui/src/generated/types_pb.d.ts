@@ -228,10 +228,8 @@ export namespace GameState {
 }
 
 export class Move extends jspb.Message {
-  hasHeister(): boolean;
-  clearHeister(): void;
-  getHeister(): Heister | undefined;
-  setHeister(value?: Heister): void;
+  getHeisterColor(): HeisterColorMap[keyof HeisterColorMap];
+  setHeisterColor(value: HeisterColorMap[keyof HeisterColorMap]): void;
 
   hasPosition(): boolean;
   clearPosition(): void;
@@ -250,7 +248,7 @@ export class Move extends jspb.Message {
 
 export namespace Move {
   export type AsObject = {
-    heister?: Heister.AsObject,
+    heisterColor: HeisterColorMap[keyof HeisterColorMap],
     position?: MapPosition.AsObject,
   }
 }

@@ -15,3 +15,10 @@ export enum ConnectionStatus {
   // TODO Do the reconnecting states from here:
   // https://github.com/giantmachines/redux-websocket
 }
+
+export enum MoveDirection {
+  North,
+  East,
+  South,
+  West,
+}

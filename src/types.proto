@@ -165,7 +165,7 @@ message GameState {
 }
 
 message Move {
-  Heister heister = 1;
+  HeisterColor heister_color = 1;
   MapPosition position = 2;
 }
 

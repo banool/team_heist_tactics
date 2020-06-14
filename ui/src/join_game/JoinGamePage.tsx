@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 
 import JoinGameForm from "./JoinGameForm";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
+import GameComponent from "./GameComponent";
 
 import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
@@ -24,7 +25,7 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
     <div>
       <h1>Team Heist Tactics</h1>
       {connection_status != ConnectionStatus.Connected ? <JoinGameForm /> : null}
-      <ConnectionStatusComponent />
+      {connection_status == ConnectionStatus.Connected ? <GameComponent /> : null}
     </div>
   );
 };
