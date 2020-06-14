@@ -1,10 +1,9 @@
 use anyhow::Result;
 use log::debug;
 use prost::Message as ProstMessage;
-use std::any::type_name;
 
 use crate::types::main_message::Body;
-use crate::types::{GameState, InvalidRequest, MainMessage};
+use crate::types::{GameState, Internal, InvalidRequest, MainMessage};
 use actix::Message as ActixMessage;
 
 #[derive(Clone, Debug)]
@@ -32,7 +31,7 @@ impl InternalMessage {
 
     pub fn from_game_state(game_state: GameState) -> InternalMessage {
         let main_message = MainMessage {
-            body: Some(Body::GameState(game_state)),
+            body: Some(Body::GameState(game_state.to_proto())),
         };
         InternalMessage { main_message }
     }
@@ -40,7 +39,7 @@ impl InternalMessage {
     pub fn from_invalid_reason(reason: String) -> InternalMessage {
         let invalid_request = InvalidRequest { reason };
         let main_message = MainMessage {
-            body: Some(Body::InvalidRequest(invalid_request)),
+            body: Some(Body::InvalidRequest(invalid_request.to_proto())),
         };
         InternalMessage { main_message }
     }

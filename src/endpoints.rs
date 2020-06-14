@@ -1,14 +1,11 @@
 use crate::errors::MyError;
-use crate::game::Game;
 use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
-use actix_web_actors::ws::WebsocketContext;
 
 use log::{debug, warn};
-use std::collections::HashSet;
 
-use actix::{Actor, Handler, Message, StreamHandler};
-use actix_web::{http::header, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix::{Actor, Handler, StreamHandler};
+use actix_web::{http::header, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
 use askama::Template;
 use serde::Deserialize;

@@ -5,7 +5,6 @@ use crate::game::Game;
 use crate::serializer::InternalMessage;
 
 use actix::Addr;
-use actix_web_actors::ws;
 use anyhow::{anyhow, Result};
 use log::info;
 use std::collections::{HashMap, HashSet};
@@ -48,7 +47,7 @@ impl GameWrapper {
         let internal_message = InternalMessage::from_game_state(game_state);
         for a in self.actors.iter() {
             // TODO Consider using send instead.
-            let res = a.do_send(internal_message.clone());
+            a.do_send(internal_message.clone());
         }
         Ok(())
     }

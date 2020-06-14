@@ -15,7 +15,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(game_handle: GameHandle, game_options: GameOptions) -> Game {
+    pub fn new(game_handle: GameHandle, _game_options: GameOptions) -> Game {
         // TODO Make starting game state.
         let mut game_state = GameState::default();
         game_state.game_name = game_handle.0.to_string();
@@ -28,7 +28,7 @@ impl Game {
     }
 
     pub fn add_player(&mut self, name: String) -> Result<()> {
-        if GameStatus::from_i32(self.game_state.game_status) != Some(GameStatus::Staging) {
+        if self.game_state.game_status != GameStatus::Staging {
             return Err(anyhow!("Cannot join game that is already in progress"));
         }
         self.players.push(Player { name });
