@@ -158,10 +158,13 @@ message GameState {
   bool all_items_taken = 6;
 
   // Number of tiles that remain to be revealed.
-  uint32 remaining_tile = 7;
+  uint32 remaining_tiles = 7;
 
   // Result of the game.
   GameStatus game_status = 8;
+
+  // Players connected to the game.
+  repeated Player players = 9;
 }
 
 message Move {

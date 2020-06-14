@@ -198,11 +198,16 @@ export class GameState extends jspb.Message {
   getAllItemsTaken(): boolean;
   setAllItemsTaken(value: boolean): void;
 
-  getRemainingTile(): number;
-  setRemainingTile(value: number): void;
+  getRemainingTiles(): number;
+  setRemainingTiles(value: number): void;
 
   getGameStatus(): GameStatusMap[keyof GameStatusMap];
   setGameStatus(value: GameStatusMap[keyof GameStatusMap]): void;
+
+  clearPlayersList(): void;
+  getPlayersList(): Array<Player>;
+  setPlayersList(value: Array<Player>): void;
+  addPlayers(value?: Player, index?: number): Player;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GameState.AsObject;
@@ -222,8 +227,9 @@ export namespace GameState {
     tilesList: Array<Tile.AsObject>,
     heistersList: Array<Heister.AsObject>,
     allItemsTaken: boolean,
-    remainingTile: number,
+    remainingTiles: number,
     gameStatus: GameStatusMap[keyof GameStatusMap],
+    playersList: Array<Player.AsObject>,
   }
 }
 
