@@ -1,15 +1,19 @@
 # UI
 
 ## Developing
-Build everything:
+Generate typescript from protobuf definitions:
+```
+./generate_types.sh
+```
+
+Build js:
 ```
 npm i
 npm run build
 ```
 Run the web UI:
 ```
-cd dist
-python3 -m http.server
+python3 -m http.server --directory dist
 # Go to the address it spits out.
 ```
 

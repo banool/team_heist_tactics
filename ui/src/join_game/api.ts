@@ -20,7 +20,7 @@ export function joinGame(scent: StagingJoinGameThing) {
       console.log("CreateScent response", data);
     } catch (error) {
       // TODO: dispatch failure.
-      console.error("failed the thing");
+      console.error("failed to join game");
     }
   }
 }
