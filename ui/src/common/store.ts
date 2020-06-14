@@ -9,8 +9,12 @@ import * as jspb from "google-protobuf";
 const customSerializer = (payload: jspb.Message) => payload.serializeBinary();
 
 // Create the middleware instance.
-const reduxWebsocketMiddleware = reduxWebsocket(
-  { serializer: customSerializer, prefix: WEBSOCKET_ACTION_PREFIX });
+const reduxWebsocketMiddleware = reduxWebsocket({
+  serializer: customSerializer,
+  prefix: WEBSOCKET_ACTION_PREFIX,
+  // Modify the websocket so it returns arraybuffers instead of blobs.
+  onOpen: (socket: WebSocket) => socket.binaryType = 'arraybuffer'
+});
 const middleware = getDefaultMiddleware().concat(reduxWebsocketMiddleware);
 
 // Create the Redux store.

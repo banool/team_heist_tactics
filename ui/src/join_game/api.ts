@@ -1,6 +1,6 @@
 import { StagingJoinGameThing } from "./types";
 
-import { Move } from "../generated/types_pb";
+import { Move, MainMessage } from "../generated/types_pb";
 import { connect, send } from '@giantmachines/redux-websocket';
 
 export function joinGame(join_game_thing: StagingJoinGameThing) {
@@ -29,7 +29,9 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
 
 export function moveHeister(move: Move) {
   return async dispatch => {
-    dispatch(send(move));
+    var main_message = new MainMessage();
+    main_message.setMove(move);
+    dispatch(send(main_message));
     console.log("Dispatched websocket send of Move");
   }
 }

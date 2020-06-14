@@ -102,8 +102,8 @@ pub async fn play_game(
         Err(e) => return HttpResponse::from_error(e),
     };
     game_manager.register_actor(handle, addr);
-    // Push initial state.
-    game_wrapper.read().unwrap().push_state();
+    // Push initial state / update other clients that there is a new player.
+    game_wrapper.read().unwrap().push_state().unwrap();
     debug!("Successfully upgraded {} to websocket for {}", info.name, info.handle);
     resp
 }

@@ -4,7 +4,7 @@ import { RootState } from "../common/reducers";
 
 import { JoinGameThing, StagingJoinGameThing, ConnectionStatus } from "./types";
 
-import { GameState } from "../generated/types_pb";
+import { GameState, MainMessage } from "../generated/types_pb";
 
 import { WEBSOCKET_ACTION_PREFIX, WEBSOCKET_ACTION_PREFIX_FULL } from "../constants/other";
 
@@ -87,13 +87,22 @@ const reducer = (state = initialState, action) => {
 
       case WEBSOCKET_MESSAGE:
         console.log("websocket_message action:", action);
-        // TODO
-        return state;
-
-      case WEBSOCKET_SEND:
-        console.log("websocket_send action:", action);
-        // TODO
-        return state;
+        console.log("websocket_message action.payload.message:", action.payload.message);
+        var main_message = MainMessage.deserializeBinary(action.payload.message);
+        console.log("Received main message", main_message);
+        var game_state = state.game_state;
+        if (main_message.hasGameState()) {
+          // Excalmation mark because we know it won't be undefined.
+          game_state = main_message.getGameState()!;
+          console.log("Updating game state to", game_state.toObject());
+        }
+        if (main_message.hasInvalidRequest()) {
+          console.log("Sent an invalid request earlier:", main_message.getInvalidRequest()!);
+        }
+        return {
+          ...state,
+          game_state: game_state,
+        };
 
       default:
         console.warn("Default websocket action statement");
