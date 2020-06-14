@@ -26,6 +26,8 @@ pub struct GameWrapper {
     actors: Vec<Addr<MyWs>>,
 }
 
+// TODO Add the ability to pause and resume the game.
+// TODO If any player disconnects, pause the game.
 impl GameWrapper {
     pub fn new(game_handle: GameHandle, game_options: GameOptions) -> GameWrapper {
         let game = Game::new(game_handle, game_options);
