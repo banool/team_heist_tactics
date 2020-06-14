@@ -86,7 +86,7 @@ const reducer = (state = initialState, action) => {
         };
 
       case WEBSOCKET_MESSAGE:
-        // TODO
+        console.log("websocket_message action:", action);
         return state;
 
       case WEBSOCKET_SEND:
@@ -94,7 +94,7 @@ const reducer = (state = initialState, action) => {
         return state;
 
       default:
-        console.log("Default websocket action statement");
+        console.warn("Default websocket action statement");
         return state;
     }
   } else {

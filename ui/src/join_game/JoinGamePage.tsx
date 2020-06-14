@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import React from "react";
+import { useSelector } from "react-redux";
 
 import JoinGameForm from "./JoinGameForm";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
 
+import { connectionStatusSelector } from "./slice";
+import { ConnectionStatus } from "./types";
+
 
 type JoinGamePageProps = {};
 const JoinGamePage = ({ }: JoinGamePageProps) => {
+  const connection_status = useSelector(connectionStatusSelector);
 
   // This dispatches a function on page load.
   /*
@@ -20,7 +23,7 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
   return (
     <div>
       <h1>Team Heist Tactics</h1>
-      <JoinGameForm />
+      {connection_status != ConnectionStatus.Connected ? <JoinGameForm /> : null}
       <ConnectionStatusComponent />
     </div>
   );
