@@ -2,8 +2,6 @@ import { StagingJoinGameThing } from "./types";
 
 import store from '../common/store';
 
-import { MainMessage } from "../generated/types_pb";
-
 import { connect } from '@giantmachines/redux-websocket';
 
 export function joinGame(scent: StagingJoinGameThing) {
@@ -21,7 +19,8 @@ export function joinGame(scent: StagingJoinGameThing) {
       var serverUrl = new URL(urlString);
       serverUrl.searchParams.set("name", scent.name);
       serverUrl.searchParams.set("handle", scent.handle);
-      store.dispatch(connect(serverUrl.toString()));
+      dispatch(connect(serverUrl.toString()));
+      console.log("Dispatched action to join game");
     } catch (error) {
       // TODO: dispatch failure.
       console.error("Failed to join game with websocket:", error);

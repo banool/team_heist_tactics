@@ -3,7 +3,9 @@ use crate::game::MoveValidity;
 use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
 
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
+use std::fs::File;
+use std::io::{BufReader, Read};
 
 use actix::{Actor, Handler, StreamHandler};
 use actix_web::{http::header, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
@@ -18,12 +20,6 @@ struct IndexTemplate<'a> {
     adjective: &'a str,
 }
 
-#[derive(Template)]
-#[template(path = "play.html")]
-struct PlayTemplate<'a> {
-    adjective: &'a str,
-}
-
 pub async fn index() -> impl Responder {
     // TODO Use random adjective from the adjective list on GameManager.
     let index = IndexTemplate { adjective: "lit" };
@@ -35,12 +31,15 @@ pub async fn index() -> impl Responder {
 }
 
 pub async fn play() -> impl Responder {
-    let play = PlayTemplate { adjective: "lit" };
-    let body = match play.render() {
+    let file = File::open("templates/play.html");
+    let file = match file {
         Ok(body) => body,
-        Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
+        Err(e) => return HttpResponse::from_error(e.into()),
     };
-    HttpResponse::Ok().body(body)
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = String::new();
+    buf_reader.read_to_string(&mut contents).expect("Failed to read play.html into buffer");
+    HttpResponse::Ok().body(contents)
 }
 
 pub async fn create_game(
@@ -103,7 +102,7 @@ pub async fn play_game(
         Err(e) => return HttpResponse::from_error(e),
     };
     game_manager.register_actor(handle, addr);
-    debug!("Successfully upgraded to websocket for {}", info.handle);
+    debug!("Successfully upgraded {} to websocket for {}", info.name, info.handle);
     resp
 }
 
@@ -118,6 +117,11 @@ impl Actor for MyWs {
 // This impl handles messages received from the client.
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
+        if let Ok(ws::Message::Ping(ping)) = msg {
+            debug!("Ponging: {:?}", ping);
+            ctx.pong(&ping);
+            return;
+        }
         let validity = match msg {
             Ok(ws::Message::Binary(bin)) => match InternalMessage::from_bytes(&bin.clone()) {
                 Ok(internal_message) => {

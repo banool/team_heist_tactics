@@ -5,6 +5,7 @@ export THT_PORT=19996
 export THT_DEPLOYMENT_MODE=dev
 
 cd ui
+./generate_types.sh
 npm ci --only=production
 npm run build
 cd ..

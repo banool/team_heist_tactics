@@ -6,6 +6,9 @@ import { useDispatch } from "react-redux";
 import { joinGame } from "./api";
 import { JoinGameThing, StagingJoinGameThing } from "./types";
 
+// TODO Hide this component when the websocket comes up.
+// TODO Make a connection status component.
+
 const defaults: StagingJoinGameThing = {
   name: "",
   handle: "",
@@ -51,12 +54,14 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
       // TODO: Implement.
       console.error("Not implemented yet :]");
     } else {
+      console.log("Dispatching action to join game");
       dispatch(joinGame(stateToStagingJoinGameThing()));
     }
   };
 
   return (
     <div>
+      <h3>Let's goooooo!!!!!!!!!!!!!!!!!!!!!!!!!!</h3>
       <form>
         <label>
           <b>Join Game -->&emsp;</b>

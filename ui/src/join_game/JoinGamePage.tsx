@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { JoinGameThing } from "./types";
 import JoinGameForm from "./JoinGameForm";
+import ConnectionStatusComponent from "./ConnectionStatusComponent";
 
 
 type JoinGamePageProps = {};
@@ -20,8 +20,8 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
   return (
     <div>
       <h1>Team Heist Tactics</h1>
-      <h3>Let's goooooo!!!!!!!!!!!!!!!!!!!!!!!!!!</h3>
       <JoinGameForm />
+      <ConnectionStatusComponent />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { getDefaultMiddleware, configureStore } from "@reduxjs/toolkit";
 import reduxWebsocket from '@giantmachines/redux-websocket';
 import rootReducer from "./reducers";
+import { WEBSOCKET_ACTION_PREFIX } from "../constants/other";
 
 import * as jspb from "google-protobuf";
 
@@ -8,7 +9,8 @@ import * as jspb from "google-protobuf";
 const customSerializer = (payload: jspb.Message) => payload.serializeBinary();
 
 // Create the middleware instance.
-const reduxWebsocketMiddleware = reduxWebsocket({ serializer: customSerializer });
+const reduxWebsocketMiddleware = reduxWebsocket(
+  { serializer: customSerializer, prefix: WEBSOCKET_ACTION_PREFIX });
 const middleware = getDefaultMiddleware().concat(reduxWebsocketMiddleware);
 
 // Create the Redux store.
