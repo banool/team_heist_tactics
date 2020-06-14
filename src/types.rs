@@ -166,11 +166,61 @@ impl Internal for Heister {
     }
 }
 
-// TODO Implement the rest
-// * player
-// * move
-// * invalidrequest
-// * mainmessage
+pub struct Player {
+    name: String,
+    abilities: Vec<Ability>,
+}
+
+impl Internal for Player {
+    type P = proto_types::Player;
+
+    fn from_proto(proto: proto_types::Player) -> Self {
+        let mut abilities : Vec<proto_types::Ability> = vec![];
+        for proto_ability in proto.abilities {
+            let ability = Ability::from_i32(proto_ability).unwrap();
+            abilities.push(ability);
+        }
+        Player {
+            name: proto.name,
+            abilities,
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Player {
+        let mut proto_abilities : Vec<i32> = vec![];
+        for ability in &self.abilities {
+            let proto_ability = i32::from(ability.clone());
+            proto_abilities.push(proto_ability);
+        }
+        proto_types::Player {
+            name: self.name.clone(),
+            abilities: proto_abilities,
+        }
+    }
+}
+
+pub struct Move {
+    heister: Heister,
+    position: MapPosition,
+}
+
+impl Internal for Move {
+    type P = proto_types::Move;
+
+    fn from_proto(proto: proto_types::Move) -> Self {
+        Move {
+            heister: Heister::from_proto(proto.heister).unwrap(),
+            position: MapPosition::from_proto(proto.position).unwrap(),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::Move {
+        proto_types::Move {
+            heister: self.heister.to_proto(),
+            position: self.position.to_proto(),
+        }
+    }
+}
 
 #[derive(Clone, Default)]
 pub struct GameState {
