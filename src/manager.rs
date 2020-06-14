@@ -1,8 +1,9 @@
 // Manages all the games.
 
 use crate::endpoints::MyWs;
-use crate::game::Game;
+use crate::game::{Game, MoveValidity};
 use crate::serializer::InternalMessage;
+use crate::types::MainMessage;
 
 use actix::Addr;
 use anyhow::{anyhow, Result};
@@ -52,7 +53,9 @@ impl GameWrapper {
         Ok(())
     }
 
-    // TODO a function that pushes the game state to all websockets
+    pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
+        self.game.handle_message(message)
+    }
 }
 
 pub struct GameManagerWrapper {

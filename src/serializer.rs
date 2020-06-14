@@ -20,9 +20,8 @@ impl InternalMessage {
         buf
     }
 
-    pub fn from_bytes(wire_message: Vec<u8>) -> Result<InternalMessage> {
-        let b: &[u8] = &wire_message;
-        let main_message = match MainMessage::decode(b) {
+    pub fn from_bytes(wire_message: &[u8]) -> Result<InternalMessage> {
+        let main_message = match MainMessage::decode(wire_message) {
             Ok(main_message) => main_message,
             Err(e) => return Err(anyhow::Error::new(e)),
         };

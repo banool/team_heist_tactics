@@ -1,8 +1,9 @@
 use crate::errors::MyError;
+use crate::game::MoveValidity;
 use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
 
-use log::{debug, warn};
+use log::{debug, error, info, warn};
 
 use actix::{Actor, Handler, StreamHandler};
 use actix_web::{http::header, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
@@ -74,6 +75,8 @@ pub struct JoinGameQuery {
 
 // TODO Make the input here a struct and use whatever actix offers for this purpose.
 // TODO This is the one that returns the websocket client connection
+// TODO Check for this handle if a player with this name already exists.
+//      If so, reconnect them with that player instead of making a new player + ws.
 pub async fn play_game(
     req: HttpRequest,
     info: web::Query<JoinGameQuery>,
@@ -108,13 +111,6 @@ pub struct MyWs {
     game_wrapper: Arc<RwLock<GameWrapper>>,
 }
 
-impl MyWs {
-    // Convert String into rust genned protobuf type.
-    // Call function of GameWrapper.
-    // It calls function of Game. If the move was valid, it will call push_state.
-    //
-}
-
 impl Actor for MyWs {
     type Context = ws::WebsocketContext<Self>;
 }
@@ -122,27 +118,40 @@ impl Actor for MyWs {
 // This impl handles messages received from the client.
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        let valid = match msg {
-            Ok(ws::Message::Binary(bin)) => {
-                debug!("Echoing bin with {:?}", bin);
-                ctx.binary(bin);
-                true
-            }
+        let validity = match msg {
+            Ok(ws::Message::Binary(bin)) => match InternalMessage::from_bytes(&bin.clone()) {
+                Ok(internal_message) => {
+                    let main_message = internal_message.main_message;
+                    self.game_wrapper
+                        .write()
+                        .unwrap()
+                        .handle_message(main_message)
+                }
+                Err(e) => {
+                    warn!("Failed to decode message: {:?}: {:?}", bin, e);
+                    MoveValidity::Invalid(format!("Failed to decode message: {:?}", e))
+                }
+            },
             wildcard => {
                 warn!("Unexpected message received: {:?}", wildcard);
-                false
+                MoveValidity::Invalid("Unexpected message received".to_string())
             }
         };
-        if valid {
-            let res = self.game_wrapper.read().unwrap().push_state();
-            match res {
-                Ok(_) => debug!("Pushed state to all actors successfully"),
-                Err(e) => warn!("Failed to push state to all actors: {:?}", e),
+        match validity {
+            MoveValidity::Valid => {
+                let res = self.game_wrapper.read().unwrap().push_state();
+                match res {
+                    Ok(_) => info!("Message was valid and pushed state to all actors successfully"),
+                    Err(e) => warn!(
+                        "Message was valid but failed to push state to all actors: {:?}",
+                        e
+                    ),
+                }
             }
-        } else {
-            let reason = "invalid reason TBA".to_string();
-            let response = InternalMessage::from_invalid_reason(reason);
-            ctx.binary(response.to_bytes());
+            MoveValidity::Invalid(reason) => {
+                let response = InternalMessage::from_invalid_reason(reason);
+                ctx.binary(response.to_bytes());
+            }
         }
     }
 }

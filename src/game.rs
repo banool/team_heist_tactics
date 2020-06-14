@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 
 use crate::manager::{GameHandle, GameOptions};
-use crate::types::{GameState, GameStatus};
+use crate::types::{GameState, GameStatus, MainMessage};
 use crate::utils::get_current_time_secs;
 
 pub struct Player {
@@ -12,6 +12,11 @@ pub struct Game {
     pub game_handle: GameHandle,
     game_state: GameState,
     players: Vec<Player>,
+}
+
+pub enum MoveValidity {
+    Valid,
+    Invalid(String),
 }
 
 impl Game {
@@ -37,5 +42,11 @@ impl Game {
 
     pub fn get_game_state(&self) -> GameState {
         self.game_state.clone()
+    }
+
+    pub fn handle_message(&mut self, _main: MainMessage) -> MoveValidity {
+        // TODO Match on main.body and influence the game state for each of the options.
+        // If we receive GameState or InvalidRequest at this endpoint, panic, it should never happen.
+        MoveValidity::Valid
     }
 }
