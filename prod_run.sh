@@ -5,4 +5,4 @@ echo "Copying static into bindmounted static directory"
 cp -R templates/static/* static/
 
 # Run the binary
-./target/release/team_heist_tactics
+./team_heist_tactics

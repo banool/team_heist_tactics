@@ -45,11 +45,16 @@ RUN set -x\
 # Copy source and rebuild
 COPY src/ src/
 COPY build.rs .
-RUN set -x\
-  && cargo build --release
+RUN set -x && cargo build --release
+COPY prod_run.sh .
+
+# Copy out the built binary into the distroless build
+FROM gcr.io/distroless/cc:debug
+COPY --from=build /tht/target/release/team_heist_tactics /
+COPY --from=build /tht/templates /templates
+COPY --from=build /tht/prod_run.sh /
 
 # Finally run it all
-COPY prod_run.sh .
 EXPOSE 19996
 ENV THT_IP_ADDRESS=0.0.0.0
 ENV THT_PORT=19996
