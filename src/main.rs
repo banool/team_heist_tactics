@@ -70,9 +70,8 @@ async fn main() -> std::io::Result<()> {
         .game_manager
         .write()
         .unwrap()
-        .new_game(GameOptions {})
+        .new_game(GameOptions {}, Some("test".to_string()))
         .unwrap();
-
 
     HttpServer::new(move || {
         let app = App::new()

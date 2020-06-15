@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { gameStateSelector } from "./slice";
-import { Move, HeisterColor, Heister } from "../generated/types_pb";
+import { Move, HeisterColor, MapPosition } from "../generated/types_pb";
 import { moveHeister } from "./api"
 import { MoveDirection } from "./types"
 
@@ -27,7 +27,9 @@ const MoveHeisterComponent = () => {
       console.error("Tried to move heister with no position");
       return;
     }
-    var new_position = current_position;
+    var new_position = new MapPosition();
+    new_position.setX(current_position.getX());
+    new_position.setY(current_position.getY());
     switch (+move_direction) {
       case MoveDirection.North:
         new_position.setY(current_position.getY()+1);
@@ -46,7 +48,7 @@ const MoveHeisterComponent = () => {
         break;
     }
     var move = new Move();
-    console.log("Dispatching action to move GREEN heister from {} to {}", current_position, new_position);
+    console.log("Dispatching action to move GREEN heister (a->b)", current_position.toObject(), new_position.toObject());
     move.setHeisterColor(hardcoded_color);
     move.setPosition(new_position);
     dispatch(moveHeister(move));

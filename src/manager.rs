@@ -82,12 +82,18 @@ impl GameManager {
         self.games.keys().map(|gh| gh.0.to_string()).collect()
     }
 
-    pub fn new_game(&mut self, game_options: GameOptions) -> Result<GameHandle> {
-        let in_use_handles: HashSet<String> = self.get_in_use_handles();
-        let mut available_handles = self.words.difference(&in_use_handles);
-        let handle = match available_handles.next() {
+    pub fn new_game(&mut self, game_options: GameOptions, handle: Option<String>) -> Result<GameHandle> {
+        let handle = match handle {
             Some(handle) => handle,
-            None => return Err(anyhow!("Ran out of game handles")),
+            None => {
+                let in_use_handles: HashSet<String> = self.get_in_use_handles();
+                let mut available_handles = self.words.difference(&in_use_handles);
+                let handle = match available_handles.next() {
+                    Some(handle) => handle,
+                    None => return Err(anyhow!("Ran out of game handles")),
+                };
+                handle.to_string()
+            }
         };
         let game_handle = GameHandle(handle.to_string());
 

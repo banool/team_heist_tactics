@@ -202,8 +202,8 @@ impl Heister {
 
 #[derive(Clone, Debug, Default)]
 pub struct Player {
-    name: String,
-    abilities: Vec<Ability>,
+    pub name: String,
+    pub abilities: Vec<Ability>,
 }
 
 impl Internal for Player {

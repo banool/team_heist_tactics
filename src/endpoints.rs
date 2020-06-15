@@ -50,7 +50,7 @@ pub async fn create_game(
 
     // Register a new game.
     let game_options = GameOptions {};
-    let game_handle = game_manager.new_game(game_options);
+    let game_handle = game_manager.new_game(game_options, None);
     let game_handle = match game_handle {
         Ok(game_handle) => game_handle,
         Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
