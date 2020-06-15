@@ -1,0 +1,26 @@
+name: Build UI + server into one container
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build_everything:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Build and publish team_heist_tactics to Github Packages
+      uses: docker/build-push-action@master
+      with:
+        repository: banool/team_heist_tactics/team_heist_tactics
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        dockerfile: Dockerfile
+        tags: latest
+        # build_args: "--no-cache,--force-rm"
+        always_pull: true
+    needs:
+      []
