@@ -25,6 +25,7 @@ RUN ./generate_types.sh
 RUN npm run prodbuild
 
 # Server stage of the build
+# FROM rust:1.44-alpine3.11 as build
 FROM rust:1.44 as build
 
 ENV app=tht
@@ -53,10 +54,11 @@ RUN set -x\
   && cargo build --release
 
 # Finally run it all
+COPY prod_run.sh .
 EXPOSE 19996
 ENV THT_IP_ADDRESS=0.0.0.0
 ENV THT_PORT=19996
 ENV THT_DEPLOYMENT_MODE=prod
 ENV RUST_LOG=debug
 ENV RUST_LOG_STYLE=always
-CMD ["/tht/target/release/team_heist_tactics"]
+CMD ["./prod_run.sh"]
