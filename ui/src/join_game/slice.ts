@@ -107,7 +107,7 @@ const reducer = (state = initialState, action) => {
         // The framework handles sending the message, this just lets us do something
         // when it happens.
         console.debug("Sending message over websocket");
-        break;
+        return state;
 
       default:
         console.warn("Default websocket action statement", action);
