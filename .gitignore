@@ -1,5 +1,5 @@
 # Generated node stuff
-templates/static
+templates/static/app.js
 
 # Rust
 /target/

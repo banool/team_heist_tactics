@@ -25,3 +25,6 @@ Use https://github.com/banool/server-setup with something like this:
 ansible-playbook -i hosts_external everything.yaml --extra-vars "@vars.json" --tags base,tht,https,nginx
 ```
 This setup binds a static directory into the container from the host. When the container starts, it copies the static content in to it. Nginx on the host serves the content in there itself.
+
+## Other
+I use git lfs to manage the static content right here in the repo instead of using some other static ocntent hosting thingo.
