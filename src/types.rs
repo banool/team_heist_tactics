@@ -22,7 +22,7 @@ pub mod main_message {
     pub use super::proto_types::main_message::Body;
 }
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::convert::From;
 
 pub trait Internal {
@@ -169,7 +169,7 @@ impl Internal for Square {
 impl From<SerializableSquare> for Square {
     fn from(item: SerializableSquare) -> Self {
         Square {
-            north_wall: WallType::from_i32(item.north_wall).unwrap(),
+            north_wall: WallType::from_i32(i32::from(item.north_wall)).unwrap(),
             east_wall: WallType::from_i32(i32::from(item.east_wall)).unwrap(),
             south_wall: WallType::from_i32(i32::from(item.south_wall)).unwrap(),
             west_wall: WallType::from_i32(i32::from(item.west_wall)).unwrap(),
@@ -178,8 +178,6 @@ impl From<SerializableSquare> for Square {
     }
 }
 
-
-#[derive(Clone, Debug, Default)]
 pub struct Heister {
     heister_color: HeisterColor,
     map_position: MapPosition,
@@ -187,6 +185,7 @@ pub struct Heister {
     has_escaped: bool,
 }
 
+#[derive(Clone, Debug, Default)]
 impl Internal for Heister {
     type P = proto_types::Heister;
 
