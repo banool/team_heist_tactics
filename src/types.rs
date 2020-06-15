@@ -18,6 +18,9 @@ pub mod main_message {
     pub use super::proto_types::main_message::Body;
 }
 
+use serde::{Serialize, Deserialize};
+use std::convert::From;
+
 pub trait Internal {
     type P;
 
@@ -49,9 +52,10 @@ impl Internal for TilePosition {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct MapPosition {
-    x: i32,
-    y: i32,
+    pub x: i32,
+    pub y: i32,
 }
 
 impl Internal for MapPosition {
@@ -72,9 +76,10 @@ impl Internal for MapPosition {
     }
 }
 
+// #[derive(Serialize, Deserialize)]
 pub struct Tile {
-    squares: Vec<Square>,
-    position: MapPosition,
+    pub squares: Vec<Square>,
+    pub position: MapPosition,
 }
 
 impl Internal for Tile {
@@ -105,12 +110,25 @@ impl Internal for Tile {
     }
 }
 
+impl From<SerializableTile> for Tile {
+    fn from(item: SerializableTile) -> Self {
+        let mut squares = vec![];
+        for serializable_square in item.squares {
+            squares.push(Square::from(serializable_square));
+        }
+        Tile {
+            squares,
+            position: item.position,
+        }
+    }
+}
+
 pub struct Square {
-    north_wall: WallType,
-    east_wall: WallType,
-    south_wall: WallType,
-    west_wall: WallType,
-    square_type: SquareType,
+    pub north_wall: WallType,
+    pub east_wall: WallType,
+    pub south_wall: WallType,
+    pub west_wall: WallType,
+    pub square_type: SquareType,
 }
 
 impl Internal for Square {
@@ -136,6 +154,20 @@ impl Internal for Square {
         }
     }
 }
+
+impl From<SerializableSquare> for Square {
+    fn from(item: SerializableSquare) -> Self {
+        let inw = i32::from(item.north_wall);
+        Square {
+            north_wall: WallType::from_i32(inw).unwrap(),
+            east_wall: WallType::from_i32(i32::from(item.east_wall)).unwrap(),
+            south_wall: WallType::from_i32(i32::from(item.south_wall)).unwrap(),
+            west_wall: WallType::from_i32(i32::from(item.west_wall)).unwrap(),
+            square_type: SquareType::from_i32(i32::from(item.square_type)).unwrap(),
+        }
+    }
+}
+
 
 pub struct Heister {
     heister_color: HeisterColor,
@@ -271,3 +303,49 @@ impl Internal for InvalidRequest {
         }
     }
 }
+
+// ---
+// JSON Serialization for Tiles
+// Since we can't directly add these derives on the proto_types
+// ---
+// Just trust that these values are OK
+#[derive(Serialize, Deserialize)]
+pub struct SerializableSquare {
+    pub north_wall: i32,
+    pub east_wall: i32,
+    pub south_wall: i32,
+    pub west_wall: i32,
+    pub square_type: i32,
+}
+
+impl From<Square> for SerializableSquare {
+    fn from(item: Square) -> Self {
+        SerializableSquare {
+            north_wall: i32::from(item.north_wall),
+            east_wall: i32::from(item.east_wall),
+            south_wall: i32::from(item.south_wall),
+            west_wall: i32::from(item.west_wall),
+            square_type: i32::from(item.square_type),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SerializableTile {
+    pub position: MapPosition,
+    pub squares: Vec<SerializableSquare>,
+}
+
+impl From<Tile> for SerializableTile {
+    fn from(item: Tile) -> Self {
+        let mut serializable_squares = vec![];
+        for square in item.squares {
+            serializable_squares.push(SerializableSquare::from(square));
+        }
+        SerializableTile {
+            squares: serializable_squares,
+            position: item.position,
+        }
+    }
+}
+// ---
