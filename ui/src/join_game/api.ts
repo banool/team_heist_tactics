@@ -31,6 +31,7 @@ export function moveHeister(move: Move) {
   return async dispatch => {
     var main_message = new MainMessage();
     main_message.setMove(move);
+    console.log("Dispatching websocket send of Move", move);
     dispatch(send(main_message));
     console.log("Dispatched websocket send of Move");
   }

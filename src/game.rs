@@ -1,16 +1,13 @@
 use anyhow::{anyhow, Result};
 
 use crate::manager::{GameHandle, GameOptions};
-use crate::types::{GameState, GameStatus, MainMessage};
+use crate::types::{GameState, GameStatus, MainMessage, Player};
 
-pub struct Player {
-    name: String,
-}
+use log::info;
 
 pub struct Game {
     pub game_handle: GameHandle,
     game_state: GameState,
-    players: Vec<Player>,
 }
 
 pub enum MoveValidity {
@@ -25,7 +22,6 @@ impl Game {
         Game {
             game_handle,
             game_state,
-            players: vec![],
         }
     }
 
@@ -33,7 +29,7 @@ impl Game {
         if self.game_state.game_status != GameStatus::Staging {
             return Err(anyhow!("Cannot join game that is already in progress"));
         }
-        self.players.push(Player { name });
+        self.game_state.players.push(Player { name, abilities: vec![] });
         Ok(())
     }
 
@@ -41,9 +37,10 @@ impl Game {
         self.game_state.clone()
     }
 
-    pub fn handle_message(&mut self, _main: MainMessage) -> MoveValidity {
+    pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
         // TODO Match on main.body and influence the game state for each of the options.
         // If we receive GameState or InvalidRequest at this endpoint, panic, it should never happen.
+        info!("Received message: {:?}", message);
         MoveValidity::Valid
     }
 }

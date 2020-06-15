@@ -86,10 +86,9 @@ const reducer = (state = initialState, action) => {
         };
 
       case WEBSOCKET_MESSAGE:
-        console.log("websocket_message action:", action);
-        console.log("websocket_message action.payload.message:", action.payload.message);
+        console.debug("websocket_message action.payload.message:", action.payload.message);
         var main_message = MainMessage.deserializeBinary(action.payload.message);
-        console.log("Received main message", main_message);
+        console.debug("Received main message", main_message);
         var game_state = state.game_state;
         if (main_message.hasGameState()) {
           // Excalmation mark because we know it won't be undefined.
@@ -104,8 +103,14 @@ const reducer = (state = initialState, action) => {
           game_state: game_state,
         };
 
+      case WEBSOCKET_SEND:
+        // The framework handles sending the message, this just lets us do something
+        // when it happens.
+        console.debug("Sending message over websocket");
+        break;
+
       default:
-        console.warn("Default websocket action statement");
+        console.warn("Default websocket action statement", action);
         return state;
     }
   } else {
