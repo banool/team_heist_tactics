@@ -88,7 +88,7 @@ impl Internal for Tile {
     type P = proto_types::Tile;
 
     fn from_proto(proto: proto_types::Tile) -> Self {
-        let mut squares : Vec<Square> = vec![];
+        let mut squares: Vec<Square>::new();
         for proto_square in proto.squares {
             let square = Square::from_proto(proto_square);
             squares.push(square);
@@ -100,7 +100,7 @@ impl Internal for Tile {
     }
 
     fn to_proto(&self) -> proto_types::Tile {
-        let mut proto_squares : Vec<proto_types::Square> = vec![];
+        let mut proto_squares: Vec<proto_types::Square>::new();
         for square in &self.squares {
             let proto_square = square.to_proto();
             proto_squares.push(proto_square);
@@ -210,7 +210,7 @@ impl Internal for Player {
     type P = proto_types::Player;
 
     fn from_proto(proto: proto_types::Player) -> Self {
-        let mut abilities : Vec<proto_types::Ability> = vec![];
+        let mut abilities = Vec::<Ability>::new();
         for proto_ability in proto.abilities {
             let ability = Ability::from_i32(proto_ability).unwrap();
             abilities.push(ability);
@@ -222,7 +222,7 @@ impl Internal for Player {
     }
 
     fn to_proto(&self) -> proto_types::Player {
-        let mut proto_abilities : Vec<i32> = vec![];
+        let mut proto_abilities: Vec<i32>::new();
         for ability in &self.abilities {
             let proto_ability = i32::from(ability.clone());
             proto_abilities.push(proto_ability);
