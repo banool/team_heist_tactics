@@ -3,7 +3,6 @@ templates/static
 
 # Rust
 /target/
-Cargo.lock
 **/*.rs.bk
 
 # Vim
