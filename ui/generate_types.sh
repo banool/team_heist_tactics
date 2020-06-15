@@ -8,5 +8,5 @@ protoc \
     --plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \
     --js_out="import_style=commonjs,binary:${OUT_DIR}" \
     --ts_out="${OUT_DIR}" \
-    --proto_path=../src \
-    ../src/types.proto
+    --proto_path=. \
+    ./types.proto
