@@ -30,7 +30,10 @@ impl Game {
         if self.game_state.game_status != GameStatus::Staging {
             return Err(anyhow!("Cannot join game that is already in progress"));
         }
-        self.game_state.players.push(Player { name, abilities: vec![] });
+        self.game_state.players.push(Player {
+            name,
+            abilities: vec![],
+        });
         Ok(())
     }
 

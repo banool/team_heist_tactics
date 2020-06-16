@@ -216,8 +216,8 @@ impl Heister {
                 HeisterColor::Purple => MapPosition { x: 1, y: 2 },
                 HeisterColor::Green => MapPosition { x: 2, y: 2 },
                 HeisterColor::Orange => MapPosition { x: 2, y: 1 },
-            }
-            _ => MapPosition { x: 0, y: 0 },  // TODO Do this for starting B side.
+            },
+            _ => MapPosition { x: 0, y: 0 }, // TODO Do this for starting B side.
         };
         Heister {
             heister_color,
@@ -304,9 +304,21 @@ impl Internal for GameState {
 
     fn from_proto(proto: proto_types::GameState) -> Self {
         let game_name = GameHandle(proto.game_name);
-        let tiles = proto.tiles.iter().map(|t| Tile::from_proto(t.clone())).collect();
-        let heisters = proto.heisters.iter().map(|h| Heister::from_proto(h.clone())).collect();
-        let players = proto.players.iter().map(|p| Player::from_proto(p.clone())).collect();
+        let tiles = proto
+            .tiles
+            .iter()
+            .map(|t| Tile::from_proto(t.clone()))
+            .collect();
+        let heisters = proto
+            .heisters
+            .iter()
+            .map(|h| Heister::from_proto(h.clone()))
+            .collect();
+        let players = proto
+            .players
+            .iter()
+            .map(|p| Player::from_proto(p.clone()))
+            .collect();
         let game_status = GameStatus::from_i32(proto.game_status).unwrap(); // TODO Handle this gracefully?
         GameState {
             game_name,
@@ -346,14 +358,29 @@ impl GameState {
     pub fn new(game_name: GameHandle) -> Self {
         let game_started = get_current_time_secs();
         let timer_runs_out = game_started + TIMER_DURATION_SECS;
-        let starting_tile = Tile { squares: vec![], position: MapPosition {x:0, y:0} };
+        let starting_tile = Tile {
+            squares: vec![],
+            position: MapPosition { x: 0, y: 0 },
+        };
         let tiles = vec![starting_tile.clone()];
         let mut heisters = Vec::new();
         let starting_tile_enum = StartingTile::A(starting_tile);
-        heisters.push(Heister::get_initial(HeisterColor::Yellow, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Purple, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Green, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Orange, &starting_tile_enum));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Yellow,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Purple,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Green,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Orange,
+            &starting_tile_enum,
+        ));
         GameState {
             game_name,
             game_started,
@@ -441,7 +468,8 @@ mod tests {
     #[test]
     fn load_map_position() {
         let map_position_json = "{\"x\": 3, \"y\": 5}";
-        let mp: super::MapPosition = serde_json::from_str(map_position_json).expect("Failed to load from json");
+        let mp: super::MapPosition =
+            serde_json::from_str(map_position_json).expect("Failed to load from json");
         assert_eq!(mp.x, 3);
         assert_eq!(mp.y, 5);
     }

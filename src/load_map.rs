@@ -21,8 +21,8 @@ pub fn load_tiles_from_json() -> HashMap<String, Tile> {
 
 #[allow(dead_code, unused_imports)]
 mod tests {
+    use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
     use log::info;
-    use crate::types::{SerializableTile, Tile, MapPosition, Square, WallType, SquareType};
 
     #[test]
     pub fn serialize_file_test() -> () {
