@@ -1,8 +1,6 @@
 // Load the map from data/tiles/*.json
 
-
 use crate::types::{SerializableTile, Tile, Square, MapPosition, WallType, SquareType};
-
 use std::collections::HashMap;
 use std::path::Path;
 use std::io::BufReader;
@@ -165,37 +163,10 @@ pub fn tile_1a() -> Tile {
 
 #[allow(dead_code, unused_imports)]
 mod tests {
-    use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
-    use log::info;
-
     #[test]
-    pub fn serialize_file_test() -> () {
-        // for discovering how to write these
-        let mut my_squares: Vec<Square> = Vec::new();
-        for _ in 0..16 {
-            let sq = Square {
-                north_wall: WallType::Clear,
-                east_wall: WallType::Clear,
-                south_wall: WallType::Clear,
-                west_wall: WallType::Clear,
-                square_type: SquareType::Normal,
-            };
-            my_squares.push(sq);
-        }
-        let my_pos = MapPosition { x: 0, y: 0 };
-        let tile = Tile {
-            squares: my_squares,
-            position: my_pos,
-        };
-
-        let st: SerializableTile = SerializableTile::from(tile);
-        let serialized = serde_json::to_string(&st).unwrap();
-        info!("{}", serialized);
-    }
-  
     pub fn test_1a_and_json_match() {
         let code1a = super::tile_1a();
         let json1a = super::load_tile_json_from_path("data/tiles/1a.json".to_string());
-        assert_eq!(code1a, json1a);
+        assert_eq!(code1a, json1a)
     }
 }

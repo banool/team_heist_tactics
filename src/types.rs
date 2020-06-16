@@ -134,7 +134,7 @@ pub enum StartingTile {
     B(Tile),
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Square {
     pub north_wall: WallType,
     pub east_wall: WallType,
