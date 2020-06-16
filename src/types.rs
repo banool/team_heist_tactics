@@ -1,11 +1,14 @@
 use crate::manager::GameHandle;
 use crate::utils::get_current_time_secs;
 
+use serde::{Deserialize, Serialize};
+use std::convert::From;
+
 // Import all the proto types in this private module.
 mod proto_types {
+    use serde::{Deserialize, Serialize};
     include!(concat!(env!("OUT_DIR"), "/types.rs"));
 }
-
 
 // Re-export the enums.
 pub use proto_types::Ability;
@@ -22,9 +25,6 @@ pub mod main_message {
     pub use super::proto_types::main_message::Body;
 }
 
-use serde::{Deserialize, Serialize};
-use std::convert::From;
-
 pub trait Internal {
     type P;
 
@@ -33,7 +33,7 @@ pub trait Internal {
     fn to_proto(&self) -> Self::P;
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
     x: u32,
     y: u32,
@@ -81,7 +81,7 @@ impl Internal for MapPosition {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Tile {
     pub squares: Vec<Square>,
     pub position: MapPosition,
@@ -133,7 +133,7 @@ pub enum StartingTile {
     B(Tile),
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Square {
     pub north_wall: WallType,
     pub east_wall: WallType,
@@ -178,7 +178,7 @@ impl From<SerializableSquare> for Square {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Heister {
     heister_color: HeisterColor,
     map_position: MapPosition,
@@ -228,7 +228,7 @@ impl Heister {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Player {
     pub name: String,
     pub abilities: Vec<Ability>,
@@ -262,7 +262,7 @@ impl Internal for Player {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Move {
     heister_color: HeisterColor,
     position: MapPosition,
@@ -286,7 +286,7 @@ impl Internal for Move {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct GameState {
     pub game_name: GameHandle,
     pub game_started: u64,
@@ -368,7 +368,7 @@ impl GameState {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct InvalidRequest {
     pub reason: String,
 }
@@ -434,3 +434,15 @@ impl From<Tile> for SerializableTile {
     }
 }
 // ---
+
+#[allow(dead_code, unused_imports)]
+mod tests {
+    use serde_json;
+    #[test]
+    fn load_map_position() {
+        let map_position_json = "{\"x\": 3, \"y\": 5}";
+        let mp: super::MapPosition = serde_json::from_str(map_position_json).expect("Failed to load from json");
+        assert_eq!(mp.x, 3);
+        assert_eq!(mp.y, 5);
+    }
+}

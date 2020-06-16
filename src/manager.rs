@@ -8,10 +8,11 @@ use crate::types::MainMessage;
 use actix::Addr;
 use anyhow::{anyhow, Result};
 use log::{info, warn};
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 
-#[derive(Clone, Default, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct GameHandle(pub String);
 
 pub struct GameOptions {}
