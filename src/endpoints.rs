@@ -104,10 +104,11 @@ pub async fn play_game(
     game_manager.register_actor(handle, addr);
     // Push initial state / update other clients that there is a new player.
     game_wrapper.read().unwrap().push_state().unwrap();
-    debug!("Successfully upgraded {} to websocket for {}", info.name, info.handle);
+    debug!("Websocket for player {} in game {} upgraded successfully", info.name, info.handle);
     resp
 }
 
+#[derive(Debug)]
 pub struct MyWs {
     game_wrapper: Arc<RwLock<GameWrapper>>,
 }

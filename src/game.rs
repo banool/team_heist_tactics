@@ -5,6 +5,7 @@ use crate::types::{GameState, GameStatus, MainMessage, Player};
 
 use log::info;
 
+#[derive(Debug)]
 pub struct Game {
     pub game_handle: GameHandle,
     game_state: GameState,
@@ -31,6 +32,15 @@ impl Game {
         }
         self.game_state.players.push(Player { name, abilities: vec![] });
         Ok(())
+    }
+
+    pub fn has_player(&self, name: &str) -> bool {
+        for p in self.game_state.players.iter() {
+            if p.name == name {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn get_game_state(&self) -> GameState {

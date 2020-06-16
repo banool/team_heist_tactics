@@ -7,7 +7,7 @@ use crate::types::MainMessage;
 
 use actix::Addr;
 use anyhow::{anyhow, Result};
-use log::info;
+use log::{info, warn};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 
@@ -21,6 +21,7 @@ pub struct JoinOptions {
     pub handle: GameHandle,
 }
 
+#[derive(Debug)]
 pub struct GameWrapper {
     game: Game,
     actors: Vec<Addr<MyWs>>,
@@ -42,7 +43,17 @@ impl GameWrapper {
     }
 
     pub fn add_actor(&mut self, actor: Addr<MyWs>) {
+        self.drop_dead_actors();
         self.actors.push(actor);
+    }
+
+    pub fn drop_dead_actors(&mut self) {
+        for a in self.actors.iter() {
+            if !a.connected() {
+                warn!("Dropping dead actor from {}: {:?}", self.game.game_handle.0, a);
+            }
+        }
+        self.actors.retain(|a| a.connected());
     }
 
     pub fn push_state(&self) -> Result<()> {
@@ -120,16 +131,26 @@ impl GameManager {
             }
         };
 
-        game_wrapper
-            .write()
-            .unwrap()
-            .add_player(join_options.name.to_string())?;
-
-        info!(
-            "Player {} joined game {}",
-            join_options.name.to_string(),
-            join_options.handle.0
-        );
+        {
+            let mut game_wrapper = game_wrapper
+                .write()
+                .unwrap();
+            let player_name = join_options.name.to_string();
+            let player_already_in = game_wrapper.game.has_player(&player_name);
+            let join_prefix_str;
+            if player_already_in {
+                join_prefix_str = "RE-";
+            } else {
+                join_prefix_str = "";
+                game_wrapper.add_player(player_name)?;
+            }
+            info!(
+                "Player {} {}joined game {}",
+                join_options.name.to_string(),
+                join_prefix_str,
+                join_options.handle.0
+            );
+        }
 
         Ok(game_wrapper.clone())
     }
