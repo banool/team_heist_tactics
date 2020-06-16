@@ -1,30 +1,29 @@
-// Load data from the data/ directory into the game
+// Load the map from data/tiles/*.json
 
 use crate::types::{SerializableTile, Tile, Square, MapPosition, WallType, SquareType};
-// use serde_json::Deserializer;
 use std::collections::HashMap;
 use std::path::Path;
 use std::io::BufReader;
 use std::fs::File;
-use log::info;
 
-pub fn load_serializable_tiles_from_json() -> HashMap<String, SerializableTile> {
-    // TODO
-    // Ideally takes a path and then loads it as a hashmap of SerializableTiles
-    // Intended as a helper for load_tiles_from_json
-    let tile_map = HashMap::<String, SerializableTile>::new();
-    tile_map
+pub fn load_tile_json_from_path(s: String) -> Tile {
+    let p = Path::new(&s);
+    let file = File::open(p).expect("Path should exist");
+    let reader = BufReader::new(file);
+    let st : SerializableTile = serde_json::from_reader(reader).expect("Path should be valid serde JSON of a Tile");
+    let t = Tile::from(st);
+    t
 }
 
 pub fn load_tiles_from_json() -> HashMap<String, Tile> {
     // TODO
-    // Ideally takes a path, then returns a hashmap of Tiles
-    let tile_map = HashMap::<String, Tile>::new();
+    // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
+    let tile_map : HashMap::<String, Tile> = HashMap::new();
     tile_map
 }
 
 pub fn tile_1a() -> Tile {
-    // for discovering how to write these
+    // Generate the object for Tile 1a
     let mut my_squares: Vec<Square> = Vec::new();
     let sq00 = Square {
         north_wall: WallType::Impassable,
@@ -155,20 +154,11 @@ pub fn tile_1a() -> Tile {
         square_type: SquareType::Filled,
     };
     my_squares.push(sq33);
-    let my_pos = MapPosition { x: 1, y: 0 };
+    let my_pos = MapPosition { x: 0, y: 0 };
     Tile {
         squares: my_squares,
         position: my_pos,
     }
-}
-
-pub fn load_tile_json_from_path(s: String) -> Tile {
-    let p = Path::new(&s);
-    let file = File::open(p).expect("Path should exist");
-    let reader = BufReader::new(file);
-    let st : SerializableTile = serde_json::from_reader(reader).expect("Path should be valid serde JSON of a Tile");
-    let t = Tile::from(st);
-    t
 }
 
 #[test]
