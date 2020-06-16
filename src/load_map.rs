@@ -6,13 +6,6 @@ use std::path::Path;
 use std::io::BufReader;
 use std::fs::File;
 
-pub fn load_tiles_from_json() -> HashMap<String, Tile> {
-    // TODO
-    // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
-    let tile_map : HashMap::<String, Tile> = HashMap::new();
-    tile_map
-}
-
 pub fn load_tile_json_from_path(s: String) -> Tile {
     let p = Path::new(&s);
     let file = File::open(p).expect("Path should exist");
@@ -22,8 +15,15 @@ pub fn load_tile_json_from_path(s: String) -> Tile {
     t
 }
 
+pub fn load_tiles_from_json() -> HashMap<String, Tile> {
+    // TODO
+    // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
+    let tile_map : HashMap::<String, Tile> = HashMap::new();
+    tile_map
+}
+
 pub fn tile_1a() -> Tile {
-    // for discovering how to write these
+    // Generate the object for Tile 1a
     let mut my_squares: Vec<Square> = Vec::new();
     let sq00 = Square {
         north_wall: WallType::Impassable,
