@@ -1,7 +1,6 @@
 // Load data from the data/ directory into the game
 
-use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
-use log::info;
+use crate::types::{SerializableTile, Tile};
 use std::collections::HashMap;
 
 pub fn load_serializable_tiles_from_json() -> HashMap<String, SerializableTile> {

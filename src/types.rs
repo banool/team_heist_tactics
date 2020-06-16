@@ -186,7 +186,6 @@ pub struct Heister {
     has_escaped: bool,
 }
 
-#[derive(Clone, Debug, Default)]
 impl Internal for Heister {
     type P = proto_types::Heister;
 
