@@ -1,4 +1,4 @@
-import { StagingJoinGameThing } from "./types";
+import { StagingJoinGameThing, ConnectionStatus } from "./types";
 
 import { GameState, Move, MainMessage, HeisterColor, MapPosition } from "../generated/types_pb";
 import { connect, send } from '@giantmachines/redux-websocket';
@@ -29,11 +29,11 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
   }
 }
 
-export function moveHeister(game_state: GameState, move_direction: MoveDirection) {
+export function moveHeister(game_state: GameState, connection_status: ConnectionStatus, move_direction: MoveDirection) {
   return async dispatch => {
     var hardcoded_color = HeisterColor.GREEN;
-    if (game_state === null) {
-      console.error("Tried to move heister with no game state");
+    if (game_state === null || connection_status !== ConnectionStatus.Connected) {
+      console.error("Tried to move heister with no game state / connection");
       return;
     }
     var heisters = game_state.getHeistersList();
@@ -81,27 +81,31 @@ export function moveHeister(game_state: GameState, move_direction: MoveDirection
 
 // Take a key input, convert to an enum representing different things
 // the user wants to do, then match on that instead.
-export function handleKeyInput(game_state: GameState | null, key: string) {
+export function handleKeyInput(game_state: GameState | null, connection_status: ConnectionStatus, key: string) {
   return async dispatch => {
     var move = getMove(key);
     // Do nothing if the key didn't match anything.
     if (move === null) {
       return;
     }
-    if (game_state === null) {
-      console.debug("No game state yet, dropping key input");
+    if (game_state === null || connection_status !== ConnectionStatus.Connected) {
+      console.debug("No game state / connection, dropping key input");
       return;
     }
     console.log("Sending move", move);
     switch (move) {
       case MyMove.MoveNorth:
-        dispatch(moveHeister(game_state, MoveDirection.North));
+        dispatch(moveHeister(game_state, connection_status, MoveDirection.North));
+        return;
       case MyMove.MoveEast:
-        dispatch(moveHeister(game_state, MoveDirection.East));
+        dispatch(moveHeister(game_state, connection_status, MoveDirection.East));
+        return;
       case MyMove.MoveSouth:
-        dispatch(moveHeister(game_state, MoveDirection.South));
+        dispatch(moveHeister(game_state, connection_status, MoveDirection.South));
+        return;
       case MyMove.MoveWest:
-        dispatch(moveHeister(game_state, MoveDirection.West));
+        dispatch(moveHeister(game_state,connection_status, MoveDirection.West));
+        return;
       default:
         return null;  // Raise error.
     }

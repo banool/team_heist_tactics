@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 import JoinGameForm from "./JoinGameForm";
@@ -22,26 +22,31 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
 
   const [keyPressed, setKeyPressed] = useState(false);
 
-  // This dispatches a function on page load.
-  /*
+  // Bind key listener on mount, and unbind on unmount.
+  // See https://reactjs.org/docs/hooks-effect.html.
+  // This still does key repeat, but it doesn't bind the event
+  // listener more than once so we don't get duplicate key events.
+  // So the keys behave as if you were typing into a text area;
+  // key repeat kicks in after a user defined OS level delay.
+  // https://stackoverflow.com/questions/41693715/react-redux-what-is-the-canonical-way-to-bind-a-keypress-action-to-kick-off-a-r
   useEffect(() => {
-    dispatch(fetchScents());
-  }, [dispatch]);
-  */
-
-  // https://stackoverflow.com/questions/5353254/javascript-onkeydown-event-fire-only-once
-  const handleKeyDown = (event) => {
-    document.removeEventListener('keydown', handleKeyDown);
-    console.debug("Key event", event);
-    dispatch(handleKeyInput(game_state, event.key));
-  };
-
-  const handleKeyUp = (_) => {
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    return function cleanup() {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  });
+
+  const handleKeyDown = (event) => {
+    console.debug("Key event", event);
+    dispatch(handleKeyInput(game_state, connection_status, event.key));
+    document.removeEventListener('keydown', handleKeyDown);
   };
 
-  document.addEventListener('keydown', handleKeyDown);
-  document.addEventListener('keyup', handleKeyUp);
+  const handleKeyUp = (event) => {
+    document.addEventListener('keydown', handleKeyDown, {once: true});
+  };
 
   return (
     <div>

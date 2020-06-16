@@ -2,16 +2,17 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { moveHeister } from "./api";
 import { MoveDirection } from "./types";
-import { gameStateSelector } from "./slice";
+import { gameStateSelector, connectionStatusSelector } from "./slice";
 
 const MoveHeisterComponent = () => {
   const dispatch = useDispatch();
 
   const game_state = useSelector(gameStateSelector);
+  const connection_status = useSelector(connectionStatusSelector);
 
   const onMoveButtonClick = (move_direction: MoveDirection) => {
     // Exclamation mark because we only show this component when we have game state.
-    dispatch(moveHeister(game_state!, move_direction));
+    dispatch(moveHeister(game_state!, connection_status, move_direction));
   };
 
   return (
