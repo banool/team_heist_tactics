@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import JoinGameForm from "./JoinGameForm";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
 import GameComponent from "./GameComponent";
+import { useDispatch } from "react-redux";
 
 import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
@@ -13,13 +14,21 @@ type JoinGamePageProps = {};
 const JoinGamePage = ({ }: JoinGamePageProps) => {
   const connection_status = useSelector(connectionStatusSelector);
 
+  const dispatch = useDispatch();
+
   // This dispatches a function on page load.
   /*
-  const dispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchScents());
   }, [dispatch]);
   */
+
+  const handleKeyPress = (event) => {
+    console.log("asdasdsa key event ", event);
+    //this.props.keyPressAction(event.keyCode);
+  };
+
+  document.addEventListener('keypress', handleKeyPress);
 
   return (
     <div>
