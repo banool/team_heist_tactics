@@ -467,10 +467,12 @@ mod tests {
     use serde_json;
     #[test]
     fn load_map_position() {
-        let map_position_json = "{\"x\": 3, \"y\": 5}";
+        let map_position_json = "{\"x\":3,\"y\":5}";
         let mp: super::MapPosition =
             serde_json::from_str(map_position_json).expect("Failed to load from json");
         assert_eq!(mp.x, 3);
         assert_eq!(mp.y, 5);
+        let out_json = serde_json::to_string(&mp).expect("Failed to write back to json");
+        assert_eq!(map_position_json, out_json);
     }
 }
