@@ -25,7 +25,6 @@ else
    exit;
 fi
 cd ..
-rm -rf templates/static
 cp ui/dist/index.html templates/play.html
-cp -R ui/dist/static templates/static
+cp -R ui/dist/static/* templates/static
 cargo run
