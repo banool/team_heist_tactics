@@ -8,10 +8,11 @@ use crate::types::MainMessage;
 use actix::Addr;
 use anyhow::{anyhow, Result};
 use log::{info, warn};
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 
-#[derive(Clone, Default, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct GameHandle(pub String);
 
 pub struct GameOptions {}
@@ -50,7 +51,10 @@ impl GameWrapper {
     pub fn drop_dead_actors(&mut self) {
         for a in self.actors.iter() {
             if !a.connected() {
-                warn!("Dropping dead actor from {}: {:?}", self.game.game_handle.0, a);
+                warn!(
+                    "Dropping dead actor from {}: {:?}",
+                    self.game.game_handle.0, a
+                );
             }
         }
         self.actors.retain(|a| a.connected());
@@ -93,7 +97,11 @@ impl GameManager {
         self.games.keys().map(|gh| gh.0.to_string()).collect()
     }
 
-    pub fn new_game(&mut self, game_options: GameOptions, handle: Option<String>) -> Result<GameHandle> {
+    pub fn new_game(
+        &mut self,
+        game_options: GameOptions,
+        handle: Option<String>,
+    ) -> Result<GameHandle> {
         let handle = match handle {
             Some(handle) => handle,
             None => {
@@ -132,9 +140,7 @@ impl GameManager {
         };
 
         {
-            let mut game_wrapper = game_wrapper
-                .write()
-                .unwrap();
+            let mut game_wrapper = game_wrapper.write().unwrap();
             let player_name = join_options.name.to_string();
             let player_already_in = game_wrapper.game.has_player(&player_name);
             let join_prefix_str;

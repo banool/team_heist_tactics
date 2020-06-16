@@ -1,12 +1,12 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 import { RootState } from "../common/reducers";
 
-import { JoinGameThing, StagingJoinGameThing, ConnectionStatus } from "./types";
+import { JoinGameThing, ConnectionStatus } from "./types";
 
 import { GameState, MainMessage } from "../generated/types_pb";
 
-import { WEBSOCKET_ACTION_PREFIX, WEBSOCKET_ACTION_PREFIX_FULL } from "../constants/other";
+import { WEBSOCKET_ACTION_PREFIX_FULL } from "../constants/other";
 
 import {
   WEBSOCKET_BROKEN,
@@ -18,13 +18,21 @@ import {
   WEBSOCKET_SEND,
 } from '@giantmachines/redux-websocket';
 
+const WEBSOCKET_BROKEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_BROKEN);
+const WEBSOCKET_CLOSED_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_CLOSED);
+const WEBSOCKET_CONNECT_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_CONNECT);
+const WEBSOCKET_DISCONNECT_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_DISCONNECT);
+const WEBSOCKET_MESSAGE_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_MESSAGE);
+const WEBSOCKET_OPEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_OPEN);
+const WEBSOCKET_SEND_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_SEND);
+
 interface GameInfo {
   connection_status: ConnectionStatus,
   game_state: GameState | null,
 }
 
-interface GetCandlesSuccessAction {
-  candles: JoinGameThing[];
+interface KeyInputAction {
+  key: JoinGameThing[];
 }
 
 interface GetCandleSuccessAction {
@@ -36,92 +44,57 @@ let initialState: GameInfo = {
   game_state: null,
 };
 
-// Define things that listen to actions.
 const joinGameSlice = createSlice({
   name: "joinGame",
   initialState,
   /*
   reducers: {
-    websocketOpen: (state, action: PayloadAction<WEBSOCKET_OPEN>) => {
-      const { candles } = action.payload;
-      state.candles = {};
-      candles.forEach(candle => (state.candles[candle.id] = candle));
-    },
-    getCandleSuccess: (state, action: PayloadAction<GetCandleSuccessAction>) => {
+    keyInput: (state, action: PayloadAction<KeyInputAction>) => {
       const { candle } = action.payload;
       state.candles[candle.id] = candle;
     }
-  },*/
-  // TODO This should be extraReducers?
-  reducers: {}
+  },
+  */
+  reducers: {},
+  extraReducers: {
+    [WEBSOCKET_CONNECT_FULL]: (state, _action) => {
+      console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.Connecting]);
+      state.connection_status = ConnectionStatus.Connecting;
+    },
+    [WEBSOCKET_OPEN_FULL]: (state, _action) => {
+      console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.Connected]);
+      state.connection_status = ConnectionStatus.Connected;
+    },
+    [WEBSOCKET_BROKEN_FULL]: (state, _action) => {
+      console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.NotConnected]);
+      state.connection_status = ConnectionStatus.NotConnected;
+    },
+    [WEBSOCKET_CLOSED_FULL]: (state, _action) => {
+      console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.NotConnected]);
+      state.connection_status = ConnectionStatus.NotConnected;
+    },
+    [WEBSOCKET_MESSAGE_FULL]: (state, action) => {
+      var main_message = MainMessage.deserializeBinary(action.payload.message);
+      console.debug("Received main message", main_message);
+      var game_state = state.game_state;
+      if (main_message.hasGameState()) {
+        // Excalmation mark because we know it won't be undefined.
+        game_state = main_message.getGameState()!;
+        console.log("Updating game state to", game_state.toObject());
+      }
+      if (main_message.hasInvalidRequest()) {
+        console.log("Sent an invalid request earlier:", main_message.getInvalidRequest()!);
+      }
+      state.game_state = game_state;
+    },
+    [WEBSOCKET_SEND_FULL]: (_state, _action) => {
+      console.debug("Sending message over websocket");
+    },
+  },
 });
 
-const reducer = (state = initialState, action) => {
-  console.log("Previous state and action:", state, action);
-  var action_type = action.type;
-  if (action_type.startsWith(WEBSOCKET_ACTION_PREFIX)) {
-    action_type = action_type.replace(WEBSOCKET_ACTION_PREFIX_FULL, "");
-    console.log("Websocket action type suffix:", action_type);
-    switch (action_type) {
-      case WEBSOCKET_CONNECT:
-        console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.Connecting]);
-        return {
-          ...state,
-          connection_status: ConnectionStatus.Connecting,
-        };
-
-      case WEBSOCKET_OPEN:
-        console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.Connected]);
-        return {
-          ...state,
-          connection_status: ConnectionStatus.Connected,
-        };
-
-      case WEBSOCKET_BROKEN:
-      case WEBSOCKET_CLOSED:
-        console.log("Setting connection status to ", ConnectionStatus[ConnectionStatus.NotConnected]);
-        return {
-          ...state,
-          connection_status: ConnectionStatus.NotConnected,
-        };
-
-      case WEBSOCKET_MESSAGE:
-        console.debug("websocket_message action.payload.message:", action.payload.message);
-        var main_message = MainMessage.deserializeBinary(action.payload.message);
-        console.debug("Received main message", main_message);
-        var game_state = state.game_state;
-        if (main_message.hasGameState()) {
-          // Excalmation mark because we know it won't be undefined.
-          game_state = main_message.getGameState()!;
-          console.log("Updating game state to", game_state.toObject());
-        }
-        if (main_message.hasInvalidRequest()) {
-          console.log("Sent an invalid request earlier:", main_message.getInvalidRequest()!);
-        }
-        return {
-          ...state,
-          game_state: game_state,
-        };
-
-      case WEBSOCKET_SEND:
-        // The framework handles sending the message, this just lets us do something
-        // when it happens.
-        console.debug("Sending message over websocket");
-        return state;
-
-      default:
-        console.warn("Default websocket action statement", action);
-        return state;
-    }
-  } else {
-    console.log("Got non-websocket action");
-    return state;
-  }
-};
-
-export const {  } = joinGameSlice.actions;
+export const { } = joinGameSlice.actions;
 export const connectionStatusSelector = (state: RootState): ConnectionStatus => state.joinGame.connection_status;
 export const gameStateSelector = (state: RootState): GameState | null => state.joinGame.game_state;
 
-//export default joinGameSlice.reducer;
-export default reducer;
+export default joinGameSlice.reducer;

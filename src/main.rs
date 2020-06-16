@@ -13,7 +13,8 @@ use actix_web::{web, App, HttpServer};
 use team_heist_tactics::endpoints;
 use team_heist_tactics::manager::{GameManager, GameManagerWrapper, GameOptions};
 
-const REQUIRED_ENV_VARS: &'static [&'static str] = &["THT_IP_ADDRESS", "THT_PORT", "THT_DEPLOYMENT_MODE"];
+const REQUIRED_ENV_VARS: &'static [&'static str] =
+    &["THT_IP_ADDRESS", "THT_PORT", "THT_DEPLOYMENT_MODE"];
 
 fn validate_env() -> bool {
     for s in REQUIRED_ENV_VARS.iter() {
@@ -36,9 +37,9 @@ impl FromStr for DeploymentMode {
 
     fn from_str(input: &str) -> Result<DeploymentMode, Self::Err> {
         match input {
-            "dev"  => Ok(DeploymentMode::Dev),
-            "prod"  => Ok(DeploymentMode::Prod),
-            _      => Err(()),
+            "dev" => Ok(DeploymentMode::Dev),
+            "prod" => Ok(DeploymentMode::Prod),
+            _ => Err(()),
         }
     }
 }
@@ -63,7 +64,8 @@ async fn main() -> std::io::Result<()> {
     let ip = env::var("THT_IP_ADDRESS").unwrap();
     let port = env::var("THT_PORT").unwrap();
     let ip_port = format!("{}:{}", ip, port);
-    let deployment_mode = DeploymentMode::from_str(&env::var("THT_DEPLOYMENT_MODE").unwrap()).expect("Invalid deployment mode");
+    let deployment_mode = DeploymentMode::from_str(&env::var("THT_DEPLOYMENT_MODE").unwrap())
+        .expect("Invalid deployment mode");
 
     // For testing.
     game_manager_wrapper
@@ -81,9 +83,7 @@ async fn main() -> std::io::Result<()> {
             .route("/create_game", web::post().to(endpoints::create_game))
             .route("/play_game", web::get().to(endpoints::play_game));
         let app = match deployment_mode {
-            DeploymentMode::Dev => {
-                app.service(fs::Files::new("/static", "templates/static"))
-            }
+            DeploymentMode::Dev => app.service(fs::Files::new("/static", "templates/static")),
             _ => app,
         };
         app

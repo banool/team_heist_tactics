@@ -1,5 +1,4 @@
 use anyhow::Result;
-use log::trace;
 use prost::Message as ProstMessage;
 
 use crate::types::main_message::Body;
@@ -16,7 +15,6 @@ impl InternalMessage {
         let mut buf = Vec::new();
         buf.reserve(self.main_message.encoded_len());
         self.main_message.encode(&mut buf).unwrap();
-        // trace!("Built client response message: {:?}", buf);
         buf
     }
 

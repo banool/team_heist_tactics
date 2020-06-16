@@ -5,8 +5,13 @@ Yayyy!!!!!!!!
 For UI specific stuff see ui/
 
 ## Developing
+Building the UI, generating protobuf types, building the server, and then running it:
 ```
 ./run.sh
+```
+Linting:
+```
+rg --files | grep '\.rs' | xargs rustfmt --edition 2018
 ```
 
 ## Deploying

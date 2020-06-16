@@ -1,11 +1,14 @@
 use crate::manager::GameHandle;
 use crate::utils::get_current_time_secs;
 
+use serde::{Deserialize, Serialize};
+use std::convert::From;
+
 // Import all the proto types in this private module.
 mod proto_types {
+    use serde::{Deserialize, Serialize};
     include!(concat!(env!("OUT_DIR"), "/types.rs"));
 }
-
 
 // Re-export the enums.
 pub use proto_types::Ability;
@@ -22,9 +25,6 @@ pub mod main_message {
     pub use super::proto_types::main_message::Body;
 }
 
-use serde::{Deserialize, Serialize};
-use std::convert::From;
-
 pub trait Internal {
     type P;
 
@@ -33,7 +33,7 @@ pub trait Internal {
     fn to_proto(&self) -> Self::P;
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
     x: u32,
     y: u32,
@@ -81,7 +81,7 @@ impl Internal for MapPosition {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Tile {
     pub squares: Vec<Square>,
     pub position: MapPosition,
@@ -133,7 +133,7 @@ pub enum StartingTile {
     B(Tile),
 }
 
-#[derive(Copy, Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Square {
     pub north_wall: WallType,
     pub east_wall: WallType,
@@ -178,7 +178,7 @@ impl From<SerializableSquare> for Square {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Heister {
     heister_color: HeisterColor,
     map_position: MapPosition,
@@ -216,8 +216,8 @@ impl Heister {
                 HeisterColor::Purple => MapPosition { x: 1, y: 2 },
                 HeisterColor::Green => MapPosition { x: 2, y: 2 },
                 HeisterColor::Orange => MapPosition { x: 2, y: 1 },
-            }
-            _ => MapPosition { x: 0, y: 0 },  // TODO Do this for starting B side.
+            },
+            _ => MapPosition { x: 0, y: 0 }, // TODO Do this for starting B side.
         };
         Heister {
             heister_color,
@@ -228,7 +228,7 @@ impl Heister {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Player {
     pub name: String,
     pub abilities: Vec<Ability>,
@@ -262,7 +262,7 @@ impl Internal for Player {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Move {
     heister_color: HeisterColor,
     position: MapPosition,
@@ -286,7 +286,7 @@ impl Internal for Move {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct GameState {
     pub game_name: GameHandle,
     pub game_started: u64,
@@ -304,9 +304,21 @@ impl Internal for GameState {
 
     fn from_proto(proto: proto_types::GameState) -> Self {
         let game_name = GameHandle(proto.game_name);
-        let tiles = proto.tiles.iter().map(|t| Tile::from_proto(t.clone())).collect();
-        let heisters = proto.heisters.iter().map(|h| Heister::from_proto(h.clone())).collect();
-        let players = proto.players.iter().map(|p| Player::from_proto(p.clone())).collect();
+        let tiles = proto
+            .tiles
+            .iter()
+            .map(|t| Tile::from_proto(t.clone()))
+            .collect();
+        let heisters = proto
+            .heisters
+            .iter()
+            .map(|h| Heister::from_proto(h.clone()))
+            .collect();
+        let players = proto
+            .players
+            .iter()
+            .map(|p| Player::from_proto(p.clone()))
+            .collect();
         let game_status = GameStatus::from_i32(proto.game_status).unwrap(); // TODO Handle this gracefully?
         GameState {
             game_name,
@@ -346,14 +358,29 @@ impl GameState {
     pub fn new(game_name: GameHandle) -> Self {
         let game_started = get_current_time_secs();
         let timer_runs_out = game_started + TIMER_DURATION_SECS;
-        let starting_tile = Tile { squares: vec![], position: MapPosition {x:0, y:0} };
+        let starting_tile = Tile {
+            squares: vec![],
+            position: MapPosition { x: 0, y: 0 },
+        };
         let tiles = vec![starting_tile.clone()];
         let mut heisters = Vec::new();
         let starting_tile_enum = StartingTile::A(starting_tile);
-        heisters.push(Heister::get_initial(HeisterColor::Yellow, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Purple, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Green, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Orange, &starting_tile_enum));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Yellow,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Purple,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Green,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Orange,
+            &starting_tile_enum,
+        ));
         GameState {
             game_name,
             game_started,
@@ -368,7 +395,7 @@ impl GameState {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct InvalidRequest {
     pub reason: String,
 }
@@ -434,3 +461,16 @@ impl From<Tile> for SerializableTile {
     }
 }
 // ---
+
+#[allow(dead_code, unused_imports)]
+mod tests {
+    use serde_json;
+    #[test]
+    fn load_map_position() {
+        let map_position_json = "{\"x\": 3, \"y\": 5}";
+        let mp: super::MapPosition =
+            serde_json::from_str(map_position_json).expect("Failed to load from json");
+        assert_eq!(mp.x, 3);
+        assert_eq!(mp.y, 5);
+    }
+}
