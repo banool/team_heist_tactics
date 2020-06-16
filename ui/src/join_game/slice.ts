@@ -1,12 +1,12 @@
-import { createSlice, combineReducers, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 import { RootState } from "../common/reducers";
 
-import { JoinGameThing, StagingJoinGameThing, ConnectionStatus } from "./types";
+import { JoinGameThing, ConnectionStatus } from "./types";
 
 import { GameState, MainMessage } from "../generated/types_pb";
 
-import { WEBSOCKET_ACTION_PREFIX, WEBSOCKET_ACTION_PREFIX_FULL } from "../constants/other";
+import { WEBSOCKET_ACTION_PREFIX_FULL } from "../constants/other";
 
 import {
   WEBSOCKET_BROKEN,
@@ -31,8 +31,8 @@ interface GameInfo {
   game_state: GameState | null,
 }
 
-interface GetCandlesSuccessAction {
-  candles: JoinGameThing[];
+interface KeyInputAction {
+  key: JoinGameThing[];
 }
 
 interface GetCandleSuccessAction {
@@ -49,16 +49,12 @@ const joinGameSlice = createSlice({
   initialState,
   /*
   reducers: {
-    websocketOpen: (state, action: PayloadAction<WEBSOCKET_OPEN>) => {
-      const { candles } = action.payload;
-      state.candles = {};
-      candles.forEach(candle => (state.candles[candle.id] = candle));
-    },
-    getCandleSuccess: (state, action: PayloadAction<GetCandleSuccessAction>) => {
+    keyInput: (state, action: PayloadAction<KeyInputAction>) => {
       const { candle } = action.payload;
       state.candles[candle.id] = candle;
     }
-  },*/
+  },
+  */
   reducers: {},
   extraReducers: {
     [WEBSOCKET_CONNECT_FULL]: (state, _action) => {
@@ -95,7 +91,6 @@ const joinGameSlice = createSlice({
       console.debug("Sending message over websocket");
     },
   },
-  //reducers: {websocketReducer: reducer},
 });
 
 export const { } = joinGameSlice.actions;
@@ -103,5 +98,3 @@ export const connectionStatusSelector = (state: RootState): ConnectionStatus => 
 export const gameStateSelector = (state: RootState): GameState | null => state.joinGame.game_state;
 
 export default joinGameSlice.reducer;
-// export default reducer;
-// export default combineReducers({websocketReducer: reducer, otherReducer: joinGameSlice.reducer});
