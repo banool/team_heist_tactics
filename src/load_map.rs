@@ -6,15 +6,6 @@ use std::path::Path;
 use std::io::BufReader;
 use std::fs::File;
 
-pub fn load_tile_json_from_path(s: String) -> Tile {
-    let p = Path::new(&s);
-    let file = File::open(p).expect("Path should exist");
-    let reader = BufReader::new(file);
-    let st : SerializableTile = serde_json::from_reader(reader).expect("Path should be valid serde JSON of a Tile");
-    let t = Tile::from(st);
-    t
-}
-
 pub fn load_tiles_from_json() -> HashMap<String, Tile> {
     // TODO
     // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
@@ -154,7 +145,7 @@ pub fn tile_1a() -> Tile {
         square_type: SquareType::Filled,
     };
     my_squares.push(sq33);
-    let my_pos = MapPosition { x: 0, y: 0 };
+    let my_pos = MapPosition { x: 250, y: 250 };
     Tile {
         squares: my_squares,
         position: my_pos,
