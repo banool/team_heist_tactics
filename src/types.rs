@@ -57,7 +57,7 @@ impl Internal for TilePosition {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct MapPosition {
     pub x: i32,
     pub y: i32,
@@ -81,7 +81,7 @@ impl Internal for MapPosition {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Tile {
     pub squares: Vec<Square>,
     pub position: MapPosition,
@@ -133,7 +133,7 @@ pub enum StartingTile {
     B(Tile),
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct Square {
     pub north_wall: WallType,
     pub east_wall: WallType,
