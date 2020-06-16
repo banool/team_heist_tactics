@@ -13,8 +13,17 @@ pub fn load_tiles_from_json() -> HashMap<String, Tile> {
     tile_map
 }
 
+pub fn load_tile_json_from_path(s: String) -> Tile {
+    let p = Path::new(&s);
+    let file = File::open(p).expect("Path should exist");
+    let reader = BufReader::new(file);
+    let st : SerializableTile = serde_json::from_reader(reader).expect("Path should be valid serde JSON of a Tile");
+    let t = Tile::from(st);
+    t
+}
+
 pub fn tile_1a() -> Tile {
-    // Generate the object for Tile 1a
+    // for discovering how to write these
     let mut my_squares: Vec<Square> = Vec::new();
     let sq00 = Square {
         north_wall: WallType::Impassable,
@@ -68,7 +77,7 @@ pub fn tile_1a() -> Tile {
         west_wall: WallType::Clear,
         square_type: SquareType::Normal,
     };
-    my_squares.push(sq11.clone());
+    my_squares.push(sq11);
     // Square 12 is the same as square 11
     my_squares.push(sq11.clone());
 
@@ -151,6 +160,7 @@ pub fn tile_1a() -> Tile {
         position: my_pos,
     }
 }
+
 
 #[allow(dead_code, unused_imports)]
 mod tests {

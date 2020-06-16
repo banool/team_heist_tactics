@@ -2,9 +2,8 @@ use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 
 use crate::manager::{GameHandle, GameOptions};
-use crate::types::{GameState, GameStatus, MainMessage, Player, Move, InvalidRequest, Internal, Square, MapPosition};
+use crate::types::{GameState, GameStatus, MainMessage, Player, Move, Internal, Square, MapPosition};
 use crate::types::main_message::Body;
-use std::collections::HashMap;
 
 use log::info;
 
