@@ -7,7 +7,7 @@ use crate::types::MainMessage;
 
 use actix::Addr;
 use anyhow::{anyhow, Result};
-use log::{info, warn};
+use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
@@ -15,6 +15,7 @@ use std::sync::{Arc, RwLock};
 #[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct GameHandle(pub String);
 
+#[derive(Default)]
 pub struct GameOptions {}
 
 pub struct JoinOptions {
@@ -62,6 +63,7 @@ impl GameWrapper {
 
     pub fn push_state(&self) -> Result<()> {
         let game_state = self.game.get_game_state();
+        debug!("GameState sent to client: {:#?}", game_state);
         let internal_message = InternalMessage::from_game_state(game_state);
         for a in self.actors.iter() {
             // TODO Consider using send instead.
