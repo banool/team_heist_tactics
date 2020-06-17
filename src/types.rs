@@ -1,6 +1,6 @@
+use crate::load_map::tile_1a;
 use crate::manager::GameHandle;
 use crate::utils::get_current_time_secs;
-use crate::load_map::tile_1a;
 
 use serde::{Deserialize, Serialize};
 use std::convert::From;
@@ -58,7 +58,7 @@ impl Internal for TilePosition {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct MapPosition {
     pub x: i32,
     pub y: i32,
@@ -134,7 +134,7 @@ pub enum StartingTile {
     B(Tile),
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Square {
     pub north_wall: WallType,
     pub east_wall: WallType,
@@ -359,16 +359,26 @@ impl GameState {
     pub fn new(game_name: GameHandle) -> Self {
         let game_started = get_current_time_secs();
         let timer_runs_out = game_started + TIMER_DURATION_SECS;
-        // Note: something weird here? StartingTile::A (starting_tile) = tile1a()
-        // seems kind of backwards?
         let starting_tile = tile_1a();
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
         let mut heisters = Vec::new();
-        heisters.push(Heister::get_initial(HeisterColor::Yellow, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Purple, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Green, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Orange, &starting_tile_enum));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Yellow,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Purple,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Green,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Orange,
+            &starting_tile_enum,
+        ));
         GameState {
             game_name,
             game_started,
