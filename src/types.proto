@@ -50,6 +50,7 @@ message MapPosition {
 message Tile {
   repeated Square squares = 1;
   MapPosition position = 2;
+  string name = 3;
 }
 
 // Describes a square, which is 1 of 16 units of a tile.

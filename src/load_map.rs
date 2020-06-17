@@ -159,6 +159,7 @@ pub fn tile_1a() -> Tile {
     Tile {
         squares: my_squares,
         position: my_pos,
+        name: "1a".to_string(),
     }
 }
 

@@ -86,6 +86,7 @@ impl Internal for MapPosition {
 pub struct Tile {
     pub squares: Vec<Square>,
     pub position: MapPosition,
+    pub name: String,
 }
 
 impl Internal for Tile {
@@ -100,6 +101,7 @@ impl Internal for Tile {
         Tile {
             squares,
             position: MapPosition::from_proto(proto.position.unwrap()),
+            name: proto.name.to_string(),
         }
     }
 
@@ -112,6 +114,7 @@ impl Internal for Tile {
         proto_types::Tile {
             squares: proto_squares,
             position: Some(self.position.to_proto()),
+            name: self.name.to_string()
         }
     }
 }
@@ -125,6 +128,7 @@ impl From<SerializableTile> for Tile {
         Tile {
             squares,
             position: item.position,
+            name: item.name,
         }
     }
 }
@@ -444,6 +448,7 @@ impl From<Square> for SerializableSquare {
 pub struct SerializableTile {
     pub position: MapPosition,
     pub squares: Vec<SerializableSquare>,
+    pub name: String,
 }
 
 impl From<Tile> for SerializableTile {
@@ -455,6 +460,7 @@ impl From<Tile> for SerializableTile {
         SerializableTile {
             squares: serializable_squares,
             position: item.position,
+            name: item.name,
         }
     }
 }
