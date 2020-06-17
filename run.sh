@@ -11,7 +11,7 @@ echo "Doing $DEV_MODE build"
 
 cd ui
 rm -rf dist
-cp ../src/types.proto ui
+cp ../src/types.proto .
 ./generate_types.sh
 rm types.proto
 if [ "$DEV_MODE" = "dev" ]; then
