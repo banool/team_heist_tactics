@@ -7,7 +7,7 @@ use crate::types::{
     GameState, GameStatus, Internal, MainMessage, MapPosition, Move, Player, Square,
 };
 
-use log::info;
+use log::{debug, info, trace};
 
 #[derive(Debug)]
 pub struct Game {
@@ -63,7 +63,7 @@ impl Game {
                 let sq_y = (sq_x % 4) as i32;
                 let grid_x = tile_pos.x + sq_x;
                 let grid_y = tile_pos.y + sq_y;
-                info!(
+                trace!(
                     "{}: {:?} {:?} {:?} {:?}, {:?}",
                     i,
                     square.north_wall,
@@ -79,7 +79,7 @@ impl Game {
                 grid.insert(mp, square.clone());
             }
         }
-        info!("{:#?}", grid);
+        debug!("Absolute grid: {:?}", grid);
         grid
     }
 
