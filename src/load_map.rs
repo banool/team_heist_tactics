@@ -68,7 +68,7 @@ pub fn tile_1a() -> Tile {
         west_wall: WallType::Clear,
         square_type: SquareType::Normal,
     };
-    my_squares.push(sq11);
+    my_squares.push(sq11.clone());
     // Square 12 is the same as square 11
     my_squares.push(sq11.clone());
 
