@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { gameStateSelector } from "./slice";
-import { Tile as ProtoTile, MapPosition } from "../generated/types_pb";
+import { Tile as ProtoTile, Heister as ProtoHeister, MapPosition } from "../generated/types_pb";
 import { moveHeister } from "./api";
 import { Stage, Layer, Circle, Text } from "react-konva";
 import Konva from "konva";
@@ -16,10 +16,6 @@ import {
 } from "../constants/other";
 import { CanvasPosition } from "./types";
 
-type TileProps = {
-  proto_tile: ProtoTile;
-};
-
 const mapPositionToCanvasPosition = (
   map_position: MapPosition
 ): CanvasPosition => {
@@ -30,6 +26,9 @@ const mapPositionToCanvasPosition = (
   return { x: x, y: y };
 };
 
+type TileProps = {
+  proto_tile: ProtoTile;
+};
 // The offset makes the center of the image be the center of the canvas element.
 const Tile = ({ proto_tile }: TileProps) => {
   // TODO Consider preloading the next / all images.
@@ -66,6 +65,12 @@ const Tile = ({ proto_tile }: TileProps) => {
 
   return comp;
 };
+
+type HeisterProps = {
+  proto_heister: ProtoHeister;
+};
+const Heister = ({ proto_heister }: HeisterProps) => {
+}
 
 // This uses special <> syntax to return multiple components.
 const Tiles = ({ tiles }) => <>{tiles.map((tile: any) => tile)}</>;

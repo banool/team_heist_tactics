@@ -83,7 +83,7 @@ async fn main() -> std::io::Result<()> {
             .route("/create_game", web::post().to(endpoints::create_game))
             .route("/play_game", web::get().to(endpoints::play_game));
         let app = match deployment_mode {
-            DeploymentMode::Dev => app.service(fs::Files::new("/static", "templates/static")),
+            DeploymentMode::Dev => app.service(fs::Files::new("/static", "static")),
             _ => app,
         };
         app

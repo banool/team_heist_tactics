@@ -26,5 +26,5 @@ else
 fi
 cd ..
 cp ui/dist/index.html templates/play.html
-cp -R ui/dist/static/* templates/static
+cp -R ui/dist/static/* static/
 cargo run

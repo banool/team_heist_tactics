@@ -26,12 +26,15 @@ WORKDIR /${app}
 # Use nightly
 RUN rustup default nightly-2020-06-11 
 
-# Copy in templates
+# Copy in HTML templates
 COPY templates templates
+
+# Copy in images
+COPY static/images static/images
 
 # Copy in npm artifacts from previous iamge
 COPY --from=builder /npm/dist/index.html /${app}/templates/play.html
-COPY --from=builder /npm/dist/static /${app}/templates/static
+COPY --from=builder /npm/dist/static /${app}/static
 
 # Files listing dependencies
 COPY Cargo.toml Cargo.lock ./
@@ -52,6 +55,7 @@ COPY prod_run.sh .
 FROM gcr.io/distroless/cc:debug
 COPY --from=build /tht/target/release/team_heist_tactics /
 COPY --from=build /tht/templates /templates
+COPY --from=build /tht/static /static
 COPY --from=build /tht/prod_run.sh /
 
 # Finally run it all
