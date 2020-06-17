@@ -180,7 +180,9 @@ impl Game {
                 WallType::Impassable => {
                     MoveValidity::Invalid("Can't pass through impassable wall".to_string())
                 }
-                _wildcard => MoveValidity::Invalid("Moving to un-placed tile not implemented yet".to_string()),
+                _wildcard => MoveValidity::Invalid(
+                    "Moving to un-placed tile not implemented yet".to_string(),
+                ),
             };
             // TODO - also check if there is another heister in the way
 
