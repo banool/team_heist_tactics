@@ -1,10 +1,13 @@
 [package]
 name = "team_heist_tactics"
 version = "0.1.0"
-authors = ["Daniel Porteous <danielporteous1@gmail.com>"]
+authors = ["Daniel Porteous <danielporteous1@gmail.com>", "Kelly McBride <kemcbride28@gmail.com>", "Fatema Boxwala <fatemabox@gmail.com>"]
 edition = "2018"
 # Only rebuild if related files change.
 include = ["src/**/*", "/build.rs", "Cargo.toml", "Cargo.lock"]
+readme = "README.md"
+repository = "https://github.com/banool/team_heist_tactics"
+publish = false
 
 [dependencies]
 actix = "*"
