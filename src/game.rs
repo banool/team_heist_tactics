@@ -84,7 +84,7 @@ impl Game {
         grid
     }
 
-    fn are_adjacent(my_pos: MapPosition, other_pos: MapPosition) -> bool {
+    fn are_adjacent(my_pos: &MapPosition, other_pos: &MapPosition) -> bool {
         if my_pos.x == other_pos.x {
             let abs_distance = (my_pos.y - other_pos.y).abs();
             return abs_distance == 1;
@@ -96,7 +96,7 @@ impl Game {
         }
     }
 
-    fn adjacent_move_direction(my_pos: MapPosition, other_pos: MapPosition) -> MoveDirection {
+    fn adjacent_move_direction(my_pos: &MapPosition, other_pos: &MapPosition) -> MoveDirection {
         // NOTE: I assume that the two positions are adjacent. Might not be relevant
         // Also suffers from NO VALIDATION AT ALL illness
         if my_pos.x > other_pos.x {
@@ -121,14 +121,14 @@ impl Game {
         return None;
     }
 
-    fn door_matches_heister(wall: WallType, color: HeisterColor) -> MoveValidity {
+    fn door_matches_heister(wall: WallType, color: &HeisterColor) -> MoveValidity {
         // Assumption: wall is one of the color-door types
         // Treating MoveValidity like a bool here, since it's the result type
         // I want anyways
-        if (wall == WallType::PurpleDoor && color == HeisterColor::Purple)
-            || (wall == WallType::OrangeDoor && color == HeisterColor::Orange)
-            || (wall == WallType::YellowDoor && color == HeisterColor::Yellow)
-            || (wall == WallType::GreenDoor && color == HeisterColor::Green)
+        if (wall == WallType::PurpleDoor && color == &HeisterColor::Purple)
+            || (wall == WallType::OrangeDoor && color == &HeisterColor::Orange)
+            || (wall == WallType::YellowDoor && color == &HeisterColor::Yellow)
+            || (wall == WallType::GreenDoor && color == &HeisterColor::Green)
         {
             return MoveValidity::Valid;
         } else {
@@ -155,7 +155,7 @@ impl Game {
         };
         // OK - if the squares are adjacent, then we can assume they're trying to
         // move to an adjacent square, and can check for doors/walls
-        if Self::are_adjacent(heister_pos.clone(), dest_pos.clone()) {
+        if Self::are_adjacent(heister_pos, &dest_pos) {
             // Is the move valid for the wall between these two squares?
             // NOTE: I'm only going to check the wall of the source square -
             // edge cases where dest square wall may not match, but for now, don't are
@@ -168,7 +168,7 @@ impl Game {
                     ))
                 }
             };
-            let move_dir = Self::adjacent_move_direction(heister_pos.clone(), dest_pos.clone());
+            let move_dir = Self::adjacent_move_direction(&heister_pos, &dest_pos);
             let blocking_wall = match move_dir {
                 MoveDirection::North => heister_square.north_wall,
                 MoveDirection::East => heister_square.east_wall,
@@ -180,12 +180,11 @@ impl Game {
                 WallType::Impassable => {
                     MoveValidity::Invalid("Can't pass through impassable wall".to_string())
                 }
-                _wildcard => Self::door_matches_heister(blocking_wall, heister_color),
+                _wildcard => MoveValidity::Invalid("Moving to un-placed tile not implemented yet".to_string()),
             };
             // TODO - also check if there is another heister in the way
 
             if validity == MoveValidity::Valid {
-                // debug!("");
                 // move the heister
                 heister.map_position = dest_pos;
             }
@@ -193,7 +192,7 @@ impl Game {
         } else {
             // If they're not adjacent, then we can check whether the destination is a
             // matching teleport, and whether teleportation is allowed right now
-            return MoveValidity::Valid;
+            return MoveValidity::Invalid("Teleports & Escalators not implemented yet".to_string());
         }
     }
 
