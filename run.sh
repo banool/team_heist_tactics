@@ -15,14 +15,14 @@ cp ../src/types.proto .
 ./generate_types.sh
 rm types.proto
 if [ "$DEV_MODE" = "dev" ]; then
-   npm i
-   npm run devbuild
+    echo 'Note: Not running npm install'
+    npm run devbuild
 elif [ "$DEV_MODE" = "prod" ]; then
-   npm ci --only=production
-   npm run prodbuild
+    npm ci --only=production
+    npm run prodbuild
 else 
-   echo 'Invalid dev mode';
-   exit;
+    echo 'Invalid dev mode';
+    exit;
 fi
 cd ..
 cp ui/dist/index.html templates/play.html

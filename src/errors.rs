@@ -1,6 +1,5 @@
 use actix_web;
 use anyhow;
-use askama;
 use std::fmt;
 
 // The purpose of this error is to consume errors like the actix

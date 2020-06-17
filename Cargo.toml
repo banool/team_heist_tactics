@@ -3,8 +3,8 @@ name = "team_heist_tactics"
 version = "0.1.0"
 authors = ["Daniel Porteous <danielporteous1@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# Only rebuild if related files change.
+include = ["src/**/*", "/build.rs", "Cargo.toml", "Cargo.lock"]
 
 [dependencies]
 actix = "*"
