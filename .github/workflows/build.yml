@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+      with:
+        lfs: true
     - name: Build and publish team_heist_tactics to Github Packages
       uses: docker/build-push-action@master
       with:
@@ -20,6 +22,5 @@ jobs:
         tags: latest
         # build_args: "--no-cache,--force-rm"
         always_pull: true
-        lfs: true
     needs:
       []
