@@ -14,7 +14,12 @@ const GameComponent = () => {
     <div>
       <GameWindowComponent width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
       <MoveHeisterComponent />
-      <p>Game State: {game_state? JSON.stringify(game_state.toObject()) : "Waiting to join game and then pull state..."}</p>
+      <p>
+        Game State:{" "}
+        {game_state
+          ? JSON.stringify(game_state.toObject())
+          : "Waiting to join game and then pull state..."}
+      </p>
     </div>
   );
 };

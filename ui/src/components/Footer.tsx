@@ -9,5 +9,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   }
 };
 export default props => (
-  <div style={styles.root}>{"made with love by fatema, kelly, and daniel (c) 2020"}</div>
+  <div style={styles.root}>
+    {"made with love by fatema, kelly, and daniel (c) 2020"}
+  </div>
 );

@@ -1,7 +1,13 @@
 import { StagingJoinGameThing, ConnectionStatus } from "./types";
 
-import { GameState, Move, MainMessage, HeisterColor, MapPosition } from "../generated/types_pb";
-import { connect, send } from '@giantmachines/redux-websocket';
+import {
+  GameState,
+  Move,
+  MainMessage,
+  HeisterColor,
+  MapPosition
+} from "../generated/types_pb";
+import { connect, send } from "@giantmachines/redux-websocket";
 
 import { MoveDirection } from "./types";
 
@@ -15,7 +21,13 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
         scheme += "s";
       }
 
-      var urlString = scheme + "://" + document.location.hostname + ":" + document.location.port + "/play_game";
+      var urlString =
+        scheme +
+        "://" +
+        document.location.hostname +
+        ":" +
+        document.location.port +
+        "/play_game";
 
       var serverUrl = new URL(urlString);
       serverUrl.searchParams.set("name", join_game_thing.name);
@@ -26,18 +38,27 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
       // TODO: dispatch failure.
       console.error("Failed to join game with websocket:", error);
     }
-  }
+  };
 }
 
-export function moveHeister(game_state: GameState, connection_status: ConnectionStatus, move_direction: MoveDirection) {
+export function moveHeister(
+  game_state: GameState,
+  connection_status: ConnectionStatus,
+  move_direction: MoveDirection
+) {
   return async dispatch => {
     var hardcoded_color = HeisterColor.GREEN;
-    if (game_state === null || connection_status !== ConnectionStatus.Connected) {
+    if (
+      game_state === null ||
+      connection_status !== ConnectionStatus.Connected
+    ) {
       console.error("Tried to move heister with no game state / connection");
       return;
     }
     var heisters = game_state.getHeistersList();
-    var green_heister = heisters.find(h => h.getHeisterColor() == hardcoded_color);
+    var green_heister = heisters.find(
+      h => h.getHeisterColor() == hardcoded_color
+    );
     if (green_heister === undefined) {
       console.error("Could not find information for heister");
       return;
@@ -52,23 +73,27 @@ export function moveHeister(game_state: GameState, connection_status: Connection
     new_position.setY(current_position.getY());
     switch (+move_direction) {
       case MoveDirection.North:
-        new_position.setY(current_position.getY()+1);
+        new_position.setY(current_position.getY() + 1);
         break;
       case MoveDirection.East:
-        new_position.setX(current_position.getX()+1);
+        new_position.setX(current_position.getX() + 1);
         break;
       case MoveDirection.South:
-        new_position.setY(current_position.getY()-1);
+        new_position.setY(current_position.getY() - 1);
         break;
       case MoveDirection.West:
-        new_position.setX(current_position.getX()-1);
+        new_position.setX(current_position.getX() - 1);
         break;
       default:
         console.error("Unexpected move direction");
         break;
     }
     var move = new Move();
-    console.log("Dispatching action to move GREEN heister (a->b)", current_position.toObject(), new_position.toObject());
+    console.log(
+      "Dispatching action to move GREEN heister (a->b)",
+      current_position.toObject(),
+      new_position.toObject()
+    );
     move.setHeisterColor(hardcoded_color);
     move.setPosition(new_position);
     var main_message = new MainMessage();
@@ -76,40 +101,55 @@ export function moveHeister(game_state: GameState, connection_status: Connection
     console.log("Dispatching websocket send of Move", move);
     dispatch(send(main_message));
     console.log("Dispatched websocket send of Move");
-  }
+  };
 }
 
 // Take a key input, convert to an enum representing different things
 // the user wants to do, then match on that instead.
-export function handleKeyInput(game_state: GameState | null, connection_status: ConnectionStatus, key: string) {
+export function handleKeyInput(
+  game_state: GameState | null,
+  connection_status: ConnectionStatus,
+  key: string
+) {
   return async dispatch => {
     var move = getMove(key);
     // Do nothing if the key didn't match anything.
     if (move === null) {
       return;
     }
-    if (game_state === null || connection_status !== ConnectionStatus.Connected) {
+    if (
+      game_state === null ||
+      connection_status !== ConnectionStatus.Connected
+    ) {
       console.debug("No game state / connection, dropping key input");
       return;
     }
     console.log("Sending move", move);
     switch (move) {
       case MyMove.MoveNorth:
-        dispatch(moveHeister(game_state, connection_status, MoveDirection.North));
+        dispatch(
+          moveHeister(game_state, connection_status, MoveDirection.North)
+        );
         return;
       case MyMove.MoveEast:
-        dispatch(moveHeister(game_state, connection_status, MoveDirection.East));
+        dispatch(
+          moveHeister(game_state, connection_status, MoveDirection.East)
+        );
         return;
       case MyMove.MoveSouth:
-        dispatch(moveHeister(game_state, connection_status, MoveDirection.South));
+        dispatch(
+          moveHeister(game_state, connection_status, MoveDirection.South)
+        );
         return;
       case MyMove.MoveWest:
-        dispatch(moveHeister(game_state,connection_status, MoveDirection.West));
+        dispatch(
+          moveHeister(game_state, connection_status, MoveDirection.West)
+        );
         return;
       default:
-        return null;  // Raise error.
+        return null; // Raise error.
     }
-  }
+  };
 }
 export function getMove(key: string) {
   switch (key) {
@@ -130,5 +170,5 @@ export enum MyMove {
   MoveNorth,
   MoveEast,
   MoveSouth,
-  MoveWest,
+  MoveWest
 }

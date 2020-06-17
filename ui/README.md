@@ -17,6 +17,11 @@ python3 -m http.server --directory dist
 # Go to the address it spits out.
 ```
 
+Make things pretty with this:
+```
+npm run style-fix
+```
+
 ## TODO
 - Use this for the websockets: https://github.com/giantmachines/redux-websocket
 

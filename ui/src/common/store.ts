@@ -1,5 +1,5 @@
 import { getDefaultMiddleware, configureStore } from "@reduxjs/toolkit";
-import reduxWebsocket from '@giantmachines/redux-websocket';
+import reduxWebsocket from "@giantmachines/redux-websocket";
 import rootReducer from "./reducers";
 import { WEBSOCKET_ACTION_PREFIX } from "../constants/other";
 
@@ -15,14 +15,14 @@ const reduxWebsocketMiddleware = reduxWebsocket({
   reconnectOnClose: true,
   reconnectInterval: 1000,
   // Modify the websocket so it returns arraybuffers instead of blobs.
-  onOpen: (socket: WebSocket) => socket.binaryType = 'arraybuffer'
+  onOpen: (socket: WebSocket) => (socket.binaryType = "arraybuffer")
 });
 const middleware = getDefaultMiddleware().concat(reduxWebsocketMiddleware);
 
 // Create the Redux store.
 const store = configureStore({
   reducer: rootReducer,
-  middleware: middleware,
+  middleware: middleware
 });
 
 if (process.env.NODE_ENV === "development" && module.hot) {

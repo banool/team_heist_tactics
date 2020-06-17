@@ -14,7 +14,7 @@ import { handleKeyInput } from "./api";
 import GameWindowComponent from "./GameWindowComponent";
 
 type JoinGamePageProps = {};
-const JoinGamePage = ({ }: JoinGamePageProps) => {
+const JoinGamePage = ({}: JoinGamePageProps) => {
   const connection_status = useSelector(connectionStatusSelector);
 
   const dispatch = useDispatch();
@@ -31,29 +31,35 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
   // key repeat kicks in after a user defined OS level delay.
   // https://stackoverflow.com/questions/41693715/react-redux-what-is-the-canonical-way-to-bind-a-keypress-action-to-kick-off-a-r
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
     return function cleanup() {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
     };
   });
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = event => {
     console.debug("Key event", event);
     dispatch(handleKeyInput(game_state, connection_status, event.key));
-    document.removeEventListener('keydown', handleKeyDown);
+    document.removeEventListener("keydown", handleKeyDown);
   };
 
-  const handleKeyUp = (event) => {
-    document.addEventListener('keydown', handleKeyDown, {once: true});
+  const handleKeyUp = event => {
+    document.addEventListener("keydown", handleKeyDown, { once: true });
   };
 
   return (
     <div>
-      {connection_status != ConnectionStatus.Connected ? <h1>Team Heist Tactics</h1> : null}
-      {connection_status != ConnectionStatus.Connected ? <JoinGameForm /> : null}
-      {connection_status == ConnectionStatus.Connected && game_state ? <GameComponent /> : null}
+      {connection_status != ConnectionStatus.Connected ? (
+        <h1>Team Heist Tactics</h1>
+      ) : null}
+      {connection_status != ConnectionStatus.Connected ? (
+        <JoinGameForm />
+      ) : null}
+      {connection_status == ConnectionStatus.Connected && game_state ? (
+        <GameComponent />
+      ) : null}
       <ConnectionStatusComponent />
     </div>
   );

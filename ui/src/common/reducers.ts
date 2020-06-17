@@ -4,7 +4,7 @@ import { combineReducers } from "redux";
 import joinGameReducer from "../join_game/slice";
 
 const rootReducer = combineReducers({
-  joinGame: joinGameReducer,
+  joinGame: joinGameReducer
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
