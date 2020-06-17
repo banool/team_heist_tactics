@@ -11,6 +11,7 @@ import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
 
 import { handleKeyInput } from "./api";
+import GameWindowComponent from "./GameWindowComponent";
 
 type JoinGamePageProps = {};
 const JoinGamePage = ({ }: JoinGamePageProps) => {
@@ -50,12 +51,15 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
 
   return (
     <div>
-      <h1>Team Heist Tactics</h1>
+      {connection_status != ConnectionStatus.Connected ? <h1>Team Heist Tactics</h1> : null}
       {connection_status != ConnectionStatus.Connected ? <JoinGameForm /> : null}
       <ConnectionStatusComponent />
       {connection_status == ConnectionStatus.Connected ? <GameComponent /> : null}
     </div>
   );
 };
+
+// <GameWindowComponent />
+// TODO Get rid of GameWindowComponent from here.
 
 export default JoinGamePage;

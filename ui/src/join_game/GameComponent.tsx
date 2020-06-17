@@ -4,6 +4,7 @@ import { gameStateSelector } from "./slice";
 import { Move } from "../generated/types_pb";
 import { moveHeister } from "./api";
 import MoveHeisterComponent from "./MoveHeisterComponent";
+import GameWindowComponent from "./GameWindowComponent";
 
 const GameComponent = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const GameComponent = () => {
     <div>
       <p>Game State: {game_state? JSON.stringify(game_state.toObject()) : "Waiting to join game and then pull state..."}</p>
       <MoveHeisterComponent />
+      <GameWindowComponent />
     </div>
   );
 };

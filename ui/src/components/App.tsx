@@ -16,17 +16,11 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   content: {
     marginTop: 20,
-    width: 900,
+    width: 1600,
     backgroundColor: colors.backgroundLight
   },
   layoutTable: {
     border: "2px solid #333"
-  },
-  sidebarCell: {
-    border: "2px solid #333",
-    width: 220,
-    padding: 5,
-    verticalAlign: "top"
   },
   contentCell: {
     border: "2px solid #333",
