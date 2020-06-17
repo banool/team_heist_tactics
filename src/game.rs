@@ -250,4 +250,15 @@ pub mod tests {
         // let validity = game.handle_message(message);
         // assert_eq!(validity, super::MoveValidity::Valid);
     }
+
+    #[test]
+    pub fn grid_walls_align(&self) -> HashMap<MapPosition, Square> {
+        let game_handle = super::GameHandle("test_can_move_to_free_square".to_string());
+        let game_options = super::GameOptions::default();
+        let mut game = super::Game::new(game_handle, game_options);
+        let mut grid: HashMap<MapPosition, Square> = HashMap::new();
+
+        // do some checks on teh grid walls
+    }
+
 }
