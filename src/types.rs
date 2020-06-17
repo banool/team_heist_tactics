@@ -58,7 +58,7 @@ impl Internal for TilePosition {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct MapPosition {
     pub x: i32,
     pub y: i32,
@@ -359,8 +359,6 @@ impl GameState {
     pub fn new(game_name: GameHandle) -> Self {
         let game_started = get_current_time_secs();
         let timer_runs_out = game_started + TIMER_DURATION_SECS;
-        // Note: something weird here? StartingTile::A (starting_tile) = tile1a()
-        // seems kind of backwards?
         let starting_tile = tile_1a();
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];

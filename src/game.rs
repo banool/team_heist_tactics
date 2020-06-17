@@ -1,10 +1,9 @@
 use anyhow::{anyhow, Result};
 
 use crate::manager::{GameHandle, GameOptions};
-use crate::types::{GameState, GameStatus, MainMessage, Player, Move, MapPosition, InvalidRequest};
+use crate::types::{GameState, GameStatus, MainMessage, Player, Move, InvalidRequest, Internal, Square, MapPosition};
 use crate::types::main_message::Body;
-use crate::types::Internal;
-use crate::types;
+use std::collections::HashMap;
 
 use log::info;
 
@@ -52,26 +51,48 @@ impl Game {
         self.game_state.clone()
     }
 
-    pub fn process_move(&mut self, m: Move) -> MoveValidity {
-        info!("{:#?}", m);
-        // let m = b as Move;
-        // let hc = m.heister_color;
-        // let mpos = m.position;
-        // info!("heister color: {:?}, map pos: {:?}", hc, mpos);
+    pub fn get_absolute_grid(&self) -> HashMap<MapPosition, Square> {
+        let mut grid: HashMap<MapPosition, Square> = HashMap::new();
+        for tile in self.game_state.tiles.iter() {
+            // this is the top position for the tile - we can assign positions for this
+            let tile_pos = &tile.position;
+            for (i,square) in tile.squares.iter().enumerate() {
+                let sq_x = (i / 4) as i32;
+                let sq_y = (sq_x % 4) as i32;
+                let grid_x = tile_pos.x + sq_x;
+                let grid_y = tile_pos.y + sq_y;
+                info!("{}: {:?} {:?} {:?} {:?}, {:?}", i, square.north_wall, square.west_wall, square.south_wall, square.east_wall, square.square_type);
+                let mp = MapPosition {
+                    x: grid_x,
+                    y: grid_y,
+                };
+                grid.insert(mp, square.clone());
+            }
+        }
+        info!("{:#?}", grid);
+        grid
+    }
 
+    pub fn process_move(&self, m: Move) -> MoveValidity {
+        let heister = m.heister_color;
+        let pos = m.position;
+        let grid = self.get_absolute_grid();
+        let my_square = match grid.get(&pos) {
+            Some(my_square) => my_square,
+            None => return MoveValidity::Invalid("Square {:?} doesn't exist".to_string()),
+        };
         MoveValidity::Valid
     }
 
     pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
-        // TODO Match on main.body and influence the game state for each of the options.
         // If we receive GameState or InvalidRequest at this endpoint, panic, it should never happen.
-        info!("Received message: {:#?}", message);
+        info!("Received message: {:?}", message);
         let body = message.body.unwrap();
-        let mv = match body {
-            Body::Move ( m ) => self.process_move(Move::from_proto(m)),
-            Body::GameState ( gs ) => MoveValidity::Invalid("invalid".to_string()),
-            Body::InvalidRequest ( ir ) => MoveValidity::Invalid("invalid".to_string()),
+        let validity = match body {
+            Body::Move(m) => self.process_move(Move::from_proto(m)),
+            Body::GameState(_gs) => MoveValidity::Invalid("GameState is invalid from players".to_string()),
+            Body::InvalidRequest(_ir) => MoveValidity::Invalid("InvalidRequest is invalid from players".to_string()),
         };
-        mv
+        validity
     }
 }
