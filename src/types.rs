@@ -82,6 +82,13 @@ impl Internal for MapPosition {
     }
 }
 
+pub enum MoveDirection {
+    North,
+    East,
+    South,
+    West,
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Tile {
     pub squares: Vec<Square>,
@@ -183,12 +190,34 @@ impl From<SerializableSquare> for Square {
     }
 }
 
+impl Square {
+    pub fn is_teleport(&self) -> bool {
+        match self.square_type {
+            SquareType::PurpleTeleportPad
+            | SquareType::YellowTeleportPad
+            | SquareType::OrangeTeleportPad
+            | SquareType::GreenTeleportPad => true,
+            _wildcard => false,
+        }
+    }
+
+    pub fn teleport_matches_heister(&self, color: HeisterColor) -> bool {
+        let square_type = self.square_type;
+        match color {
+            HeisterColor::Purple => square_type == SquareType::PurpleTeleportPad,
+            HeisterColor::Yellow => square_type == SquareType::YellowTeleportPad,
+            HeisterColor::Orange => square_type == SquareType::OrangeTeleportPad,
+            HeisterColor::Green => square_type == SquareType::GreenTeleportPad,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Heister {
-    heister_color: HeisterColor,
-    map_position: MapPosition,
-    has_taken_item: bool,
-    has_escaped: bool,
+    pub heister_color: HeisterColor,
+    pub map_position: MapPosition,
+    pub has_taken_item: bool,
+    pub has_escaped: bool,
 }
 
 impl Internal for Heister {
@@ -213,16 +242,37 @@ impl Internal for Heister {
     }
 }
 
+const MAP_CENTER: i32 = 250;
+
 impl Heister {
     pub fn get_initial(heister_color: HeisterColor, starting_tile: &StartingTile) -> Self {
         let map_position = match starting_tile {
+            // | | | | |
+            // | |y|o| |
+            // | |p|g| |
+            // | | | | |
             StartingTile::A(_) => match heister_color {
-                HeisterColor::Yellow => MapPosition { x: 1, y: 2 },
-                HeisterColor::Purple => MapPosition { x: 1, y: 2 },
-                HeisterColor::Green => MapPosition { x: 2, y: 2 },
-                HeisterColor::Orange => MapPosition { x: 2, y: 1 },
+                HeisterColor::Yellow => MapPosition {
+                    x: MAP_CENTER + 1,
+                    y: MAP_CENTER + 1,
+                },
+                HeisterColor::Purple => MapPosition {
+                    x: MAP_CENTER + 1,
+                    y: MAP_CENTER + 2,
+                },
+                HeisterColor::Green => MapPosition {
+                    x: MAP_CENTER + 2,
+                    y: MAP_CENTER + 2,
+                },
+                HeisterColor::Orange => MapPosition {
+                    x: MAP_CENTER + 2,
+                    y: MAP_CENTER + 1,
+                },
             },
-            _ => MapPosition { x: 0, y: 0 }, // TODO Do this for starting B side.
+            _ => MapPosition {
+                x: MAP_CENTER,
+                y: MAP_CENTER,
+            }, // TODO Do this for starting B side.
         };
         Heister {
             heister_color,

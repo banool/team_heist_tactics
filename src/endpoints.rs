@@ -151,6 +151,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
                 MoveValidity::Invalid("Unexpected message received".to_string())
             }
         };
+        debug!("Received move that is: {:?}", validity);
         match validity {
             MoveValidity::Valid => {
                 let res = self.game_wrapper.read().unwrap().push_state();
