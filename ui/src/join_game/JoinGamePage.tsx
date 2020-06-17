@@ -53,8 +53,8 @@ const JoinGamePage = ({ }: JoinGamePageProps) => {
     <div>
       {connection_status != ConnectionStatus.Connected ? <h1>Team Heist Tactics</h1> : null}
       {connection_status != ConnectionStatus.Connected ? <JoinGameForm /> : null}
+      {connection_status == ConnectionStatus.Connected && game_state ? <GameComponent /> : null}
       <ConnectionStatusComponent />
-      {connection_status == ConnectionStatus.Connected ? <GameComponent /> : null}
     </div>
   );
 };

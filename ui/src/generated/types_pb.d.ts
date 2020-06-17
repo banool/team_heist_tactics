@@ -62,6 +62,9 @@ export class Tile extends jspb.Message {
   getPosition(): MapPosition | undefined;
   setPosition(value?: MapPosition): void;
 
+  getName(): string;
+  setName(value: string): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Tile.AsObject;
   static toObject(includeInstance: boolean, msg: Tile): Tile.AsObject;
@@ -76,6 +79,7 @@ export namespace Tile {
   export type AsObject = {
     squaresList: Array<Square.AsObject>,
     position?: MapPosition.AsObject,
+    name: string,
   }
 }
 

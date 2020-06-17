@@ -601,7 +601,8 @@ proto.types.Tile.toObject = function(includeInstance, msg) {
   var f, obj = {
     squaresList: jspb.Message.toObjectList(msg.getSquaresList(),
     proto.types.Square.toObject, includeInstance),
-    position: (f = msg.getPosition()) && proto.types.MapPosition.toObject(includeInstance, f)
+    position: (f = msg.getPosition()) && proto.types.MapPosition.toObject(includeInstance, f),
+    name: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -648,6 +649,10 @@ proto.types.Tile.deserializeBinaryFromReader = function(msg, reader) {
       reader.readMessage(value,proto.types.MapPosition.deserializeBinaryFromReader);
       msg.setPosition(value);
       break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setName(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -691,6 +696,13 @@ proto.types.Tile.serializeBinaryToWriter = function(message, writer) {
       2,
       f,
       proto.types.MapPosition.serializeBinaryToWriter
+    );
+  }
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
     );
   }
 };
@@ -768,6 +780,24 @@ proto.types.Tile.prototype.clearPosition = function() {
  */
 proto.types.Tile.prototype.hasPosition = function() {
   return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional string name = 3;
+ * @return {string}
+ */
+proto.types.Tile.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.types.Tile} returns this
+ */
+proto.types.Tile.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
