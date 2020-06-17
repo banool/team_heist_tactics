@@ -1,16 +1,26 @@
 // Load the map from data/tiles/*.json
 
-use crate::types::{SerializableTile, Tile, Square, MapPosition, WallType, SquareType};
+use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
 use std::collections::HashMap;
-use std::path::Path;
-use std::io::BufReader;
 use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
 
 pub fn load_tiles_from_json() -> HashMap<String, Tile> {
     // TODO
     // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
-    let tile_map : HashMap::<String, Tile> = HashMap::new();
+    let tile_map: HashMap<String, Tile> = HashMap::new();
     tile_map
+}
+
+pub fn load_tile_json_from_path(s: String) -> Tile {
+    let p = Path::new(&s);
+    let file = File::open(p).expect("Path should exist");
+    let reader = BufReader::new(file);
+    let st: SerializableTile =
+        serde_json::from_reader(reader).expect("Path should be valid serde JSON of a Tile");
+    let t = Tile::from(st);
+    t
 }
 
 pub fn tile_1a() -> Tile {
@@ -151,7 +161,6 @@ pub fn tile_1a() -> Tile {
         position: my_pos,
     }
 }
-
 
 #[allow(dead_code, unused_imports)]
 mod tests {

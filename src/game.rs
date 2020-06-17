@@ -2,8 +2,10 @@ use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 
 use crate::manager::{GameHandle, GameOptions};
-use crate::types::{GameState, GameStatus, MainMessage, Player, Move, Internal, Square, MapPosition};
 use crate::types::main_message::Body;
+use crate::types::{
+    GameState, GameStatus, Internal, MainMessage, MapPosition, Move, Player, Square,
+};
 
 use log::info;
 
@@ -56,12 +58,20 @@ impl Game {
         for tile in self.game_state.tiles.iter() {
             // this is the top position for the tile - we can assign positions for this
             let tile_pos = &tile.position;
-            for (i,square) in tile.squares.iter().enumerate() {
+            for (i, square) in tile.squares.iter().enumerate() {
                 let sq_x = (i / 4) as i32;
                 let sq_y = (sq_x % 4) as i32;
                 let grid_x = tile_pos.x + sq_x;
                 let grid_y = tile_pos.y + sq_y;
-                info!("{}: {:?} {:?} {:?} {:?}, {:?}", i, square.north_wall, square.west_wall, square.south_wall, square.east_wall, square.square_type);
+                info!(
+                    "{}: {:?} {:?} {:?} {:?}, {:?}",
+                    i,
+                    square.north_wall,
+                    square.west_wall,
+                    square.south_wall,
+                    square.east_wall,
+                    square.square_type
+                );
                 let mp = MapPosition {
                     x: grid_x,
                     y: grid_y,
@@ -90,8 +100,12 @@ impl Game {
         let body = message.body.unwrap();
         let validity = match body {
             Body::Move(m) => self.process_move(Move::from_proto(m)),
-            Body::GameState(_gs) => MoveValidity::Invalid("GameState is invalid from players".to_string()),
-            Body::InvalidRequest(_ir) => MoveValidity::Invalid("InvalidRequest is invalid from players".to_string()),
+            Body::GameState(_gs) => {
+                MoveValidity::Invalid("GameState is invalid from players".to_string())
+            }
+            Body::InvalidRequest(_ir) => {
+                MoveValidity::Invalid("InvalidRequest is invalid from players".to_string())
+            }
         };
         validity
     }

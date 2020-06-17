@@ -1,6 +1,6 @@
+use crate::load_map::tile_1a;
 use crate::manager::GameHandle;
 use crate::utils::get_current_time_secs;
-use crate::load_map::tile_1a;
 
 use serde::{Deserialize, Serialize};
 use std::convert::From;
@@ -363,10 +363,22 @@ impl GameState {
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
         let mut heisters = Vec::new();
-        heisters.push(Heister::get_initial(HeisterColor::Yellow, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Purple, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Green, &starting_tile_enum));
-        heisters.push(Heister::get_initial(HeisterColor::Orange, &starting_tile_enum));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Yellow,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Purple,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Green,
+            &starting_tile_enum,
+        ));
+        heisters.push(Heister::get_initial(
+            HeisterColor::Orange,
+            &starting_tile_enum,
+        ));
         GameState {
             game_name,
             game_started,
