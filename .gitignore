@@ -1,5 +1,6 @@
 # Generated node stuff
 templates/static/app.js
+/static/*.js
 
 # Rust
 /target/

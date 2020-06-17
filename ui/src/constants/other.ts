@@ -7,6 +7,10 @@ export const SERVER_WIDTH = 500;
 export const SERVER_HEIGHT = 500;
 
 export const TILE_SIZE = 300;
+export const SQUARE_SIZE = TILE_SIZE / 4;
 
-// Make the heister the size of a square minus a bit.
-export const HEISTER_SIZE = TILE_SIZE / 4 - 10;
+export const NUM_MAP_UNITS_WIDE = CANVAS_WIDTH / SQUARE_SIZE;
+export const NUM_MAP_UNITS_HIGH = CANVAS_HEIGHT / SQUARE_SIZE;
+
+// Make the heister the size of a square / 2 minus a bit.
+export const HEISTER_SIZE = SQUARE_SIZE / 2 - 15;

@@ -71,15 +71,17 @@ export function moveHeister(
     var new_position = new MapPosition();
     new_position.setX(current_position.getX());
     new_position.setY(current_position.getY());
+    // 0,0 is the top left of the map, not the middle,
+    // so you have to minus Y to go north.
     switch (+move_direction) {
       case MoveDirection.North:
-        new_position.setY(current_position.getY() + 1);
+        new_position.setY(current_position.getY() - 1);
         break;
       case MoveDirection.East:
         new_position.setX(current_position.getX() + 1);
         break;
       case MoveDirection.South:
-        new_position.setY(current_position.getY() - 1);
+        new_position.setY(current_position.getY() + 1);
         break;
       case MoveDirection.West:
         new_position.setX(current_position.getX() - 1);
