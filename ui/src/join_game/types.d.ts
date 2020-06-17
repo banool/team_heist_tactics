@@ -22,3 +22,8 @@ export enum MoveDirection {
   South,
   West,
 }
+
+export interface CanvasPosition {
+  x: number;
+  y: number;
+}

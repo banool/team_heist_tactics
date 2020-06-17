@@ -1,65 +1,48 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { gameStateSelector } from "./slice";
-import { Tile as ProtoTile } from "../generated/types_pb";
+import { Tile as ProtoTile, MapPosition } from "../generated/types_pb";
 import { moveHeister } from "./api";
 import { Stage, Layer, Circle, Text } from 'react-konva';
 import Konva from 'konva';
 import { Image } from 'react-konva';
 import useImage from 'use-image';
-import { CANVAS_WIDTH, CANVAS_HEIGHT, SERVER_WIDTH, SERVER_HEIGHT } from "../constants/other";
-
-class ColoredRect extends React.Component {
-  state = {
-    color: 'green'
-  };
-  handleClick = () => {
-    this.setState({
-      color: Konva.Util.getRandomColor()
-    });
-  };
-  render() {
-    return (
-      <Circle
-        x={120}
-        y={120}
-        radius={30}
-        fill={this.state.color}
-        shadowBlur={10}
-        onClick={this.handleClick}
-      />
-    );
-  }
-}
+import { CANVAS_WIDTH, CANVAS_HEIGHT, SERVER_WIDTH, SERVER_HEIGHT, TILE_SIZE } from "../constants/other";
+import { CanvasPosition } from "./types";
 
 type TileProps = {
   proto_tile: ProtoTile;
 };
 
+const mapPositionToCanvasPosition = (map_position: MapPosition): CanvasPosition => {
+  var map_x = map_position.getX();
+  var map_y = map_position.getY();
+  var x = (map_x / SERVER_WIDTH) * CANVAS_WIDTH;
+  var y = (map_y / SERVER_HEIGHT) * CANVAS_HEIGHT;
+  return { x: x, y: y };
+};
+
 // The offset makes the center of the image be the center of the canvas element.
 const Tile = ({ proto_tile }: TileProps) => {
+  // TODO Consider preloading the next / all images.
+  // Probably not necessary becayse images are cached in the client, so the user
+  // only ever suffers the slow load time once.
   const url = `static/images/00${proto_tile.getName()}.jpg`;
   const [image, status] = useImage(url);
 
-  const size = 300;
+  const size = TILE_SIZE;
   const offset = size/2;
 
-  var position = proto_tile.getPosition();
-  var proto_x = position!.getX();
-  var proto_y = position!.getY();
-  var x = (proto_x / SERVER_WIDTH) * CANVAS_WIDTH;
-  var y = (proto_y / SERVER_HEIGHT) * CANVAS_HEIGHT;
-
-  console.log("x", x);
-  console.log("y", y);
+  var map_position = proto_tile.getPosition()!;
+  var canvas_position = mapPositionToCanvasPosition(map_position);
 
   var comp: JSX.Element;
   if (status === "loaded") {
-    comp = <Image shadowBlur={10} image={image} width={size} height={size} offsetX={offset} offsetY={offset} x={x} y={y} />;
+    comp = <Image shadowBlur={10} image={image} width={size} height={size} offsetX={offset} offsetY={offset} x={canvas_position.x} y={canvas_position.y} />;
   } else if (status === "loading") {
     comp = <Text text={`Loading tile ${name}...`}/>
   } else {
-    comp = <Text text={`Failed to load tile ${name}!`}/>
+    comp = <Text text={`Failed to load tile ${name}!!!`}/>
   }
 
   return (comp);
