@@ -20,5 +20,6 @@ jobs:
         tags: latest
         # build_args: "--no-cache,--force-rm"
         always_pull: true
+        lfs: true
     needs:
       []
