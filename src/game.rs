@@ -212,10 +212,11 @@ impl Game {
         };
         if Self::are_adjacent(heister_pos, &dest_pos) {
             let validity = self.move_blocked_by_wall(&heister_pos, &dest_pos);
-            let validity = match validity.clone() {
-                MoveValidity::Valid => self.position_is_occupied(&dest_pos),
-                _invalid => validity,
-            };
+            match validity {
+                MoveValidity::Invalid(_) => return validity,
+                _ => (),
+            }
+            let validity = self.position_is_occupied(&dest_pos);
 
             if validity == MoveValidity::Valid {
                 // If the move is valid, actually move it
