@@ -138,12 +138,17 @@ impl Game {
 
     fn process_move(&mut self, m: Move) -> MoveValidity {
         let grid = self.get_absolute_grid();
+        // debug!("{:#?}", grid);
 
         let heister_color = m.heister_color;
         let heister = self.get_heister_from_vec(heister_color.clone()).unwrap();
         let heister_pos = &heister.map_position;
+        debug!("Heister pos:");
+        debug!("{}", grid.get(&heister_pos).unwrap().pp());
 
         let dest_pos = m.position;
+        debug!("Dest pos:");
+        debug!("{}", grid.get(&dest_pos).unwrap().pp());
         match grid.get(&dest_pos) {
             None => {
                 return MoveValidity::Invalid(format!(
@@ -217,48 +222,101 @@ impl Game {
 
 #[allow(dead_code, unused_imports)]
 pub mod tests {
-    use crate::types::{Internal, MainMessage};
+    use std::collections::HashMap;
+    use log::{warn, info};
+    use crate::manager::{GameHandle, GameOptions};
+    use crate::types::{
+        Internal, MainMessage, MapPosition, Move,
+        MoveDirection, Player, Square, WallType,
+    };
     #[test]
     pub fn test_can_move_to_free_square() -> () {
+        // Assuming that Yellow starts at 1, 1
+        // This test tries to move it up (safe),
+        // Then back down to its starting square
+        // Checks that the moves are accepted as valid
         let game_handle = super::GameHandle("test_can_move_to_free_square".to_string());
         let game_options = super::GameOptions::default();
         let mut game = super::Game::new(game_handle, game_options);
 
-        let position = super::MapPosition { x: 251, y: 250 };
+        let position = super::MapPosition { x: 1, y: 0 };
         let mut test_move = super::Move {
             heister_color: super::HeisterColor::Yellow,
-            position,
+            position: position.clone(),
         };
         let message = MainMessage {
             body: Some(super::Body::Move(test_move.to_proto())),
         };
         let validity = game.handle_message(message);
         assert_eq!(validity, super::MoveValidity::Valid);
+        let mut curr_yellow_pos = game.get_heister_from_vec(super::HeisterColor::Yellow).unwrap();
+        assert_eq!(&curr_yellow_pos.map_position, &position);
 
         // THIS FOLLOWING PART *SHOULD* pass - but doesn't! Need unit tests on
-        // tiles & tile loading - to ensure that tiles' walls are symmetic
-        // let next_position = super::MapPosition {
-        //     x: 251, y: 251
-        // };
-        // test_move = super::Move {
-        //     heister_color: super::HeisterColor::Yellow,
-        //     position: next_position,
-        // };
-        // let message = MainMessage {
-        //     body: Some(super::Body::Move(test_move.to_proto())),
-        // };
-        // let validity = game.handle_message(message);
-        // assert_eq!(validity, super::MoveValidity::Valid);
+        // tiles & tile loading - to ensure that tiles' walls are symmetric
+        let next_position = super::MapPosition {
+            x: 1, y: 1
+        };
+        test_move = super::Move {
+            heister_color: super::HeisterColor::Yellow,
+            position: next_position.clone(),
+        };
+        let message = MainMessage {
+            body: Some(super::Body::Move(test_move.to_proto())),
+        };
+        let validity = game.handle_message(message);
+        assert_eq!(validity, super::MoveValidity::Valid);
+        curr_yellow_pos = game.get_heister_from_vec(super::HeisterColor::Yellow).unwrap();
+        assert_eq!(&curr_yellow_pos.map_position, &next_position);
     }
 
     #[test]
-    pub fn grid_walls_align(&self) -> HashMap<MapPosition, Square> {
-        let game_handle = super::GameHandle("test_can_move_to_free_square".to_string());
-        let game_options = super::GameOptions::default();
-        let mut game = super::Game::new(game_handle, game_options);
-        let mut grid: HashMap<MapPosition, Square> = HashMap::new();
+    pub fn grid_walls_align() -> () {
+        let game_handle = GameHandle("test_grid_walls_align".to_string());
+        let game_options = GameOptions::default();
+        let game = super::Game::new(game_handle, game_options);
+        let grid: HashMap<MapPosition, Square> = game.get_absolute_grid();
 
-        // do some checks on teh grid walls
+        // do horizontal wall checks first
+        for row in 0..3 {
+            for col in 0..2 {
+                let mp = MapPosition {
+                    x: row,
+                    y: col,
+                };
+                let mut msg = format!("Map tile {},{} not found", &mp.x, &mp.y);
+                let square = grid.get(&mp).expect(&msg);
+                let next_mp = MapPosition {
+                    x: row,
+                    y: col + 1,
+                };
+                msg = format!("Map tile {},{} not found", &next_mp.x, &next_mp.y);
+                let next_square = grid.get(&next_mp).expect(&msg);
+                let first_square_east_wall = square.east_wall;
+                let second_square_west_wall = next_square.west_wall;
+                assert_eq!(first_square_east_wall, second_square_west_wall)
+            }
+        }
+
+        // now vertical checks
+        for col in 0..3 {
+            for row in 0..2 {
+                let mp = MapPosition {
+                    x: row,
+                    y: col,
+                };
+                let mut msg = format!("Map tile {},{} not found", &mp.x, &mp.y);
+                let square = grid.get(&mp).expect(&msg);
+                let next_mp = MapPosition {
+                    x: row + 1,
+                    y: col,
+                };
+                msg = format!("Map tile {},{} not found", &next_mp.x, &next_mp.y);
+                let next_square = grid.get(&next_mp).expect(&msg);
+                let first_square_south_wall = square.south_wall;
+                let second_square_north_wall = next_square.north_wall;
+                assert_eq!(first_square_south_wall, second_square_north_wall)
+            }
+        }
     }
-
 }

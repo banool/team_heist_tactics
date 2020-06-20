@@ -4,6 +4,8 @@ use crate::utils::get_current_time_secs;
 
 use serde::{Deserialize, Serialize};
 use std::convert::From;
+// TEMP TODO
+use log::{debug, info, trace};
 
 // Import all the proto types in this private module.
 mod proto_types {
@@ -140,6 +142,31 @@ impl From<SerializableTile> for Tile {
     }
 }
 
+impl Tile {
+    pub fn pp(&self) -> String {
+        let mut square_strs: Vec<String> = Vec::new();
+        // should have 12 entries, for 3 rows of each square (4 squares in a tile)
+        for i in (0..15).step_by(4) {
+            let mut top_row = String::new();
+            let mut middle_row = String::new();
+            let mut bottom_row = String::new();
+            for j in 0..4 {
+                top_row += &self.squares.get(i+j).unwrap().pp_top_row();
+                middle_row += &self.squares.get(i+j).unwrap().pp_middle_row();
+                bottom_row += &self.squares.get(i+j).unwrap().pp_bottom_row();
+            }
+            square_strs.push(top_row);
+            square_strs.push(middle_row);
+            square_strs.push(bottom_row);
+        }
+        let mut pp = String::new();
+        for line in square_strs {
+            pp += format!("{}\n", line).as_str();
+        }
+        pp
+    }
+}
+
 pub enum StartingTile {
     A(Tile),
     B(Tile),
@@ -210,6 +237,70 @@ impl Square {
             HeisterColor::Green => square_type == SquareType::GreenTeleportPad,
         }
     }
+
+    fn pp_wall(w: WallType, vertical: bool) -> String {
+        let wallchar = match vertical {
+            true => "|",
+            false => "_",
+        };
+        match w {
+            WallType::Clear => " ".to_string(),
+            WallType::Impassable => wallchar.to_string(),
+            WallType::PurpleDoor => "P".to_string(),
+            WallType::OrangeDoor => "O".to_string(),
+            WallType::YellowDoor => "Y".to_string(),
+            WallType::GreenDoor => "G".to_string(),
+            _wildcard => "?".to_string(),
+        }
+    }
+
+    fn pp_space(s: SquareType) -> String {
+        match s {
+            SquareType::TimerFlip => "x".to_string(),
+            SquareType::TimerFlipUsed => "*".to_string(),
+            SquareType::Escalator => "Z".to_string(),
+            SquareType::Filled => "&".to_string(),
+            SquareType::YellowTeleportPad => "@".to_string(),
+            SquareType::YellowItem => "i".to_string(),
+            SquareType::YellowEscape => "e".to_string(),
+            SquareType::GreenTeleportPad => "@".to_string(),
+            SquareType::GreenItem => "i".to_string(),
+            SquareType::GreenEscape => "e".to_string(),
+            SquareType::PurpleTeleportPad => "@".to_string(),
+            SquareType::PurpleItem => "i".to_string(),
+            SquareType::PurpleEscape => "e".to_string(),
+            SquareType::OrangeTeleportPad => "@".to_string(),
+            SquareType::OrangeItem => "i".to_string(),
+            SquareType::OrangeEscape => "e".to_string(),
+            _wildcard => " ".to_string(),
+        }
+    }
+
+    pub fn pp_top_row(&self) -> String {
+        format!(".{}.", Self::pp_wall(self.north_wall, false))
+    }
+
+    pub fn pp_middle_row(&self) -> String {
+        format!(
+            "{}{}{}",
+            Self::pp_wall(self.west_wall, true),
+            Self::pp_space(self.square_type),
+            Self::pp_wall(self.east_wall, true),
+        )
+    }
+
+    pub fn pp_bottom_row(&self) -> String {
+        format!(".{}.", Self::pp_wall(self.south_wall, false))
+    }
+
+    pub fn pp(&self) -> String {
+        format!(
+            "{}\n{}\n{}\n",
+            self.pp_top_row(),
+            self.pp_middle_row(),
+            self.pp_bottom_row()
+        )
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -242,8 +333,6 @@ impl Internal for Heister {
     }
 }
 
-const MAP_CENTER: i32 = 250;
-
 impl Heister {
     pub fn get_initial(heister_color: HeisterColor, starting_tile: &StartingTile) -> Self {
         let map_position = match starting_tile {
@@ -253,25 +342,25 @@ impl Heister {
             // | | | | |
             StartingTile::A(_) => match heister_color {
                 HeisterColor::Yellow => MapPosition {
-                    x: MAP_CENTER + 1,
-                    y: MAP_CENTER + 1,
+                    x: 1,
+                    y: 1,
                 },
                 HeisterColor::Purple => MapPosition {
-                    x: MAP_CENTER + 1,
-                    y: MAP_CENTER + 2,
+                    x: 1,
+                    y: 2,
                 },
                 HeisterColor::Green => MapPosition {
-                    x: MAP_CENTER + 2,
-                    y: MAP_CENTER + 2,
+                    x: 2,
+                    y: 2,
                 },
                 HeisterColor::Orange => MapPosition {
-                    x: MAP_CENTER + 2,
-                    y: MAP_CENTER + 1,
+                    x: 2,
+                    y: 1,
                 },
             },
             _ => MapPosition {
-                x: MAP_CENTER,
-                y: MAP_CENTER,
+                x: 0,
+                y: 0,
             }, // TODO Do this for starting B side.
         };
         Heister {
@@ -414,6 +503,7 @@ impl GameState {
         let game_started = get_current_time_secs();
         let timer_runs_out = game_started + TIMER_DURATION_SECS;
         let starting_tile = tile_1a();
+        info!("{}", format!("\n{}", starting_tile.pp()));
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
         let mut heisters = Vec::new();
