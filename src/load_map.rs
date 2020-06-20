@@ -155,7 +155,7 @@ pub fn tile_1a() -> Tile {
         square_type: SquareType::Filled,
     };
     my_squares.push(sq33);
-    let my_pos = MapPosition { x: 250, y: 250 };
+    let my_pos = MapPosition { x: 0, y: 0 };
     Tile {
         squares: my_squares,
         position: my_pos,
