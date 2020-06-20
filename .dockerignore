@@ -4,6 +4,7 @@ templates/static
 /ui/node_modules
 
 # Krita files
+**/*.kra
 *.kra
 
 # Rust

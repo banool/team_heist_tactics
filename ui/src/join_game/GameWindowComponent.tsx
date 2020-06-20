@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector, Provider, connect } from "react-redux";
 import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
 import { Tile as ProtoTile, Heister as ProtoHeister, HeisterColor, HeisterColorMap, MapPosition } from "../generated/types_pb";
@@ -16,6 +16,7 @@ import {
 import { mapPositionToCanvasPosition, canvasPositionToMapPosition } from "./helpers";
 import { CanvasPosition } from "./types";
 import store from "../common/store";
+import { ResetMapComponent } from "./overlay_components";
 
 
 type TileProps = {
@@ -169,15 +170,26 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
     return heisters;
   };
 
+  const [stageX, setStageX] = useState(0);
+  const [stageY, setStageY] = useState(0);
+
+  // Force the map to re-render in the middle by making the X and Y slightly different.
+  const resetMap = () => {
+    setStageX(Math.random() * 0.001 + 0.001);
+    setStageY(Math.random() * 0.001 + 0.001);
+  }
+
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
+  // Use position only for transformsEnabled since we don't scale or rotate.
   return (
     <div style={{ width: "100%", backgroundColor: "#ffffff" }}>
-      <Stage width={width} height={height} draggable={true}>
+      <Stage x={stageX} y={stageY} width={width} height={height} draggable={true} transformsEnabled={"position"}>
         <Layer>
           <Tiles tiles={getTiles()} />
           <Heisters heisters={getHeisters()} />
         </Layer>
       </Stage>
+      <ResetMapComponent reset_parent_func={resetMap}/>
     </div>
   );
 };

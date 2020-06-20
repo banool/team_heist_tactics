@@ -9,7 +9,6 @@ const GameComponent = () => {
   const dispatch = useDispatch();
 
   const game_state = useSelector(gameStateSelector);
-  const num_invalid_move_attempts = useSelector(numInvalidMoveAttemptsSelector);
 
   return (
     <div>
