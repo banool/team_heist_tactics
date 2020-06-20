@@ -3,6 +3,9 @@ templates/static
 /ui/dist
 /ui/node_modules
 
+# Krita files
+*.kra
+
 # Rust
 /target/
 **/*.rs.bk
