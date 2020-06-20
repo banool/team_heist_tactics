@@ -20,21 +20,7 @@ import {
 } from "../constants/other";
 import { CanvasPosition } from "./types";
 
-const tilePositionToCanvasPosition = (
-  map_position: MapPosition
-): CanvasPosition => {
-  var map_x_middle = SERVER_WIDTH / 2;
-  var map_y_middle = SERVER_HEIGHT / 2;
-  var map_x = map_position.getX();
-  var map_y = map_position.getY();
-  var map_x_offset = map_x - map_x_middle;
-  var map_y_offset = map_y - map_y_middle;
-  var x = (CANVAS_WIDTH / 2) + map_x_offset * MAP_SQUARE_SIZE;
-  var y = (CANVAS_HEIGHT / 2) + map_y_offset * MAP_SQUARE_SIZE;
-  return { x: x, y: y };
-};
-
-const heisterPositionToCanvasPosition = (
+const mapPositionToCanvasPosition = (
   map_position: MapPosition,
   pixel_offset: number,
 ): CanvasPosition => {
@@ -42,16 +28,53 @@ const heisterPositionToCanvasPosition = (
   var map_y_middle = SERVER_HEIGHT / 2;
   var map_x = map_position.getX();
   var map_y = map_position.getY();
-  var middle_map_x = map_x - map_x_middle;
-  var middle_map_y = map_y - map_y_middle;
-  var num_tiles_away_from_center_x = Math.floor(middle_map_x / 4);
-  var num_tiles_away_from_center_y = Math.floor(middle_map_y / 4);
-  var corner_canvas_x = (((num_tiles_away_from_center_x * 2) + 1) * INTERNAL_TILE_OFFSET) + (middle_map_x * INTERNAL_SQUARE_SIZE);
-  var corner_canvas_y = (((num_tiles_away_from_center_y * 2) + 1) * INTERNAL_TILE_OFFSET) + (middle_map_y * INTERNAL_SQUARE_SIZE);
+  var map_x_offset = map_x - map_x_middle;
+  var map_y_offset = map_y - map_y_middle;
+  var num_tiles_away_from_center_x = Math.floor(map_x_offset / 4);
+  var num_tiles_away_from_center_y = Math.floor(map_y_offset / 4);
+  var corner_canvas_x = (((num_tiles_away_from_center_x * 2) + 1) * INTERNAL_TILE_OFFSET) + (map_x_offset * INTERNAL_SQUARE_SIZE);
+  var corner_canvas_y = (((num_tiles_away_from_center_y * 2) + 1) * INTERNAL_TILE_OFFSET) + (map_y_offset * INTERNAL_SQUARE_SIZE);
   var adjusted_canvas_x = corner_canvas_x + pixel_offset + (CANVAS_WIDTH / 2);
   var adjusted_canvas_y = corner_canvas_y + pixel_offset + (CANVAS_HEIGHT / 2);
   return { x: adjusted_canvas_x, y: adjusted_canvas_y };
 };
+
+const canvasPositionToMapPosition = (
+  canvas_position: CanvasPosition,
+  pixel_offset: number,
+): MapPosition => {
+  var acx = canvas_position.x;
+  var acy = canvas_position.y;
+  var ccxm = acx - pixel_offset - (CANVAS_WIDTH / 2);
+  var ccym = acy - pixel_offset - (CANVAS_WIDTH / 2);
+  var ccx = ccxm - (mxo * INTERNAL_SQUARE_SIZE);
+  var ccy = ccym - (myo * INTERNAL_SQUARE_SIZE);
+  var mxo = (((ccx/INTERNAL_TILE_OFFSET) - 1) / 2) * 4;
+  var myo = ((ccy/INTERNAL_TILE_OFFSET) - 1) / 2;
+  var map_x_middle = SERVER_WIDTH / 2;
+  var map_y_middle = SERVER_HEIGHT / 2;
+  var mpx = mxo + map_x_middle;
+  var mpy = myo + map_y_middle;
+  var out = new MapPosition();
+  out.setX(mpx);
+  out.setY(mpy);
+  return out;
+}
+
+// Unit test of sorts.
+var mp = new MapPosition();
+mp.setX(251);
+mp.setY(252);
+console.log("map x y", mp.getX(), mp.getY());
+var a = mapPositionToCanvasPosition(mp, 20);
+console.log("canvas x y", a.x, a.y);
+var b = canvasPositionToMapPosition(a, 20);
+console.log("back to map x y", b.getX(), b.getY());
+if (b.getX() != 30 || b.getY() != 40) {
+  var msg = "Map -> canvas -> map position is wrong";
+  console.error(msg);
+  throw msg;
+}
 
 type TileProps = {
   proto_tile: ProtoTile;
@@ -69,7 +92,7 @@ const Tile = ({ proto_tile }: TileProps) => {
   const pixel_offset = -INTERNAL_TILE_OFFSET;
 
   var map_position = proto_tile.getPosition()!;
-  var canvas_position = heisterPositionToCanvasPosition(map_position, pixel_offset);
+  var canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset);
 
   console.log(`tile at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`);
 
@@ -103,9 +126,9 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   const offset = HEISTER_SIZE;
   const pixel_offset = -INTERNAL_SQUARE_SIZE - HEISTER_SIZE * 2 + 3;
 
-  var heister_color = proto_heister.getHeisterColor();
-  var map_position = proto_heister.getMapPosition()!;
-  var canvas_position = heisterPositionToCanvasPosition(map_position, pixel_offset);
+  const heister_color = proto_heister.getHeisterColor();
+  const map_position = proto_heister.getMapPosition()!;
+  const canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset);
 
   console.log(`${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`);
 
@@ -125,17 +148,37 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     }
   };
 
+  // First, resolve the canvas position into an intended map position.
+  // Second, dispatch the move request.
+  // Third, turn the map position back into a canvas position (to snap the unit to a square).
+  const onDragEnd = (event) => {
+    // Pause rendering of this unit until we get information back
+    // about whether the move attempt was valid. Otherwise it'll just snap back immediately.
+    // Or perhaps until we get new game state back as a stop gap.
+    var x = event.target.x();
+    var y = event.target.x();
+    console.log("Attempted position ", x, y);
+
+  }
+
+  // If x changes but y doesn't, y won't update, only x will.
+  // Introducing some jitter makes sure they always change.
+  var random_x = Math.random() * 0.001 + 0.001;
+  var random_y = Math.random() * 0.001 + 0.001;
+
   return (
     <Circle
       shadowBlur={1}
-      x={canvas_position.x}
-      y={canvas_position.y}
+      x={canvas_position.x + random_x}
+      y={canvas_position.y + random_y}
       stroke="black"
       fill={getColor(heister_color)}
       strokeWidth={4}
       radius={HEISTER_SIZE}
       offsetX={offset}
       offsetY={offset}
+      draggable={true}
+      onDragEnd={onDragEnd}
     />
   );
 }
