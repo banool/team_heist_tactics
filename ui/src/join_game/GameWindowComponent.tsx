@@ -153,7 +153,7 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
     var proto_tiles = game_state!.getTilesList();
     var tiles: JSX.Element[] = [];
     for (let i = 0; i < proto_tiles.length; i++) {
-      var t = <Provider store={store}><Tile key={i} proto_tile={proto_tiles[i]} /></Provider>;
+      var t = <Provider key={i} store={store}><Tile key={i+100} proto_tile={proto_tiles[i]} /></Provider>;
       tiles.push(t);
     }
     return tiles;
@@ -163,7 +163,7 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
     var proto_heisters = game_state!.getHeistersList();
     var heisters: JSX.Element[] = [];
     for (let i = 0; i < proto_heisters.length; i++) {
-      var t = <Provider store={store}><Heister key={i} proto_heister={proto_heisters[i]} /></Provider>;
+      var t = <Provider key={i} store={store}><Heister key={i+100} proto_heister={proto_heisters[i]} /></Provider>;
       heisters.push(t);
     }
     return heisters;
@@ -172,7 +172,7 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
   return (
     <div style={{ width: "100%", backgroundColor: "#ffffff" }}>
-      <Stage width={width} height={height}>
+      <Stage width={width} height={height} draggable={true}>
         <Layer>
           <Tiles tiles={getTiles()} />
           <Heisters heisters={getHeisters()} />
