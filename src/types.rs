@@ -487,7 +487,6 @@ impl GameState {
         let game_started = get_current_time_secs();
         let timer_runs_out = game_started + TIMER_DURATION_SECS;
         let starting_tile = tile_1a();
-        info!("{}", format!("\n{}", starting_tile.pp()));
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
         let mut heisters = Vec::new();
@@ -542,11 +541,8 @@ impl Internal for InvalidRequest {
     }
 }
 
-// ---
 // JSON Serialization for Tiles
 // Since we can't directly add these derives on the proto_types
-// ---
-// Just trust that these values are OK
 #[derive(Serialize, Deserialize)]
 pub struct SerializableSquare {
     pub north_wall: i32,
@@ -588,7 +584,6 @@ impl From<Tile> for SerializableTile {
         }
     }
 }
-// ---
 
 #[allow(dead_code, unused_imports)]
 mod tests {
