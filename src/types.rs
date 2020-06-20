@@ -5,7 +5,7 @@ use crate::utils::get_current_time_secs;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 // TEMP TODO
-use log::{debug, info, trace};
+use log::info;
 
 // Import all the proto types in this private module.
 mod proto_types {
@@ -123,7 +123,7 @@ impl Internal for Tile {
         proto_types::Tile {
             squares: proto_squares,
             position: Some(self.position.to_proto()),
-            name: self.name.to_string()
+            name: self.name.to_string(),
         }
     }
 }
@@ -151,9 +151,9 @@ impl Tile {
             let mut middle_row = String::new();
             let mut bottom_row = String::new();
             for j in 0..4 {
-                top_row += &self.squares.get(i+j).unwrap().pp_top_row();
-                middle_row += &self.squares.get(i+j).unwrap().pp_middle_row();
-                bottom_row += &self.squares.get(i+j).unwrap().pp_bottom_row();
+                top_row += &self.squares.get(i + j).unwrap().pp_top_row();
+                middle_row += &self.squares.get(i + j).unwrap().pp_middle_row();
+                bottom_row += &self.squares.get(i + j).unwrap().pp_bottom_row();
             }
             square_strs.push(top_row);
             square_strs.push(middle_row);
@@ -250,7 +250,6 @@ impl Square {
             WallType::OrangeDoor => "O".to_string(),
             WallType::YellowDoor => "Y".to_string(),
             WallType::GreenDoor => "G".to_string(),
-            _wildcard => "?".to_string(),
         }
     }
 
@@ -341,27 +340,12 @@ impl Heister {
             // | |p|g| |
             // | | | | |
             StartingTile::A(_) => match heister_color {
-                HeisterColor::Yellow => MapPosition {
-                    x: 1,
-                    y: 1,
-                },
-                HeisterColor::Purple => MapPosition {
-                    x: 1,
-                    y: 2,
-                },
-                HeisterColor::Green => MapPosition {
-                    x: 2,
-                    y: 2,
-                },
-                HeisterColor::Orange => MapPosition {
-                    x: 2,
-                    y: 1,
-                },
+                HeisterColor::Yellow => MapPosition { x: 1, y: 1 },
+                HeisterColor::Purple => MapPosition { x: 1, y: 2 },
+                HeisterColor::Green => MapPosition { x: 2, y: 2 },
+                HeisterColor::Orange => MapPosition { x: 2, y: 1 },
             },
-            _ => MapPosition {
-                x: 0,
-                y: 0,
-            }, // TODO Do this for starting B side.
+            _ => MapPosition { x: 0, y: 0 }, // TODO Do this for starting B side.
         };
         Heister {
             heister_color,
