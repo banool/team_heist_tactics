@@ -1,12 +1,12 @@
 // Load the map from data/tiles/*.json
 
-use serde_json::json;
 use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
+use log::info;
+use serde_json::json;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use log::info;
 
 pub fn load_tiles_from_json() -> HashMap<String, Tile> {
     // TODO
