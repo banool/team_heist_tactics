@@ -144,11 +144,11 @@ impl Game {
         let heister = self.get_heister_from_vec(heister_color.clone()).unwrap();
         let heister_pos = &heister.map_position;
         debug!("Heister pos:");
-        debug!("{}", grid.get(&heister_pos).unwrap().pp());
+        // debug!("{}", grid.get(&heister_pos).unwrap().pp());
 
         let dest_pos = m.position;
         debug!("Dest pos:");
-        debug!("{}", grid.get(&dest_pos).unwrap().pp());
+        // debug!("{}", grid.get(&dest_pos).unwrap().pp());
         match grid.get(&dest_pos) {
             None => {
                 return MoveValidity::Invalid(format!(

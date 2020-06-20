@@ -24,16 +24,12 @@ const mapPositionToCanvasPosition = (
   map_position: MapPosition,
   pixel_offset: number,
 ): CanvasPosition => {
-  var map_x_middle = SERVER_WIDTH / 2;
-  var map_y_middle = SERVER_HEIGHT / 2;
   var map_x = map_position.getX();
   var map_y = map_position.getY();
-  var map_x_offset = map_x - map_x_middle;
-  var map_y_offset = map_y - map_y_middle;
-  var num_tiles_away_from_center_x = Math.floor(map_x_offset / 4);
-  var num_tiles_away_from_center_y = Math.floor(map_y_offset / 4);
-  var corner_canvas_x = (((num_tiles_away_from_center_x * 2) + 1) * INTERNAL_TILE_OFFSET) + (map_x_offset * INTERNAL_SQUARE_SIZE);
-  var corner_canvas_y = (((num_tiles_away_from_center_y * 2) + 1) * INTERNAL_TILE_OFFSET) + (map_y_offset * INTERNAL_SQUARE_SIZE);
+  var num_tiles_away_from_center_x = Math.floor(map_x / 4);
+  var num_tiles_away_from_center_y = Math.floor(map_y / 4);
+  var corner_canvas_x = (((num_tiles_away_from_center_x * 2) + 1) * INTERNAL_TILE_OFFSET) + (map_x * INTERNAL_SQUARE_SIZE);
+  var corner_canvas_y = (((num_tiles_away_from_center_y * 2) + 1) * INTERNAL_TILE_OFFSET) + (map_y * INTERNAL_SQUARE_SIZE);
   var adjusted_canvas_x = corner_canvas_x + pixel_offset + (CANVAS_WIDTH / 2);
   var adjusted_canvas_y = corner_canvas_y + pixel_offset + (CANVAS_HEIGHT / 2);
   return { x: adjusted_canvas_x, y: adjusted_canvas_y };
@@ -44,7 +40,6 @@ const canvasCoordToMapCoord = (
   pixel_offset: number,
   canvas_dimension_size_px: number // CANVAS_WIDTH or CANVAS_HEIGHT
 ): number => {
-  var val_middle = SERVER_WIDTH / 2;
   // We start this function with a canvas coordinate, and we want to translate it back to a MapPosition
   // The first thing we can do is reverse the last step -
   // we will subtract pixel offset, and the CANVAS center offset
@@ -65,7 +60,7 @@ const canvasCoordToMapCoord = (
   // ... now that I am reading this, I think we ought to rename it from num_tiles_away... to num_squares_away...
   var num_squares_away_from_center_val = /*tile_offset * 4 + */square_offset;
   // For each tile, we're moved 4 away. For each square, it's 1 worth
-  var map_coord = num_squares_away_from_center_val + val_middle;
+  var map_coord = num_squares_away_from_center_val;
   return map_coord;
 }
 
@@ -81,16 +76,17 @@ const canvasPositionToMapPosition = (
   return out;
 }
 
+// NOTE: This fails at big numbers (251 and 252).
 // Unit test of sorts.
 var mp = new MapPosition();
-mp.setX(251);
-mp.setY(252);
+mp.setX(1);
+mp.setY(2);
 console.log("map x y", mp.getX(), mp.getY());
 var a = mapPositionToCanvasPosition(mp, 20);
 console.log("canvas x y", a.x, a.y);
 var b = canvasPositionToMapPosition(a, 20);
 console.log("back to map x y", b.getX(), b.getY());
-if (b.getX() != 251 || b.getY() != 252) {
+if (b.getX() != 1 || b.getY() != 2) {
   var msg = "Map -> canvas -> map position is wrong";
   console.error(msg);
   throw msg;
