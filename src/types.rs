@@ -5,7 +5,7 @@ use crate::utils::get_current_time_secs;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 // TEMP TODO
-use log::{debug, info, trace};
+use log::info;
 
 // Import all the proto types in this private module.
 mod proto_types {
@@ -250,7 +250,6 @@ impl Square {
             WallType::OrangeDoor => "O".to_string(),
             WallType::YellowDoor => "Y".to_string(),
             WallType::GreenDoor => "G".to_string(),
-            _wildcard => "?".to_string(),
         }
     }
 
