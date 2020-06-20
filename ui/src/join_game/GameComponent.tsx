@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { gameStateSelector } from "./slice";
+import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
 import MoveHeisterComponent from "./MoveHeisterComponent";
 import GameWindowComponent from "./GameWindowComponent";
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../constants/other";
@@ -9,6 +9,7 @@ const GameComponent = () => {
   const dispatch = useDispatch();
 
   const game_state = useSelector(gameStateSelector);
+  const num_invalid_move_attempts = useSelector(numInvalidMoveAttemptsSelector);
 
   return (
     <div>

@@ -1,8 +1,8 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { gameStateSelector } from "./slice";
+import { useDispatch, useSelector, Provider, connect } from "react-redux";
+import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
 import { Tile as ProtoTile, Heister as ProtoHeister, HeisterColor, HeisterColorMap, MapPosition } from "../generated/types_pb";
-import { moveHeister } from "./api";
+import { moveHeisterReal } from "./api";
 import { Stage, Layer, Circle, Text } from "react-konva";
 import Konva from "konva";
 import { Image } from "react-konva";
@@ -14,6 +14,8 @@ import {
   INTERNAL_TILE_OFFSET,
 } from "../constants/other";
 import { mapPositionToCanvasPosition, canvasPositionToMapPosition } from "./helpers";
+import { CanvasPosition } from "./types";
+import store from "../common/store";
 
 
 type TileProps = {
@@ -63,6 +65,8 @@ type HeisterProps = {
   proto_heister: ProtoHeister;
 };
 const Heister = ({ proto_heister }: HeisterProps) => {
+  const dispatch = useDispatch();
+
   const offset = HEISTER_SIZE;
   const pixel_offset = -INTERNAL_SQUARE_SIZE - HEISTER_SIZE * 2 + 3;
 
@@ -96,9 +100,12 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     // about whether the move attempt was valid. Otherwise it'll just snap back immediately.
     // Or perhaps until we get new game state back as a stop gap.
     var x = event.target.x();
-    var y = event.target.x();
+    var y = event.target.y();
     console.log("Attempted position ", x, y);
-
+    var intended_canvas_position = {x: x, y: y};
+    var intended_map_position = canvasPositionToMapPosition(intended_canvas_position, pixel_offset);
+    console.log(`Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`);
+    dispatch(moveHeisterReal(proto_heister, intended_map_position));
   }
 
   // If x changes but y doesn't, y won't update, only x will.
@@ -136,11 +143,17 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
 
   const game_state = useSelector(gameStateSelector);
 
+  // By making this invalid move counter part of the state relevant to this component,
+  // the component will get updated whenever there is an invalid move attempt.
+  // TODO: Make one of these per heister, to reduce necessary updates.
+  useSelector(numInvalidMoveAttemptsSelector);
+
+  // https://reactjs.org/docs/lists-and-keys.html#keys
   const getTiles = () => {
     var proto_tiles = game_state!.getTilesList();
     var tiles: JSX.Element[] = [];
     for (let i = 0; i < proto_tiles.length; i++) {
-      var t = <Tile proto_tile={proto_tiles[i]} />;
+      var t = <Provider store={store}><Tile key={i} proto_tile={proto_tiles[i]} /></Provider>;
       tiles.push(t);
     }
     return tiles;
@@ -150,7 +163,7 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
     var proto_heisters = game_state!.getHeistersList();
     var heisters: JSX.Element[] = [];
     for (let i = 0; i < proto_heisters.length; i++) {
-      var t = <Heister proto_heister={proto_heisters[i]} />;
+      var t = <Provider store={store}><Heister key={i} proto_heister={proto_heisters[i]} /></Provider>;
       heisters.push(t);
     }
     return heisters;

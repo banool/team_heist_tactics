@@ -39,6 +39,7 @@ const WEBSOCKET_SEND_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_SEND);
 interface GameInfo {
   connection_status: ConnectionStatus;
   game_state: GameState | null;
+  num_invalid_move_attempts: number;
 }
 
 interface KeyInputAction {
@@ -51,7 +52,8 @@ interface GetCandleSuccessAction {
 
 let initialState: GameInfo = {
   connection_status: ConnectionStatus.NotConnected,
-  game_state: null
+  game_state: null,
+  num_invalid_move_attempts: 0,
 };
 
 const joinGameSlice = createSlice({
@@ -109,6 +111,7 @@ const joinGameSlice = createSlice({
           "Sent an invalid request earlier:",
           main_message.getInvalidRequest()!
         );
+        state.num_invalid_move_attempts += 1;
       }
       state.game_state = game_state;
     },
@@ -123,5 +126,7 @@ export const connectionStatusSelector = (state: RootState): ConnectionStatus =>
   state.joinGame.connection_status;
 export const gameStateSelector = (state: RootState): GameState | null =>
   state.joinGame.game_state;
+export const numInvalidMoveAttemptsSelector = (state: RootState): number | null =>
+  state.joinGame.num_invalid_move_attempts;
 
 export default joinGameSlice.reducer;

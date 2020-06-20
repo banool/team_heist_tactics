@@ -5,7 +5,8 @@ import {
   Move,
   MainMessage,
   HeisterColor,
-  MapPosition
+  MapPosition,
+  Heister,
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
 
@@ -90,20 +91,29 @@ export function moveHeister(
         console.error("Unexpected move direction");
         break;
     }
+    dispatch(moveHeisterReal(green_heister, new_position));
+  };
+}
+
+export function moveHeisterReal(
+  heister: Heister,
+  new_position: MapPosition,
+) {
+  return async dispatch => {
+    var current_position = heister.getMapPosition()!;
     var move = new Move();
+    var heister_color = heister.getHeisterColor();
     console.log(
-      "Dispatching action to move GREEN heister (a->b)",
-      current_position.toObject(),
-      new_position.toObject()
+      `Dispatching action to move heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) from ${current_position.toObject()} -> ${new_position.toObject()})`
     );
-    move.setHeisterColor(hardcoded_color);
+    move.setHeisterColor(heister_color);
     move.setPosition(new_position);
     var main_message = new MainMessage();
     main_message.setMove(move);
-    console.log("Dispatching websocket send of Move", move);
+    console.debug("Dispatching websocket send of Move", move);
     dispatch(send(main_message));
-    console.log("Dispatched websocket send of Move");
-  };
+    console.debug("Dispatched websocket send of Move");
+  }
 }
 
 // Take a key input, convert to an enum representing different things
