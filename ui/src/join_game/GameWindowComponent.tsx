@@ -39,43 +39,6 @@ const mapPositionToCanvasPosition = (
   return { x: adjusted_canvas_x, y: adjusted_canvas_y };
 };
 
-const canvasPositionToMapPosition = (
-  canvas_position: CanvasPosition,
-  pixel_offset: number,
-): MapPosition => {
-  var acx = canvas_position.x;
-  var acy = canvas_position.y;
-  var ccxm = acx - pixel_offset - (CANVAS_WIDTH / 2);
-  var ccym = acy - pixel_offset - (CANVAS_WIDTH / 2);
-  var ccx = ccxm - (mxo * INTERNAL_SQUARE_SIZE);
-  var ccy = ccym - (myo * INTERNAL_SQUARE_SIZE);
-  var mxo = (((ccx/INTERNAL_TILE_OFFSET) - 1) / 2) * 4;
-  var myo = ((ccy/INTERNAL_TILE_OFFSET) - 1) / 2;
-  var map_x_middle = SERVER_WIDTH / 2;
-  var map_y_middle = SERVER_HEIGHT / 2;
-  var mpx = mxo + map_x_middle;
-  var mpy = myo + map_y_middle;
-  var out = new MapPosition();
-  out.setX(mpx);
-  out.setY(mpy);
-  return out;
-}
-
-// Unit test of sorts.
-var mp = new MapPosition();
-mp.setX(251);
-mp.setY(252);
-console.log("map x y", mp.getX(), mp.getY());
-var a = mapPositionToCanvasPosition(mp, 20);
-console.log("canvas x y", a.x, a.y);
-var b = canvasPositionToMapPosition(a, 20);
-console.log("back to map x y", b.getX(), b.getY());
-if (b.getX() != 30 || b.getY() != 40) {
-  var msg = "Map -> canvas -> map position is wrong";
-  console.error(msg);
-  throw msg;
-}
-
 type TileProps = {
   proto_tile: ProtoTile;
 };
