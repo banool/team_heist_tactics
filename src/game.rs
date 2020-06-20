@@ -16,7 +16,7 @@ pub struct Game {
     game_state: GameState,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum MoveValidity {
     Valid,
     Invalid(String),
@@ -145,27 +145,62 @@ impl Game {
         }
     }
 
+    fn move_blocked_by_wall(
+        &self,
+        heister_pos: &MapPosition,
+        dest_pos: &MapPosition,
+    ) -> MoveValidity {
+        // Assumes that heister_pos & dest_pos are adjacent
+        let grid = self.get_absolute_grid();
+        let heister_square = match grid.get(&heister_pos) {
+            Some(s) => s,
+            None => {
+                return MoveValidity::Invalid(format!(
+                    "Heister square {:?} doesn't exist",
+                    heister_pos
+                ))
+            }
+        };
+        let move_dir = Self::adjacent_move_direction(heister_pos, dest_pos);
+        let blocking_wall = match move_dir {
+            MoveDirection::North => heister_square.north_wall,
+            MoveDirection::East => heister_square.east_wall,
+            MoveDirection::South => heister_square.south_wall,
+            MoveDirection::West => heister_square.west_wall,
+        };
+
+        match blocking_wall {
+            WallType::Clear => MoveValidity::Valid,
+            WallType::Impassable => {
+                MoveValidity::Invalid("Can't pass through impassable wall".to_string())
+            }
+            // Wildcard matches each tile-discovery type (one per color)
+            _wildcard => {
+                MoveValidity::Invalid("Moving to un-placed tile not implemented yet".to_string())
+            }
+        }
+    }
+
     fn position_is_occupied(&self, position: &MapPosition) -> MoveValidity {
         for h in &self.game_state.heisters {
             match &h.map_position == position {
                 true => {
                     let msg = format!("Heister {:?} is on {:?}", h.heister_color, position);
-                    MoveValidity::Invalid(msg);
+                    return MoveValidity::Invalid(msg);
                 }
                 false => {}
             }
         }
-        MoveValidity::Valid
+        return MoveValidity::Valid;
     }
 
     fn process_move(&mut self, m: Move) -> MoveValidity {
-        let grid = self.get_absolute_grid();
-
         let heister_color = m.heister_color;
         let heister = self.get_heister_from_vec(heister_color).unwrap();
         let heister_pos = &heister.map_position;
         let dest_pos = m.position;
 
+        let grid = self.get_absolute_grid();
         match grid.get(&dest_pos) {
             None => {
                 return MoveValidity::Invalid(format!(
@@ -175,37 +210,12 @@ impl Game {
             }
             Some(_wildcard) => (),
         };
-        // OK - if the squares are adjacent, then we can assume they're trying to
-        // move to an adjacent square, and can check for doors/walls
         if Self::are_adjacent(heister_pos, &dest_pos) {
-            // Is the move valid for the wall between these two squares?
-            // note: we assume that walls are symmetrical in a tile
-            let heister_square = match grid.get(&heister_pos) {
-                Some(s) => s,
-                None => {
-                    return MoveValidity::Invalid(format!(
-                        "Heister square {:?} doesn't exist",
-                        heister_pos
-                    ))
-                }
+            let validity = self.move_blocked_by_wall(&heister_pos, &dest_pos);
+            let validity = match validity.clone() {
+                MoveValidity::Valid => self.position_is_occupied(&dest_pos),
+                _invalid => validity,
             };
-            let move_dir = Self::adjacent_move_direction(&heister_pos, &dest_pos);
-            let blocking_wall = match move_dir {
-                MoveDirection::North => heister_square.north_wall,
-                MoveDirection::East => heister_square.east_wall,
-                MoveDirection::South => heister_square.south_wall,
-                MoveDirection::West => heister_square.west_wall,
-            };
-            match blocking_wall {
-                WallType::Clear => MoveValidity::Valid,
-                WallType::Impassable => {
-                    MoveValidity::Invalid("Can't pass through impassable wall".to_string())
-                }
-                _wildcard => MoveValidity::Invalid(
-                    "Moving to un-placed tile not implemented yet".to_string(),
-                ),
-            };
-            let validity = self.position_is_occupied(&dest_pos);
 
             if validity == MoveValidity::Valid {
                 // If the move is valid, actually move it
@@ -214,7 +224,7 @@ impl Game {
                     .unwrap();
                 heister.map_position = dest_pos;
             }
-            return validity;
+            validity
         } else {
             // If they're not adjacent, then we can check whether the destination is a
             // matching teleport, and whether teleportation is allowed right now
@@ -244,7 +254,8 @@ impl Game {
 pub mod tests {
     use crate::manager::{GameHandle, GameOptions};
     use crate::types::{
-        Internal, MainMessage, MapPosition, Move, MoveDirection, Player, Square, WallType,
+        HeisterColor, Internal, MainMessage, MapPosition, Move, MoveDirection, Player, Square,
+        WallType,
     };
     use log::{info, warn};
     use std::collections::HashMap;
@@ -308,6 +319,57 @@ pub mod tests {
             .get_heister_from_vec(super::HeisterColor::Yellow)
             .unwrap();
         assert_eq!(&curr_yellow_pos.map_position, &next_position);
+    }
+
+    #[test]
+    pub fn heister_collision_is_invalid() -> () {
+        let _ = env_logger::builder().is_test(true).try_init();
+        // Assuming that Yellow starts at 1, 1
+        // This test tries to move it up (safe),
+        // Then back down to its starting square
+        // Checks that the moves are accepted as valid
+        let game_handle = super::GameHandle("test_can_move_to_free_square".to_string());
+        let game_options = super::GameOptions::default();
+        let mut game = super::Game::new(game_handle, game_options);
+
+        // Confirm green heister is where we expect it to be to begin with.
+        let src_position = super::MapPosition { x: 2, y: 2 };
+        let heister_color = super::HeisterColor::Green;
+        assert_eq!(
+            game.get_heister_from_vec(heister_color)
+                .unwrap()
+                .map_position
+                .x,
+            src_position.x
+        );
+        assert_eq!(
+            game.get_heister_from_vec(heister_color)
+                .unwrap()
+                .map_position
+                .y,
+            src_position.y
+        );
+
+        let dest_position = super::MapPosition { x: 2, y: 1 };
+        // defined here to avoid borrow issues if used later
+        let expected_msg = format!(
+            "Heister {:?} is on {:?}",
+            HeisterColor::Orange,
+            dest_position
+        );
+        let test_move = super::Move {
+            heister_color,
+            position: dest_position,
+        };
+        let message = MainMessage {
+            body: Some(super::Body::Move(test_move.to_proto())),
+        };
+        let validity = game.handle_message(message);
+        assert_eq!(validity, super::MoveValidity::Invalid(expected_msg));
+        let curr_green_pos = game
+            .get_heister_from_vec(super::HeisterColor::Green)
+            .unwrap();
+        assert_eq!(&curr_green_pos.map_position, &src_position);
     }
 
     #[test]
