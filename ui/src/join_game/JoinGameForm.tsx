@@ -56,6 +56,14 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
       // TODO: Implement.
       console.error("Not implemented yet :]");
     } else {
+      if (name.length <= 0) {
+        alert("Please enter a name");
+        return;
+      }
+      if (handle.length <= 0) {
+        alert("Please enter a game handle");
+        return;
+      }
       console.log("Dispatching action to join game");
       dispatch(joinGame(stateToStagingJoinGameThing()));
     }
@@ -73,6 +81,13 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             placeholder="Your name"
             value={name}
             onChange={e => setName(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            required={true}
+            minLength={1}
+            maxLength={100}
           />
         </label>
         <label>
@@ -82,6 +97,12 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             placeholder="Game handle"
             value={handle}
             onChange={e => setHandle(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            required={true}
+            minLength={1}
           />
         </label>
         <input type="button" value="Submit" onClick={onSubmit} />
