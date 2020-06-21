@@ -7,5 +7,5 @@ type ResetMapComponentProps = {
 export const ResetMapComponent = ({
   reset_parent_func
 }: ResetMapComponentProps) => {
-  return <button onClick={reset_parent_func}>Reset Map</button>;
+  return <button style={{ width: 120, height: 50 }} onClick={reset_parent_func}>Reset Map</button>;
 };

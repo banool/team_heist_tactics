@@ -226,15 +226,8 @@ const GameWindowComponent = () => {
           </Layer>
         </Stage>
       </div>
-      <div style={styles.gameWindowComponentWrapper}>
-        <div style={styles.gameWindowOverlay}>
-          <div style={styles.resetMapComponent}>
-            <ResetMapComponent reset_parent_func={resetMap} />
-          </div>
-          <div style={styles.resetMapComponent}>
-            <ResetMapComponent reset_parent_func={resetMap} />
-          </div>
-        </div>
+      <div style={styles.resetGameWindowOverlay}>
+        <ResetMapComponent reset_parent_func={resetMap} />
       </div>
     </div>
   );
