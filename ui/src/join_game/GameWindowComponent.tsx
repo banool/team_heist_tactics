@@ -12,11 +12,14 @@ import {
   TILE_SIZE,
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
 } from "../constants/other";
 import { mapPositionToCanvasPosition, canvasPositionToMapPosition } from "./helpers";
 import { CanvasPosition } from "./types";
 import store from "../common/store";
 import { ResetMapComponent } from "./overlay_components";
+import styles from "../components/styles";
 
 
 type TileProps = {
@@ -135,12 +138,9 @@ const Heister = ({ proto_heister }: HeisterProps) => {
 const Tiles = ({ tiles }) => <>{tiles.map((t: any) => t)}</>;
 const Heisters = ({ heisters }) => <>{heisters.map((h: any) => h)}</>;
 
-type GameWindowComponentProps = {
-  width: number;
-  height: number;
-};
-const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
-  const dispatch = useDispatch();
+const GameWindowComponent = () => {
+  const width = CANVAS_WIDTH;
+  const height = CANVAS_HEIGHT;
 
   const game_state = useSelector(gameStateSelector);
 
@@ -182,14 +182,25 @@ const GameWindowComponent = ({ width, height }: GameWindowComponentProps) => {
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
   // Use position only for transformsEnabled since we don't scale or rotate.
   return (
-    <div style={{ width: "100%", backgroundColor: "#ffffff" }}>
-      <Stage x={stageX} y={stageY} width={width} height={height} draggable={true} transformsEnabled={"position"}>
-        <Layer>
-          <Tiles tiles={getTiles()} />
-          <Heisters heisters={getHeisters()} />
-        </Layer>
-      </Stage>
-      <ResetMapComponent reset_parent_func={resetMap}/>
+    <div style={styles.gameWindowComponent}>
+      <div style={styles.gameWindowComponentWrapper}>
+        <Stage x={stageX} y={stageY} width={width} height={height} draggable={true} transformsEnabled={"position"}>
+          <Layer>
+            <Tiles tiles={getTiles()} />
+            <Heisters heisters={getHeisters()} />
+          </Layer>
+        </Stage>
+      </div>
+      <div style={styles.gameWindowComponentWrapper}>
+        <div style={styles.gameWindowOverlay}>
+          <div style={styles.resetMapComponent}>
+            <ResetMapComponent reset_parent_func={resetMap}/>
+          </div>
+          <div style={styles.resetMapComponent}>
+            <ResetMapComponent reset_parent_func={resetMap}/>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

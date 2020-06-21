@@ -12,7 +12,7 @@ const GameComponent = () => {
 
   return (
     <div>
-      <GameWindowComponent width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
+      <GameWindowComponent />
       <MoveHeisterComponent />
       <p>
         Game State:{" "}
