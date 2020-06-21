@@ -2,6 +2,7 @@ import * as colors from "../constants/colors";
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../constants/other";
 
 const styles: { [key: string]: React.CSSProperties } = {
+  //https://css-tricks.com/snippets/css/a-guide-to-flexbox
   root: {
     display: "flex",
     flexDirection: "row",
@@ -21,14 +22,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: "5px 10px",
     verticalAlign: "top"
   },
-  //https://css-tricks.com/snippets/css/a-guide-to-flexbox
   gameWindowComponent: {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     backgroundColor: "#ffffff",
     position: "relative"
   },
-  // Use this to make the overlay appear on top of the main game component window.
   gameWindowComponentWrapper: {
     position: "absolute",
     left: 0,
