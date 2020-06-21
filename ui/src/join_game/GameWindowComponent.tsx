@@ -98,13 +98,13 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   const getColor = (heister_color): string => {
     switch (+heister_color) {
       case HeisterColor.YELLOW:
-        return "#ffff66";
+        return "#f0d249";
       case HeisterColor.PURPLE:
-        return "#9900cc";
+        return "#cb97ef";
       case HeisterColor.GREEN:
-        return "#009933";
+        return "#81ae62";
       case HeisterColor.ORANGE:
-        return "#ff9900";
+        return "#e78234";
       default:
         console.error("Unexpected heister color");
         return "#000000";
