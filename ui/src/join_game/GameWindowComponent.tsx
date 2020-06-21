@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector, Provider, connect } from "react-redux";
 import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
-import { Tile as ProtoTile, Heister as ProtoHeister, HeisterColor, HeisterColorMap, MapPosition } from "../generated/types_pb";
+import {
+  Tile as ProtoTile,
+  Heister as ProtoHeister,
+  HeisterColor,
+  HeisterColorMap,
+  MapPosition
+} from "../generated/types_pb";
 import { moveHeisterReal } from "./api";
 import { Stage, Layer, Circle, Text } from "react-konva";
 import Konva from "konva";
@@ -13,14 +19,16 @@ import {
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
   CANVAS_WIDTH,
-  CANVAS_HEIGHT,
+  CANVAS_HEIGHT
 } from "../constants/other";
-import { mapPositionToCanvasPosition, canvasPositionToMapPosition } from "./helpers";
+import {
+  mapPositionToCanvasPosition,
+  canvasPositionToMapPosition
+} from "./helpers";
 import { CanvasPosition } from "./types";
 import store from "../common/store";
 import { ResetMapComponent } from "./overlay_components";
 import styles from "../components/styles";
-
 
 type TileProps = {
   proto_tile: ProtoTile;
@@ -40,7 +48,9 @@ const Tile = ({ proto_tile }: TileProps) => {
   var map_position = proto_tile.getPosition()!;
   var canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset);
 
-  console.log(`tile at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`);
+  console.log(
+    `tile at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
+  );
 
   var comp: JSX.Element;
   if (status === "loaded") {
@@ -76,9 +86,14 @@ const Heister = ({ proto_heister }: HeisterProps) => {
 
   const heister_color = proto_heister.getHeisterColor();
   const map_position = proto_heister.getMapPosition()!;
-  const canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset);
+  const canvas_position = mapPositionToCanvasPosition(
+    map_position,
+    pixel_offset
+  );
 
-  console.log(`${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`);
+  console.log(
+    `${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
+  );
 
   const getColor = (heister_color): string => {
     switch (+heister_color) {
@@ -99,18 +114,23 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   // First, resolve the canvas position into an intended map position.
   // Second, dispatch the move request.
   // Third, turn the map position back into a canvas position (to snap the unit to a square).
-  const onDragEnd = (event) => {
+  const onDragEnd = event => {
     // Pause rendering of this unit until we get information back
     // about whether the move attempt was valid. Otherwise it'll just snap back immediately.
     // Or perhaps until we get new game state back as a stop gap.
     var x = event.target.x();
     var y = event.target.y();
     console.log("Attempted position ", x, y);
-    var intended_canvas_position = {x: x, y: y};
-    var intended_map_position = canvasPositionToMapPosition(intended_canvas_position, pixel_offset);
-    console.log(`Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`);
+    var intended_canvas_position = { x: x, y: y };
+    var intended_map_position = canvasPositionToMapPosition(
+      intended_canvas_position,
+      pixel_offset
+    );
+    console.log(
+      `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
+    );
     dispatch(moveHeisterReal(proto_heister, intended_map_position));
-  }
+  };
 
   // If x changes but y doesn't, y won't update, only x will.
   // Introducing some jitter makes sure they always change.
@@ -132,7 +152,7 @@ const Heister = ({ proto_heister }: HeisterProps) => {
       onDragEnd={onDragEnd}
     />
   );
-}
+};
 
 // This uses special <> syntax to return multiple components.
 const Tiles = ({ tiles }) => <>{tiles.map((t: any) => t)}</>;
@@ -154,7 +174,11 @@ const GameWindowComponent = () => {
     var proto_tiles = game_state!.getTilesList();
     var tiles: JSX.Element[] = [];
     for (let i = 0; i < proto_tiles.length; i++) {
-      var t = <Provider key={i} store={store}><Tile key={i+100} proto_tile={proto_tiles[i]} /></Provider>;
+      var t = (
+        <Provider key={i} store={store}>
+          <Tile key={i + 100} proto_tile={proto_tiles[i]} />
+        </Provider>
+      );
       tiles.push(t);
     }
     return tiles;
@@ -164,7 +188,11 @@ const GameWindowComponent = () => {
     var proto_heisters = game_state!.getHeistersList();
     var heisters: JSX.Element[] = [];
     for (let i = 0; i < proto_heisters.length; i++) {
-      var t = <Provider key={i} store={store}><Heister key={i+100} proto_heister={proto_heisters[i]} /></Provider>;
+      var t = (
+        <Provider key={i} store={store}>
+          <Heister key={i + 100} proto_heister={proto_heisters[i]} />
+        </Provider>
+      );
       heisters.push(t);
     }
     return heisters;
@@ -177,14 +205,21 @@ const GameWindowComponent = () => {
   const resetMap = () => {
     setStageX(Math.random() * 0.001 + 0.001);
     setStageY(Math.random() * 0.001 + 0.001);
-  }
+  };
 
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
   // Use position only for transformsEnabled since we don't scale or rotate.
   return (
     <div style={styles.gameWindowComponent}>
       <div style={styles.gameWindowComponentWrapper}>
-        <Stage x={stageX} y={stageY} width={width} height={height} draggable={true} transformsEnabled={"position"}>
+        <Stage
+          x={stageX}
+          y={stageY}
+          width={width}
+          height={height}
+          draggable={true}
+          transformsEnabled={"position"}
+        >
           <Layer>
             <Tiles tiles={getTiles()} />
             <Heisters heisters={getHeisters()} />
@@ -194,10 +229,10 @@ const GameWindowComponent = () => {
       <div style={styles.gameWindowComponentWrapper}>
         <div style={styles.gameWindowOverlay}>
           <div style={styles.resetMapComponent}>
-            <ResetMapComponent reset_parent_func={resetMap}/>
+            <ResetMapComponent reset_parent_func={resetMap} />
           </div>
           <div style={styles.resetMapComponent}>
-            <ResetMapComponent reset_parent_func={resetMap}/>
+            <ResetMapComponent reset_parent_func={resetMap} />
           </div>
         </div>
       </div>

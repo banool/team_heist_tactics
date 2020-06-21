@@ -26,7 +26,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     backgroundColor: "#ffffff",
-    position: "relative",
+    position: "relative"
   },
   // Use this to make the overlay appear on top of the main game component window.
   gameWindowComponentWrapper: {
@@ -34,17 +34,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     left: 0,
     right: 0,
     width: "100%",
-    height: "100%",
+    height: "100%"
   },
   gameWindowOverlay: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    zIndex: 2,
+    zIndex: 2
   },
   resetMapComponent: {
-    border: "1px solid black",
-  },
+    border: "1px solid black"
+  }
 };
 
 export default styles;

@@ -53,7 +53,7 @@ interface GetCandleSuccessAction {
 let initialState: GameInfo = {
   connection_status: ConnectionStatus.NotConnected,
   game_state: null,
-  num_invalid_move_attempts: 0,
+  num_invalid_move_attempts: 0
 };
 
 const joinGameSlice = createSlice({
@@ -126,7 +126,8 @@ export const connectionStatusSelector = (state: RootState): ConnectionStatus =>
   state.joinGame.connection_status;
 export const gameStateSelector = (state: RootState): GameState | null =>
   state.joinGame.game_state;
-export const numInvalidMoveAttemptsSelector = (state: RootState): number | null =>
-  state.joinGame.num_invalid_move_attempts;
+export const numInvalidMoveAttemptsSelector = (
+  state: RootState
+): number | null => state.joinGame.num_invalid_move_attempts;
 
 export default joinGameSlice.reducer;

@@ -6,7 +6,7 @@ import {
   MainMessage,
   HeisterColor,
   MapPosition,
-  Heister,
+  Heister
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
 
@@ -95,10 +95,7 @@ export function moveHeister(
   };
 }
 
-export function moveHeisterReal(
-  heister: Heister,
-  new_position: MapPosition,
-) {
+export function moveHeisterReal(heister: Heister, new_position: MapPosition) {
   return async dispatch => {
     var current_position = heister.getMapPosition()!;
     var move = new Move();
@@ -113,7 +110,7 @@ export function moveHeisterReal(
     console.debug("Dispatching websocket send of Move", move);
     dispatch(send(main_message));
     console.debug("Dispatched websocket send of Move");
-  }
+  };
 }
 
 // Take a key input, convert to an enum representing different things
