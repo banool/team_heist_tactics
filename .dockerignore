@@ -1,11 +1,14 @@
+# Git
+/.git
+/.github
+
 # Generated node stuff
-templates/static
+/templates/static
 /ui/dist
 /ui/node_modules
 
 # Krita files
-**/*.kra
-*.kra
+/data/krita
 
 # Rust
 /target/
