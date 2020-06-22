@@ -37,10 +37,25 @@ const styles: { [key: string]: React.CSSProperties } = {
   resetGameWindowOverlay: {
     zIndex: 2,
     position: "absolute",
-    //padding: "20px 20px 20px 20px",
     bottom: 20,
     right: 20,
   },
+  // CSS for the second canvas we put on top of the first canvas.
+  // This makes clicks "pass through" so we can just use it to display stuff.
+  // https://stackoverflow.com/questions/1401658/html-overlay-which-allows-clicks-to-fall-through-to-elements-behind-it
+  overlayCanvas: {
+    pointerEvents: "none",
+    height: "0px",
+    overflow: "visible",
+    background: "none !important"
+  },
+  keyboardHeisterNumber: {
+    zIndex: 2,
+    position: "absolute",
+    top: 15,
+    color: "black",
+    fontSize: 18,
+  }
 };
 
 export default styles;

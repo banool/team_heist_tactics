@@ -8,7 +8,7 @@ import {
   HeisterColorMap,
   MapPosition
 } from "../generated/types_pb";
-import { moveHeisterReal } from "./api";
+import { moveHeisterReal, getColor } from "./api";
 import { Stage, Layer, Circle, Text } from "react-konva";
 import Konva from "konva";
 import { Image } from "react-konva";
@@ -27,7 +27,7 @@ import {
 } from "./helpers";
 import { CanvasPosition } from "./types";
 import store from "../common/store";
-import { ResetMapComponent } from "./overlay_components";
+import { ResetMapComponent, ActiveHeisterKeyboardComponent } from "./overlay_components";
 import styles from "../components/styles";
 
 type TileProps = {
@@ -94,22 +94,6 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   console.log(
     `${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
   );
-
-  const getColor = (heister_color): string => {
-    switch (+heister_color) {
-      case HeisterColor.YELLOW:
-        return "#f0d249";
-      case HeisterColor.PURPLE:
-        return "#cb97ef";
-      case HeisterColor.GREEN:
-        return "#81ae62";
-      case HeisterColor.ORANGE:
-        return "#e78234";
-      default:
-        console.error("Unexpected heister color");
-        return "#000000";
-    }
-  };
 
   // First, resolve the canvas position into an intended map position.
   // Second, dispatch the move request.
@@ -207,9 +191,16 @@ const GameWindowComponent = () => {
     setStageY(Math.random() * 0.001 + 0.001);
   };
 
+  const KEYBOARD_ITEM_Y = 50;
+  const YELLOW_HEISTER_KEYBOARD_ICON = 30;
+  const PURPLE_HEISTER_KEYBOARD_ICON = 65;
+  const GREEN_HEISTER_KEYBOARD_ICON = 100;
+  const ORANGE_HEISTER_KEYBOARD_ICON = 135;
+
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
   // Use position only for transformsEnabled since we don't scale or rotate.
   return (
+
     <div style={styles.gameWindowComponent}>
       <div style={styles.gameWindowComponentWrapper}>
         <Stage
@@ -229,8 +220,34 @@ const GameWindowComponent = () => {
       <div style={styles.resetGameWindowOverlay}>
         <ResetMapComponent reset_parent_func={resetMap} />
       </div>
+      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 5}}}>1</div>
+      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 5}}}>2</div>
+      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 5}}}>3</div>
+      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 5}}}>4</div>
+      <div style={styles.overlayCanvas}>
+        <Stage
+          x={stageX}
+          y={stageY}
+          width={width}
+          height={height}
+          draggable={false}
+          transformsEnabled={"none"}
+        >
+          <Layer>
+            <Provider store={store}>
+              <ActiveHeisterKeyboardComponent x={YELLOW_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.YELLOW} />
+              <ActiveHeisterKeyboardComponent x={PURPLE_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.PURPLE} />
+              <ActiveHeisterKeyboardComponent x={GREEN_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.GREEN} />
+              <ActiveHeisterKeyboardComponent x={ORANGE_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.ORANGE} />
+            </Provider>
+          </Layer>
+        </Stage>
+      </div>
     </div>
   );
 };
 
 export default GameWindowComponent;
+
+// TODO
+// Draw 4 circles at the top right and highlight the heister you want to control.

@@ -5,7 +5,7 @@ import JoinGameForm from "./JoinGameForm";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
 import GameComponent from "./GameComponent";
 import { useDispatch } from "react-redux";
-import { gameStateSelector } from "./slice";
+import { gameStateSelector, heisterSelectedSelector } from "./slice";
 
 import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
@@ -21,7 +21,7 @@ const JoinGamePage = ({}: JoinGamePageProps) => {
 
   const game_state = useSelector(gameStateSelector);
 
-  const [keyPressed, setKeyPressed] = useState(false);
+  const heister_selected_keyboard = useSelector(heisterSelectedSelector);
 
   // Bind key listener on mount, and unbind on unmount.
   // See https://reactjs.org/docs/hooks-effect.html.
@@ -41,7 +41,7 @@ const JoinGamePage = ({}: JoinGamePageProps) => {
 
   const handleKeyDown = event => {
     console.debug("Key event", event);
-    dispatch(handleKeyInput(game_state, connection_status, event.key));
+    dispatch(handleKeyInput(game_state, connection_status, heister_selected_keyboard, event.key));
     document.removeEventListener("keydown", handleKeyDown);
   };
 

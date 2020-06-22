@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../common/reducers";
 
@@ -40,10 +40,13 @@ interface GameInfo {
   connection_status: ConnectionStatus;
   game_state: GameState | null;
   num_invalid_move_attempts: number;
+  // HeisterColor for whichever is selected, or null if none are.
+  heister_selected_keyboard: any | null;
 }
 
-interface KeyInputAction {
-  key: JoinGameThing[];
+interface SelectKeyboardHeisterAction {
+  // HeisterColor.
+  heister_color: number
 }
 
 interface GetCandleSuccessAction {
@@ -53,21 +56,23 @@ interface GetCandleSuccessAction {
 let initialState: GameInfo = {
   connection_status: ConnectionStatus.NotConnected,
   game_state: null,
-  num_invalid_move_attempts: 0
+  num_invalid_move_attempts: 0,
+  heister_selected_keyboard: null,
 };
 
 const joinGameSlice = createSlice({
   name: "joinGame",
   initialState,
-  /*
   reducers: {
-    keyInput: (state, action: PayloadAction<KeyInputAction>) => {
-      const { candle } = action.payload;
-      state.candles[candle.id] = candle;
+    selectKeyboardHeister: (state, action: PayloadAction<SelectKeyboardHeisterAction>) => {
+      const { heister_color } = action.payload;
+      if (heister_color === state.heister_selected_keyboard) {
+        state.heister_selected_keyboard = null;
+      } else {
+        state.heister_selected_keyboard = heister_color;
+      }
     }
   },
-  */
-  reducers: {},
   extraReducers: {
     [WEBSOCKET_CONNECT_FULL]: (state, _action) => {
       console.log(
@@ -121,7 +126,8 @@ const joinGameSlice = createSlice({
   }
 });
 
-export const {} = joinGameSlice.actions;
+export const { selectKeyboardHeister } = joinGameSlice.actions;
+
 export const connectionStatusSelector = (state: RootState): ConnectionStatus =>
   state.joinGame.connection_status;
 export const gameStateSelector = (state: RootState): GameState | null =>
@@ -129,5 +135,8 @@ export const gameStateSelector = (state: RootState): GameState | null =>
 export const numInvalidMoveAttemptsSelector = (
   state: RootState
 ): number | null => state.joinGame.num_invalid_move_attempts;
+export const heisterSelectedSelector = (
+  state: RootState
+): any | null => state.joinGame.heister_selected_keyboard;
 
 export default joinGameSlice.reducer;

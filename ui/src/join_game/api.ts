@@ -11,6 +11,7 @@ import {
 import { connect, send } from "@giantmachines/redux-websocket";
 
 import { MoveDirection } from "./types";
+import { selectKeyboardHeister } from "./slice";
 
 export function joinGame(join_game_thing: StagingJoinGameThing) {
   return async dispatch => {
@@ -45,10 +46,10 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
 export function moveHeister(
   game_state: GameState,
   connection_status: ConnectionStatus,
+  heister_selected_keyboard: number,  // HeisterColor
   move_direction: MoveDirection
 ) {
   return async dispatch => {
-    var hardcoded_color = HeisterColor.GREEN;
     if (
       game_state === null ||
       connection_status !== ConnectionStatus.Connected
@@ -57,14 +58,14 @@ export function moveHeister(
       return;
     }
     var heisters = game_state.getHeistersList();
-    var green_heister = heisters.find(
-      h => h.getHeisterColor() == hardcoded_color
+    var heister = heisters.find(
+      h => h.getHeisterColor() == heister_selected_keyboard
     );
-    if (green_heister === undefined) {
+    if (heister === undefined) {
       console.error("Could not find information for heister");
       return;
     }
-    var current_position = green_heister.getMapPosition();
+    var current_position = heister.getMapPosition();
     if (current_position === undefined) {
       console.error("Tried to move heister with no position");
       return;
@@ -91,7 +92,7 @@ export function moveHeister(
         console.error("Unexpected move direction");
         break;
     }
-    dispatch(moveHeisterReal(green_heister, new_position));
+    dispatch(moveHeisterReal(heister, new_position));
   };
 }
 
@@ -118,12 +119,13 @@ export function moveHeisterReal(heister: Heister, new_position: MapPosition) {
 export function handleKeyInput(
   game_state: GameState | null,
   connection_status: ConnectionStatus,
+  heister_selected_keyboard: number,
   key: string
 ) {
   return async dispatch => {
-    var move = getMove(key);
+    var key_action = getKeyAction(key);
     // Do nothing if the key didn't match anything.
-    if (move === null) {
+    if (key_action === null) {
       return;
     }
     if (
@@ -133,51 +135,91 @@ export function handleKeyInput(
       console.debug("No game state / connection, dropping key input");
       return;
     }
-    console.log("Sending move", move);
-    switch (move) {
-      case MyMove.MoveNorth:
+    switch (key_action) {
+      case KeyAction.MoveNorth:
         dispatch(
-          moveHeister(game_state, connection_status, MoveDirection.North)
+          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.North)
         );
         return;
-      case MyMove.MoveEast:
+      case KeyAction.MoveEast:
         dispatch(
-          moveHeister(game_state, connection_status, MoveDirection.East)
+          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.East)
         );
         return;
-      case MyMove.MoveSouth:
+      case KeyAction.MoveSouth:
         dispatch(
-          moveHeister(game_state, connection_status, MoveDirection.South)
+          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.South)
         );
         return;
-      case MyMove.MoveWest:
+      case KeyAction.MoveWest:
         dispatch(
-          moveHeister(game_state, connection_status, MoveDirection.West)
+          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.West)
         );
+        return;
+      case KeyAction.SelectYellowHeister:
+        dispatch(selectKeyboardHeister({heister_color: HeisterColor.YELLOW }));
+        return;
+      case KeyAction.SelectPurpleHeister:
+        dispatch(selectKeyboardHeister({ heister_color: HeisterColor.PURPLE }));
+        return;
+      case KeyAction.SelectGreenHeister:
+        dispatch(selectKeyboardHeister({ heister_color: HeisterColor.GREEN }));
+        return;
+      case KeyAction.SelectOrangeHeister:
+        dispatch(selectKeyboardHeister({ heister_color: HeisterColor.ORANGE }));
         return;
       default:
         return null; // Raise error.
     }
   };
 }
-export function getMove(key: string) {
+
+export function getKeyAction(key: string) {
   switch (key) {
     case "w":
-      return MyMove.MoveNorth;
+      return KeyAction.MoveNorth;
     case "d":
-      return MyMove.MoveEast;
+      return KeyAction.MoveEast;
     case "s":
-      return MyMove.MoveSouth;
+      return KeyAction.MoveSouth;
     case "a":
-      return MyMove.MoveWest;
+      return KeyAction.MoveWest;
+    case "1":
+      return KeyAction.SelectYellowHeister;
+    case "2":
+      return KeyAction.SelectPurpleHeister;
+    case "3":
+      return KeyAction.SelectGreenHeister;
+    case "4":
+      return KeyAction.SelectOrangeHeister;
     default:
       return null;
   }
 }
 
-export enum MyMove {
+export enum KeyAction {
   MoveNorth,
   MoveEast,
   MoveSouth,
-  MoveWest
+  MoveWest,
+  SelectYellowHeister,
+  SelectPurpleHeister,
+  SelectGreenHeister,
+  SelectOrangeHeister,
 }
+
+export const getColor = (heister_color): string => {
+  switch (+heister_color) {
+    case HeisterColor.YELLOW:
+      return "#f0d249";
+    case HeisterColor.PURPLE:
+      return "#cb97ef";
+    case HeisterColor.GREEN:
+      return "#81ae62";
+    case HeisterColor.ORANGE:
+      return "#e78234";
+    default:
+      console.error("Unexpected heister color");
+      return "#000000";
+  }
+};

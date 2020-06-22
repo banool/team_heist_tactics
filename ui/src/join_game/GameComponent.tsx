@@ -10,16 +10,19 @@ const GameComponent = () => {
 
   const game_state = useSelector(gameStateSelector);
 
+  /*
+  <MoveHeisterComponent />
+  <p>
+    Game State:{" "}
+    {game_state
+      ? JSON.stringify(game_state.toObject())
+      : "Waiting to join game and then pull state..."}
+  </p>
+  */
+
   return (
     <div>
       <GameWindowComponent />
-      <MoveHeisterComponent />
-      <p>
-        Game State:{" "}
-        {game_state
-          ? JSON.stringify(game_state.toObject())
-          : "Waiting to join game and then pull state..."}
-      </p>
     </div>
   );
 };
