@@ -1,4 +1,0 @@
-# Krita files
-
-
-todo!!
