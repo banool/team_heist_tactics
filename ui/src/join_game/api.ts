@@ -177,12 +177,16 @@ export function handleKeyInput(
 export function getKeyAction(key: string) {
   switch (key) {
     case "w":
+    case "ArrowUp":
       return KeyAction.MoveNorth;
     case "d":
+    case "ArrowRight":
       return KeyAction.MoveEast;
     case "s":
+    case "ArrowDown":
       return KeyAction.MoveSouth;
     case "a":
+    case "ArrowLeft":
       return KeyAction.MoveWest;
     case "1":
       return KeyAction.SelectYellowHeister;
