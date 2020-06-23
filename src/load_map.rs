@@ -11,7 +11,9 @@ use std::path::Path;
 pub fn load_tiles_from_json() -> HashMap<String, Tile> {
     // TODO
     // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
-    let tile_map: HashMap<String, Tile> = HashMap::new();
+    let mut tile_map: HashMap<String, Tile> = HashMap::new();
+    tile_map.insert("1a".to_string(), tile_1a());
+    tile_map.insert("2".to_string(), tile_2());
     tile_map
 }
 
@@ -172,7 +174,7 @@ pub fn tile_1a() -> Tile {
 }
 
 pub fn tile_2() -> Tile {
-    // Generate the object for Tile 1a
+    // Generate the object for Tile 2
     let mut my_squares: Vec<Square> = Vec::new();
     let sq00 = Square {
         north_wall: WallType::Impassable,

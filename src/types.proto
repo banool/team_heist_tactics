@@ -173,6 +173,11 @@ message Move {
   MapPosition position = 2;
 }
 
+message PlaceTile {
+ // This position is the MapPosition of the square where heisters enter the new tile
+  MapPosition tile_entrance = 1;
+}
+
 // The server returns this when the client tries to do something invalid.
 message InvalidRequest {
   string reason = 1;
@@ -184,5 +189,6 @@ message MainMessage {
     GameState game_state = 1;
     InvalidRequest invalid_request = 2;
     Move move = 3;
+    PlaceTile place_tile = 4;
   }
 }

@@ -4,6 +4,7 @@ use crate::utils::get_current_time_secs;
 
 use serde::{Deserialize, Serialize};
 use std::convert::From;
+use std::collections::HashMap;
 // TEMP TODO
 use log::info;
 
@@ -84,6 +85,7 @@ impl Internal for MapPosition {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MoveDirection {
     North,
     East,
@@ -165,6 +167,58 @@ impl Tile {
         }
         pp
     }
+
+    pub fn to_matrix(&self) -> Vec<Vec<Square>> {
+        let temp_sq = Square::default();
+        let mut m: Vec::<Vec::<Square>> = vec![vec![temp_sq; 4]; 4];
+        let mut i = 0;
+        for row in 0..4 {
+            for col in 0..4 {
+                let square = self.squares.get(i).unwrap();
+                m[row][col] = *square;
+                i += 1;
+            }
+        }
+        info!("{:?}", m);
+        info!("len {:?}", m.len());
+        m
+    }
+
+    pub fn from_matrix(m: Vec<Vec<Square>>, name: String, position: MapPosition) -> Tile {
+        let mut squares: Vec<Square> = Vec::new();
+        for row in 0..4 {
+            for col in 0..4 {
+                let square = m.get(row).unwrap().get(col).unwrap();
+                squares.push(*square);
+            }
+        }
+        info!("Size of squares: expected 16 - {}", squares.len());
+        Tile {
+            position,
+            squares,
+            name,
+        }
+    }
+
+    pub fn rotate_matrix_clockwise(m: &Vec<Vec<Square>>) -> Vec<Vec<Square>> {
+        let n = 4;
+        let x = 2;
+        let y = n - 1;
+        let temp_sq = Square::default();
+        let mut rotated: Vec::<Vec::<Square>> = vec![vec![temp_sq; n]; n];
+
+        for a in 0..(x+1) {
+            for b in a..(y-a+1) {
+                let k = m[a][b];
+                rotated[a][b] = m[y - b][a].rotate_clockwise();
+                rotated[y - b][a] = m[y - a][y - b].rotate_clockwise();
+                rotated[y - a][y - b] = m[b][y - a].rotate_clockwise();
+                rotated[b][y - a] = k.rotate_clockwise();
+            }
+        }
+        info!("{:?}", rotated);
+        rotated
+    }
 }
 
 pub enum StartingTile {
@@ -238,6 +292,26 @@ impl Square {
         }
     }
 
+    pub fn rotate_clockwise(&self) -> Square {
+        let rotated_clockwise_90degrees = Square {
+            north_wall: self.west_wall,
+            east_wall: self.north_wall,
+            south_wall: self.east_wall,
+            west_wall: self.south_wall,
+            square_type: self.square_type,
+        };
+        rotated_clockwise_90degrees
+    }
+
+    pub fn get_walls(&self) -> HashMap::<MoveDirection, WallType> {
+        let mut walls: HashMap<MoveDirection, WallType> = HashMap::new();
+        walls.insert(MoveDirection::North, self.north_wall);
+        walls.insert(MoveDirection::East, self.east_wall);
+        walls.insert(MoveDirection::South, self.south_wall);
+        walls.insert(MoveDirection::West, self.west_wall);
+        walls
+    }
+
     fn pp_wall(w: WallType, vertical: bool) -> String {
         let wallchar = match vertical {
             true => "|",
@@ -250,6 +324,7 @@ impl Square {
             WallType::OrangeDoor => "O".to_string(),
             WallType::YellowDoor => "Y".to_string(),
             WallType::GreenDoor => "G".to_string(),
+            WallType::Entrance => "v".to_string(),
         }
     }
 
@@ -541,6 +616,29 @@ impl Internal for InvalidRequest {
     }
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct PlaceTile {
+    pub tile_entrance: MapPosition,
+}
+
+impl Internal for PlaceTile {
+    type P = proto_types::PlaceTile;
+
+    fn from_proto(proto: proto_types::PlaceTile) -> Self {
+        PlaceTile {
+            tile_entrance: MapPosition::from_proto(proto.tile_entrance.unwrap()),
+        }
+    }
+
+    fn to_proto(&self) -> proto_types::PlaceTile {
+        proto_types::PlaceTile {
+            tile_entrance: Some(self.tile_entrance.to_proto()),
+        }
+    }
+}
+
+
+
 // JSON Serialization for Tiles
 // Since we can't directly add these derives on the proto_types
 #[derive(Serialize, Deserialize)]
@@ -588,6 +686,8 @@ impl From<Tile> for SerializableTile {
 #[allow(dead_code, unused_imports)]
 mod tests {
     use serde_json;
+    use crate::load_map::tile_1a;
+    use super::{Tile, Square};
     #[test]
     fn load_map_position() {
         let map_position_json = "{\"x\":3,\"y\":5}";
@@ -597,5 +697,17 @@ mod tests {
         assert_eq!(mp.y, 5);
         let out_json = serde_json::to_string(&mp).expect("Failed to write back to json");
         assert_eq!(map_position_json, out_json);
+    }
+
+    #[test]
+    fn tile_rotation_identity() {
+        let t = tile_1a();
+        let m = t.to_matrix();
+        let mut m2 = Tile::rotate_matrix_clockwise(&m);
+        for _ in 0..3 {
+            m2 = Tile::rotate_matrix_clockwise(&m2);
+        }
+        let u = Tile::from_matrix(m2, t.name.clone(), t.position.clone());
+        assert_eq!(t, u);
     }
 }
