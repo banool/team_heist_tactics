@@ -15,7 +15,7 @@ import {
   WEBSOCKET_DISCONNECT,
   WEBSOCKET_MESSAGE,
   WEBSOCKET_OPEN,
-  WEBSOCKET_SEND
+  WEBSOCKET_SEND,
 } from "@giantmachines/redux-websocket";
 
 const WEBSOCKET_BROKEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
@@ -46,7 +46,7 @@ interface GameInfo {
 
 interface SelectKeyboardHeisterAction {
   // HeisterColor.
-  heister_color: number
+  heister_color: number;
 }
 
 interface GetCandleSuccessAction {
@@ -64,14 +64,17 @@ const joinGameSlice = createSlice({
   name: "joinGame",
   initialState,
   reducers: {
-    selectKeyboardHeister: (state, action: PayloadAction<SelectKeyboardHeisterAction>) => {
+    selectKeyboardHeister: (
+      state,
+      action: PayloadAction<SelectKeyboardHeisterAction>
+    ) => {
       const { heister_color } = action.payload;
       if (heister_color === state.heister_selected_keyboard) {
         state.heister_selected_keyboard = null;
       } else {
         state.heister_selected_keyboard = heister_color;
       }
-    }
+    },
   },
   extraReducers: {
     [WEBSOCKET_CONNECT_FULL]: (state, _action) => {
@@ -122,8 +125,8 @@ const joinGameSlice = createSlice({
     },
     [WEBSOCKET_SEND_FULL]: (_state, _action) => {
       console.debug("Sending message over websocket");
-    }
-  }
+    },
+  },
 });
 
 export const { selectKeyboardHeister } = joinGameSlice.actions;
@@ -135,8 +138,7 @@ export const gameStateSelector = (state: RootState): GameState | null =>
 export const numInvalidMoveAttemptsSelector = (
   state: RootState
 ): number | null => state.joinGame.num_invalid_move_attempts;
-export const heisterSelectedSelector = (
-  state: RootState
-): any | null => state.joinGame.heister_selected_keyboard;
+export const heisterSelectedSelector = (state: RootState): any | null =>
+  state.joinGame.heister_selected_keyboard;
 
 export default joinGameSlice.reducer;

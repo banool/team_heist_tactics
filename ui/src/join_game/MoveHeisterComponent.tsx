@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { moveHeister } from "./api";
 import { MoveDirection } from "./types";
 import { gameStateSelector, connectionStatusSelector } from "./slice";
+import { HeisterColor } from "../generated/types_pb";
 
 const MoveHeisterComponent = () => {
   const dispatch = useDispatch();
@@ -12,7 +13,15 @@ const MoveHeisterComponent = () => {
 
   const onMoveButtonClick = (move_direction: MoveDirection) => {
     // Exclamation mark because we only show this component when we have game state.
-    dispatch(moveHeister(game_state!, connection_status, move_direction));
+    // This is hardcoded to the yellow heister.
+    dispatch(
+      moveHeister(
+        game_state!,
+        connection_status,
+        move_direction,
+        HeisterColor.YELLOW
+      )
+    );
   };
 
   return (

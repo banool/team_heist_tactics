@@ -11,7 +11,7 @@ export interface StagingJoinGameThing {
 export enum ConnectionStatus {
   NotConnected,
   Connecting,
-  Connected
+  Connected,
   // TODO Do the reconnecting states from here:
   // https://github.com/giantmachines/redux-websocket
 }
@@ -20,7 +20,7 @@ export enum MoveDirection {
   North,
   East,
   South,
-  West
+  West,
 }
 
 export interface CanvasPosition {

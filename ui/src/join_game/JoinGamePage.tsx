@@ -39,13 +39,20 @@ const JoinGamePage = ({}: JoinGamePageProps) => {
     };
   });
 
-  const handleKeyDown = event => {
+  const handleKeyDown = (event) => {
     console.debug("Key event", event);
-    dispatch(handleKeyInput(game_state, connection_status, heister_selected_keyboard, event.key));
+    dispatch(
+      handleKeyInput(
+        game_state,
+        connection_status,
+        heister_selected_keyboard,
+        event.key
+      )
+    );
     document.removeEventListener("keydown", handleKeyDown);
   };
 
-  const handleKeyUp = event => {
+  const handleKeyUp = (event) => {
     document.addEventListener("keydown", handleKeyDown, { once: true });
   };
 

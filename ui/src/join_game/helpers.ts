@@ -3,7 +3,7 @@ import {
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
   INTERNAL_SQUARE_SIZE,
-  INTERNAL_TILE_OFFSET
+  INTERNAL_TILE_OFFSET,
 } from "../constants/other";
 import { CanvasPosition } from "./types";
 

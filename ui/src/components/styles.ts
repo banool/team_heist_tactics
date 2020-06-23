@@ -6,33 +6,33 @@ const styles: { [key: string]: React.CSSProperties } = {
   root: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   content: {
     marginTop: 0,
     width: CANVAS_WIDTH,
-    backgroundColor: colors.backgroundLight
+    backgroundColor: colors.backgroundLight,
   },
   layoutTable: {
-    border: "2px solid #333"
+    border: "2px solid #333",
   },
   contentCell: {
     border: "2px solid #333",
     width: "100%",
     padding: "5px 10px",
-    verticalAlign: "top"
+    verticalAlign: "top",
   },
   gameWindowComponent: {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     backgroundColor: "#ffffff",
-    position: "relative"
+    position: "relative",
   },
   gameWindowComponentWrapper: {
     position: "absolute",
     left: 0,
     width: "100%",
-    height: "100%"
+    height: "100%",
   },
   resetGameWindowOverlay: {
     zIndex: 2,
@@ -47,7 +47,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     pointerEvents: "none",
     height: "0px",
     overflow: "visible",
-    background: "none !important"
+    background: "none !important",
   },
   keyboardHeisterNumber: {
     zIndex: 2,
@@ -55,7 +55,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: 15,
     color: "black",
     fontSize: 18,
-  }
+  },
 };
 
 export default styles;

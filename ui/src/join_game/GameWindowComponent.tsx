@@ -6,7 +6,7 @@ import {
   Heister as ProtoHeister,
   HeisterColor,
   HeisterColorMap,
-  MapPosition
+  MapPosition,
 } from "../generated/types_pb";
 import { moveHeisterReal, getColor } from "./api";
 import { Stage, Layer, Circle, Text } from "react-konva";
@@ -19,15 +19,18 @@ import {
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
   CANVAS_WIDTH,
-  CANVAS_HEIGHT
+  CANVAS_HEIGHT,
 } from "../constants/other";
 import {
   mapPositionToCanvasPosition,
-  canvasPositionToMapPosition
+  canvasPositionToMapPosition,
 } from "./helpers";
 import { CanvasPosition } from "./types";
 import store from "../common/store";
-import { ResetMapComponent, ActiveHeisterKeyboardComponent } from "./overlay_components";
+import {
+  ResetMapComponent,
+  ActiveHeisterKeyboardComponent,
+} from "./overlay_components";
 import styles from "../components/styles";
 
 type TileProps = {
@@ -98,7 +101,7 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   // First, resolve the canvas position into an intended map position.
   // Second, dispatch the move request.
   // Third, turn the map position back into a canvas position (to snap the unit to a square).
-  const onDragEnd = event => {
+  const onDragEnd = (event) => {
     // Pause rendering of this unit until we get information back
     // about whether the move attempt was valid. Otherwise it'll just snap back immediately.
     // Or perhaps until we get new game state back as a stop gap.
@@ -200,7 +203,6 @@ const GameWindowComponent = () => {
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
   // Use position only for transformsEnabled since we don't scale or rotate.
   return (
-
     <div style={styles.gameWindowComponent}>
       <div style={styles.gameWindowComponentWrapper}>
         <Stage
@@ -220,10 +222,38 @@ const GameWindowComponent = () => {
       <div style={styles.resetGameWindowOverlay}>
         <ResetMapComponent reset_parent_func={resetMap} />
       </div>
-      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 5}}}>1</div>
-      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 5}}}>2</div>
-      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 5}}}>3</div>
-      <div style={{ ...styles.keyboardHeisterNumber, ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 5}}}>4</div>
+      <div
+        style={{
+          ...styles.keyboardHeisterNumber,
+          ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 5 },
+        }}
+      >
+        1
+      </div>
+      <div
+        style={{
+          ...styles.keyboardHeisterNumber,
+          ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 5 },
+        }}
+      >
+        2
+      </div>
+      <div
+        style={{
+          ...styles.keyboardHeisterNumber,
+          ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 5 },
+        }}
+      >
+        3
+      </div>
+      <div
+        style={{
+          ...styles.keyboardHeisterNumber,
+          ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 5 },
+        }}
+      >
+        4
+      </div>
       <div style={styles.overlayCanvas}>
         <Stage
           x={stageX}
@@ -235,10 +265,26 @@ const GameWindowComponent = () => {
         >
           <Layer>
             <Provider store={store}>
-              <ActiveHeisterKeyboardComponent x={YELLOW_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.YELLOW} />
-              <ActiveHeisterKeyboardComponent x={PURPLE_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.PURPLE} />
-              <ActiveHeisterKeyboardComponent x={GREEN_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.GREEN} />
-              <ActiveHeisterKeyboardComponent x={ORANGE_HEISTER_KEYBOARD_ICON} y={KEYBOARD_ITEM_Y} heister_color={HeisterColor.ORANGE} />
+              <ActiveHeisterKeyboardComponent
+                x={YELLOW_HEISTER_KEYBOARD_ICON}
+                y={KEYBOARD_ITEM_Y}
+                heister_color={HeisterColor.YELLOW}
+              />
+              <ActiveHeisterKeyboardComponent
+                x={PURPLE_HEISTER_KEYBOARD_ICON}
+                y={KEYBOARD_ITEM_Y}
+                heister_color={HeisterColor.PURPLE}
+              />
+              <ActiveHeisterKeyboardComponent
+                x={GREEN_HEISTER_KEYBOARD_ICON}
+                y={KEYBOARD_ITEM_Y}
+                heister_color={HeisterColor.GREEN}
+              />
+              <ActiveHeisterKeyboardComponent
+                x={ORANGE_HEISTER_KEYBOARD_ICON}
+                y={KEYBOARD_ITEM_Y}
+                heister_color={HeisterColor.ORANGE}
+              />
             </Provider>
           </Layer>
         </Stage>

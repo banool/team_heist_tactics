@@ -6,7 +6,7 @@ import {
   MainMessage,
   HeisterColor,
   MapPosition,
-  Heister
+  Heister,
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
 
@@ -14,7 +14,7 @@ import { MoveDirection } from "./types";
 import { selectKeyboardHeister } from "./slice";
 
 export function joinGame(join_game_thing: StagingJoinGameThing) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       var scheme = "ws";
       // If this is an HTTPS connection, we have to use a secure WebSocket
@@ -46,10 +46,10 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
 export function moveHeister(
   game_state: GameState,
   connection_status: ConnectionStatus,
-  heister_selected_keyboard: number,  // HeisterColor
+  heister_selected_keyboard: number, // HeisterColor
   move_direction: MoveDirection
 ) {
-  return async dispatch => {
+  return async (dispatch) => {
     if (
       game_state === null ||
       connection_status !== ConnectionStatus.Connected
@@ -59,7 +59,7 @@ export function moveHeister(
     }
     var heisters = game_state.getHeistersList();
     var heister = heisters.find(
-      h => h.getHeisterColor() == heister_selected_keyboard
+      (h) => h.getHeisterColor() == heister_selected_keyboard
     );
     if (heister === undefined) {
       console.error("Could not find information for heister");
@@ -97,7 +97,7 @@ export function moveHeister(
 }
 
 export function moveHeisterReal(heister: Heister, new_position: MapPosition) {
-  return async dispatch => {
+  return async (dispatch) => {
     var current_position = heister.getMapPosition()!;
     var move = new Move();
     var heister_color = heister.getHeisterColor();
@@ -122,7 +122,7 @@ export function handleKeyInput(
   heister_selected_keyboard: number,
   key: string
 ) {
-  return async dispatch => {
+  return async (dispatch) => {
     var key_action = getKeyAction(key);
     // Do nothing if the key didn't match anything.
     if (key_action === null) {
@@ -138,26 +138,46 @@ export function handleKeyInput(
     switch (key_action) {
       case KeyAction.MoveNorth:
         dispatch(
-          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.North)
+          moveHeister(
+            game_state,
+            connection_status,
+            heister_selected_keyboard,
+            MoveDirection.North
+          )
         );
         return;
       case KeyAction.MoveEast:
         dispatch(
-          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.East)
+          moveHeister(
+            game_state,
+            connection_status,
+            heister_selected_keyboard,
+            MoveDirection.East
+          )
         );
         return;
       case KeyAction.MoveSouth:
         dispatch(
-          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.South)
+          moveHeister(
+            game_state,
+            connection_status,
+            heister_selected_keyboard,
+            MoveDirection.South
+          )
         );
         return;
       case KeyAction.MoveWest:
         dispatch(
-          moveHeister(game_state, connection_status, heister_selected_keyboard, MoveDirection.West)
+          moveHeister(
+            game_state,
+            connection_status,
+            heister_selected_keyboard,
+            MoveDirection.West
+          )
         );
         return;
       case KeyAction.SelectYellowHeister:
-        dispatch(selectKeyboardHeister({heister_color: HeisterColor.YELLOW }));
+        dispatch(selectKeyboardHeister({ heister_color: HeisterColor.YELLOW }));
         return;
       case KeyAction.SelectPurpleHeister:
         dispatch(selectKeyboardHeister({ heister_color: HeisterColor.PURPLE }));

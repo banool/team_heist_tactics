@@ -9,21 +9,25 @@ type ResetMapComponentProps = {
   reset_parent_func: () => any;
 };
 export const ResetMapComponent = ({
-  reset_parent_func
+  reset_parent_func,
 }: ResetMapComponentProps) => {
-  return <button style={{ width: 100, height: 40 }} onClick={reset_parent_func}>Reset Map</button>;
+  return (
+    <button style={{ width: 100, height: 40 }} onClick={reset_parent_func}>
+      Reset Map
+    </button>
+  );
 };
-
 
 type ActiveHeisterKeyboardComponentProps = {
-  heister_color,
-  x: number,
-  y: number,
+  heister_color;
+  x: number;
+  y: number;
 };
 export const ActiveHeisterKeyboardComponent = ({
-  heister_color, x, y
+  heister_color,
+  x,
+  y,
 }: ActiveHeisterKeyboardComponentProps) => {
-
   const heister_selected = useSelector(heisterSelectedSelector);
 
   const color = getColor(heister_color);

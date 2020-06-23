@@ -11,7 +11,7 @@ import { JoinGameThing, StagingJoinGameThing } from "./types";
 
 const defaults: StagingJoinGameThing = {
   name: "",
-  handle: ""
+  handle: "",
 };
 
 type JoinGameFormProps = {
@@ -47,7 +47,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
   const stateToStagingJoinGameThing = (): StagingJoinGameThing => {
     return {
       name,
-      handle
+      handle,
     };
   };
 
@@ -74,13 +74,13 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
       <h3>Let's goooooo!!!!!!!!!!!!!!!!!!!!!!!!!!</h3>
       <form>
         <label>
-          <b>Join Game -->&emsp;</b>
+          <b>Join Game --{">"}&emsp;</b>
           Name:
           <input
             type="text"
             placeholder="Your name"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
@@ -96,7 +96,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             type="text"
             placeholder="Game handle"
             value={handle}
-            onChange={e => setHandle(e.target.value)}
+            onChange={(e) => setHandle(e.target.value)}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
