@@ -3,8 +3,8 @@ use crate::manager::GameHandle;
 use crate::utils::get_current_time_secs;
 
 use serde::{Deserialize, Serialize};
-use std::convert::From;
 use std::collections::HashMap;
+use std::convert::From;
 // TEMP TODO
 use log::info;
 
@@ -170,7 +170,7 @@ impl Tile {
 
     pub fn to_matrix(&self) -> Vec<Vec<Square>> {
         let temp_sq = Square::default();
-        let mut m: Vec::<Vec::<Square>> = vec![vec![temp_sq; 4]; 4];
+        let mut m: Vec<Vec<Square>> = vec![vec![temp_sq; 4]; 4];
         let mut i = 0;
         for row in 0..4 {
             for col in 0..4 {
@@ -205,10 +205,10 @@ impl Tile {
         let x = 2;
         let y = n - 1;
         let temp_sq = Square::default();
-        let mut rotated: Vec::<Vec::<Square>> = vec![vec![temp_sq; n]; n];
+        let mut rotated: Vec<Vec<Square>> = vec![vec![temp_sq; n]; n];
 
-        for a in 0..(x+1) {
-            for b in a..(y-a+1) {
+        for a in 0..(x + 1) {
+            for b in a..(y - a + 1) {
                 let k = m[a][b];
                 rotated[a][b] = m[y - b][a].rotate_clockwise();
                 rotated[y - b][a] = m[y - a][y - b].rotate_clockwise();
@@ -303,7 +303,7 @@ impl Square {
         rotated_clockwise_90degrees
     }
 
-    pub fn get_walls(&self) -> HashMap::<MoveDirection, WallType> {
+    pub fn get_walls(&self) -> HashMap<MoveDirection, WallType> {
         let mut walls: HashMap<MoveDirection, WallType> = HashMap::new();
         walls.insert(MoveDirection::North, self.north_wall);
         walls.insert(MoveDirection::East, self.east_wall);
@@ -636,8 +636,6 @@ impl Internal for PlaceTile {
     }
 }
 
-
-
 // JSON Serialization for Tiles
 // Since we can't directly add these derives on the proto_types
 #[derive(Serialize, Deserialize)]
@@ -684,9 +682,9 @@ impl From<Tile> for SerializableTile {
 
 #[allow(dead_code, unused_imports)]
 mod tests {
-    use serde_json;
+    use super::{Square, Tile};
     use crate::load_map::tile_1a;
-    use super::{Tile, Square};
+    use serde_json;
     #[test]
     fn load_map_position() {
         let map_position_json = "{\"x\":3,\"y\":5}";
