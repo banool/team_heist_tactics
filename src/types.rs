@@ -37,6 +37,13 @@ pub trait Internal {
     fn to_proto(&self) -> Self::P;
 }
 
+pub const DOOR_TYPES: [&'static WallType; 4] = [
+    &WallType::PurpleDoor,
+    &WallType::OrangeDoor,
+    &WallType::GreenDoor,
+    &WallType::YellowDoor,
+];
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
     x: u32,
