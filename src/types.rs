@@ -324,7 +324,6 @@ impl Square {
             WallType::OrangeDoor => "O".to_string(),
             WallType::YellowDoor => "Y".to_string(),
             WallType::GreenDoor => "G".to_string(),
-            WallType::Entrance => "v".to_string(),
         }
     }
 
