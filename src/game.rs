@@ -390,13 +390,12 @@ impl Game {
                 for _ in 0..=num_rotations {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
-                let rotated_tile = &Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
-                self.game_state.tiles.push(rotated_tile.clone());
-
+                let rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
                 info!(
                     "Added Tile {} at {:?} to Game map",
                     rotated_tile.name, rotated_tile.position
                 );
+                self.game_state.tiles.push(rotated_tile);
                 MoveValidity::Valid
             }
             None => MoveValidity::Invalid("No tiles left in deck to draw".to_string()),
