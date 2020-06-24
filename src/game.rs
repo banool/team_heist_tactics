@@ -436,7 +436,7 @@ impl Game {
         let dir = &Self::get_door_direction(heister_square)
             .expect("Heister must be on a square with a door");
 
-        self.place_tile(&pt.tile_entrance, dir);
+        self.place_tile(&pt.tile_entrance, dir)
     }
 
     pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
