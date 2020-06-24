@@ -290,7 +290,6 @@ mod tests {
     pub fn test_1a_and_json_match() {
         let code1a = super::tile_1a();
         let json1a = super::load_tile_json_from_path("data/tiles/1a.json".to_string());
-        super::print_tile_json();
         assert_eq!(code1a, json1a)
     }
 }
