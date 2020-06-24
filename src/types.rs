@@ -103,6 +103,7 @@ pub struct Tile {
     pub squares: Vec<Square>,
     pub position: MapPosition,
     pub name: String,
+    pub num_rotations: u32,
 }
 
 impl Internal for Tile {
@@ -118,6 +119,7 @@ impl Internal for Tile {
             squares,
             position: MapPosition::from_proto(proto.position.unwrap()),
             name: proto.name.to_string(),
+            num_rotations: proto.num_rotations,
         }
     }
 
@@ -131,6 +133,7 @@ impl Internal for Tile {
             squares: proto_squares,
             position: Some(self.position.to_proto()),
             name: self.name.to_string(),
+            num_rotations: self.num_rotations,
         }
     }
 }
@@ -145,6 +148,7 @@ impl From<SerializableTile> for Tile {
             squares,
             position: item.position,
             name: item.name,
+            num_rotations: item.num_rotations,
         }
     }
 }
@@ -187,7 +191,12 @@ impl Tile {
         m
     }
 
-    pub fn from_matrix(m: Vec<Vec<Square>>, name: String, position: MapPosition) -> Tile {
+    pub fn from_matrix(
+        m: Vec<Vec<Square>>,
+        name: String,
+        position: MapPosition,
+        num_rotations: u32,
+    ) -> Tile {
         let mut squares: Vec<Square> = Vec::new();
         for row in 0..4 {
             for col in 0..4 {
@@ -199,6 +208,7 @@ impl Tile {
             position,
             squares,
             name,
+            num_rotations,
         }
     }
 
@@ -665,6 +675,7 @@ pub struct SerializableTile {
     pub position: MapPosition,
     pub squares: Vec<SerializableSquare>,
     pub name: String,
+    pub num_rotations: u32,
 }
 
 impl From<Tile> for SerializableTile {
@@ -677,6 +688,7 @@ impl From<Tile> for SerializableTile {
             squares: serializable_squares,
             position: item.position,
             name: item.name,
+            num_rotations: item.num_rotations,
         }
     }
 }
@@ -705,7 +717,7 @@ mod tests {
         for _ in 0..3 {
             m2 = Tile::rotate_matrix_clockwise(&m2);
         }
-        let u = Tile::from_matrix(m2, t.name.clone(), t.position.clone());
+        let u = Tile::from_matrix(m2, t.name.clone(), t.position.clone(), 0);
         assert_eq!(t, u);
     }
 }

@@ -390,8 +390,7 @@ impl Game {
                 for _ in 0..=num_rotations {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
-
-                let rotated_tile = &Tile::from_matrix(m, t.name.clone(), new_pos);
+                let rotated_tile = &Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
                 self.game_state.tiles.push(rotated_tile.clone());
 
                 info!(
