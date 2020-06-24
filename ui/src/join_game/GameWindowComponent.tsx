@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import * as colors from "../constants/colors";
 import { useDispatch, useSelector, Provider, connect } from "react-redux";
 import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
 import {
@@ -8,8 +9,8 @@ import {
   HeisterColorMap,
   MapPosition,
 } from "../generated/types_pb";
-import { moveHeisterReal, getColor } from "./api";
-import { Stage, Layer, Circle, Text } from "react-konva";
+import { moveHeisterReal, placeTile, getColor } from "./api";
+import { Stage, Layer, Circle, Text, Rect } from "react-konva";
 import Konva from "konva";
 import { Image } from "react-konva";
 import useImage from "use-image";
@@ -141,9 +142,65 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   );
 };
 
+type PossiblePlacementProps = {
+  map_position: MapPosition;
+};
+const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
+  const dispatch = useDispatch();
+
+  const pixel_offset = -INTERNAL_SQUARE_SIZE * 2.2;
+  console.log("pixel offset", pixel_offset);
+
+  const canvas_position = mapPositionToCanvasPosition(
+    map_position,
+    pixel_offset
+  );
+
+  console.log(
+    `square at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
+  );
+
+  const onClick = (_event) => {
+    dispatch(placeTile(map_position));
+  };
+
+  const onMouseEnter = (_event) => {
+    setShadowEnabled(true);
+  };
+
+  const onMouseLeave = (_event) => {
+    setShadowEnabled(false);
+  };
+
+  const [shadowEnabled, setShadowEnabled] = useState(false);
+
+  const stroke_width = 4;
+
+  return (
+    <Rect
+      x={canvas_position.x}
+      y={canvas_position.y}
+      width={INTERNAL_SQUARE_SIZE}
+      height={INTERNAL_SQUARE_SIZE}
+      stroke="black"
+      strokeWidth={stroke_width}
+      offsetX={INTERNAL_SQUARE_SIZE/4}
+      offsetY={INTERNAL_SQUARE_SIZE/4}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+      fill={colors.background}
+      shadowBlur={8}
+      shadowColor="black"
+      shadowEnabled={shadowEnabled}
+    />
+  )
+}
+
 // This uses special <> syntax to return multiple components.
 const Tiles = ({ tiles }) => <>{tiles.map((t: any) => t)}</>;
 const Heisters = ({ heisters }) => <>{heisters.map((h: any) => h)}</>;
+const PossiblePlacements = ({ possible_placements }) => <>{possible_placements.map((p: any) => p)}</>;
 
 const GameWindowComponent = () => {
   const width = CANVAS_WIDTH;
@@ -177,13 +234,30 @@ const GameWindowComponent = () => {
     for (let i = 0; i < proto_heisters.length; i++) {
       var t = (
         <Provider key={i} store={store}>
-          <Heister key={i + 100} proto_heister={proto_heisters[i]} />
+          <Heister key={i + 200} proto_heister={proto_heisters[i]} />
         </Provider>
       );
       heisters.push(t);
     }
     return heisters;
   };
+
+  // Renders squares in positions where the player with the ability
+  // to place tiles could place tiles.
+  // TODO: Only render this if the player has the ability to place tiles.
+  const getPossiblePlacements = () => {
+    var proto_possible_placements = game_state!.getPossiblePlacementsList();
+    var possiblePlacements: JSX.Element[] = [];
+    for (let i = 0; i < proto_possible_placements.length; i++) {
+      var pp = (
+        <Provider key={i} store={store}>
+          <PossiblePlacement key={i + 300} map_position={proto_possible_placements[i]} />
+        </Provider>
+      );
+      possiblePlacements.push(pp);
+    }
+    return possiblePlacements;
+  }
 
   const [stageX, setStageX] = useState(0);
   const [stageY, setStageY] = useState(0);
@@ -201,7 +275,15 @@ const GameWindowComponent = () => {
   const ORANGE_HEISTER_KEYBOARD_ICON = 135;
 
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
+
   // Use position only for transformsEnabled since we don't scale or rotate.
+  // For some reason I need to add a provider again for elements inside the
+  // konva Stage, even though I shouldn't need to because I have a top level
+  // provider wrapping the app.
+
+  // There are two stages. The first here is for things that should move when
+  // move "the map". The second is for overlay elements that shouldn't move
+  // even when the user drags the map around.
   return (
     <div style={styles.gameWindowComponent}>
       <div style={styles.gameWindowComponentWrapper}>
@@ -216,6 +298,7 @@ const GameWindowComponent = () => {
           <Layer>
             <Tiles tiles={getTiles()} />
             <Heisters heisters={getHeisters()} />
+            <PossiblePlacements possible_placements={getPossiblePlacements()} />
           </Layer>
         </Stage>
       </div>

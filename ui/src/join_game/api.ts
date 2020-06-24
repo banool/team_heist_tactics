@@ -7,6 +7,7 @@ import {
   HeisterColor,
   MapPosition,
   Heister,
+  PlaceTile,
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
 
@@ -247,3 +248,16 @@ export const getColor = (heister_color): string => {
       return "#000000";
   }
 };
+
+export function placeTile(map_position: MapPosition) {
+  return async (dispatch) => {
+    var place_tile = new PlaceTile();
+    place_tile.setTileEntrance(map_position);
+    console.log(`Dispatching action to place tile at ${map_position.toObject()}`);
+    var main_message = new MainMessage();
+    main_message.setPlaceTile(place_tile);
+    console.debug("Dispatching websocket send of PlaceTile", place_tile);
+    dispatch(send(main_message));
+    console.debug("Dispatched websocket send of PlaceTile");
+  };
+}

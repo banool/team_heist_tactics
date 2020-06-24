@@ -25,7 +25,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   gameWindowComponent: {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.background,
     position: "relative",
   },
   gameWindowComponentWrapper: {
