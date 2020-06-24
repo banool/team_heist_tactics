@@ -165,15 +165,14 @@ impl Game {
             MoveDirection::West => heister_square.west_wall,
         };
 
+        let invalid_msg = format!("Wall {:?} cannot be passed through", blocking_wall);
         match blocking_wall {
             WallType::Clear => MoveValidity::Valid,
             WallType::Impassable => {
                 MoveValidity::Invalid("Can't pass through impassable wall".to_string())
             }
             // Wildcard matches each tile-discovery type (one per color)
-            _wildcard => {
-                MoveValidity::Invalid("Moving to un-placed tile not implemented yet".to_string())
-            }
+            _wildcard => MoveValidity::Invalid(invalid_msg),
         }
     }
 
@@ -424,11 +423,11 @@ impl Game {
                     MoveDirection::West => 3,
                 };
                 let mut m: Vec<Vec<Square>> = t.to_matrix();
-                for _ in 0..=num_rotations {
+                for _ in 0..num_rotations {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
                 let rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
-                info!(
+                debug!(
                     "Added Tile {} at {:?} to Game map",
                     rotated_tile.name, rotated_tile.position
                 );
@@ -526,6 +525,7 @@ impl Game {
 #[cfg(test)]
 #[allow(dead_code, unused_imports)]
 pub mod tests {
+    use super::{Game, MoveValidity};
     use crate::manager::{GameHandle, GameOptions};
     use crate::types::{
         Heister, HeisterColor, Internal, MainMessage, MapPosition, Move, MoveDirection, Player,
@@ -534,7 +534,7 @@ pub mod tests {
     use log::{info, warn};
     use std::collections::HashMap;
 
-    fn setup_game(handle: String) -> super::Game {
+    fn setup_game(handle: String) -> Game {
         let _ = env_logger::builder().is_test(true).try_init();
         let game_handle = GameHandle(handle);
         let game_options = GameOptions::default();
@@ -542,34 +542,54 @@ pub mod tests {
         game
     }
 
-    #[test]
-    pub fn test_can_move_to_free_square() -> () {
-        let handle = "test can move to free square".to_string();
-        let mut game = setup_game(handle);
-        let _ = env_logger::builder().is_test(true).try_init();
-        // Assuming that Yellow starts at 1, 1
-        // This test tries to move it up (safe),
-        // Then back down to its starting square
-        // Checks that the moves are accepted as valid
+    /// In-place movement for heisters, to cause game state to update
+    fn move_heister_in_place(game: &mut Game, heister_color: HeisterColor) -> MoveValidity {
+        let heister_pos = &game
+            .get_heister_from_vec(heister_color)
+            .unwrap()
+            .map_position;
+        let test_move = super::Move {
+            heister_color,
+            position: heister_pos.clone(),
+        };
+        let message = MainMessage {
+            body: Some(super::Body::Move(test_move.to_proto())),
+        };
+        let validity = game.handle_message(message);
+        assert_eq!(validity, MoveValidity::Valid);
+        validity
+    }
 
-        // Confirm yellow heister is where we expect it to be to begin with.
-        let heister_color = super::HeisterColor::Yellow;
-        assert_eq!(
-            game.get_heister_from_vec(heister_color)
-                .unwrap()
-                .map_position
-                .x,
-            1
-        );
-        assert_eq!(
-            game.get_heister_from_vec(heister_color)
-                .unwrap()
-                .map_position
-                .y,
-            1
-        );
-
-        let position = super::MapPosition { x: 1, y: 0 };
+    /// Adjacent square movement for heisters, to make testing easier
+    /// Asserts that move was valid & that position is correct for valid move
+    fn move_heister_in_dir(
+        game: &mut Game,
+        heister_color: HeisterColor,
+        dir: MoveDirection,
+        expected_validity: MoveValidity,
+    ) -> MoveValidity {
+        let heister_pos = &game
+            .get_heister_from_vec(heister_color)
+            .unwrap()
+            .map_position;
+        let position = match dir {
+            MoveDirection::North => MapPosition {
+                x: heister_pos.x,
+                y: heister_pos.y - 1,
+            },
+            MoveDirection::East => MapPosition {
+                x: heister_pos.x + 1,
+                y: heister_pos.y,
+            },
+            MoveDirection::South => MapPosition {
+                x: heister_pos.x,
+                y: heister_pos.y + 1,
+            },
+            MoveDirection::West => MapPosition {
+                x: heister_pos.x - 1,
+                y: heister_pos.y,
+            },
+        };
         let test_move = super::Move {
             heister_color,
             position: position.clone(),
@@ -578,73 +598,118 @@ pub mod tests {
             body: Some(super::Body::Move(test_move.to_proto())),
         };
         let validity = game.handle_message(message);
-        assert_eq!(validity, super::MoveValidity::Valid);
-        let mut curr_yellow_pos = game
-            .get_heister_from_vec(super::HeisterColor::Yellow)
-            .unwrap();
-        assert_eq!(&curr_yellow_pos.map_position, &position);
+        assert_eq!(validity, expected_validity);
+        match validity.clone() {
+            MoveValidity::Valid => {
+                let curr_heister_pos = &game
+                    .get_heister_from_vec(heister_color)
+                    .unwrap()
+                    .map_position;
+                assert_eq!(curr_heister_pos, &position);
+            }
+            _invalid => {}
+        }
+        validity
+    }
 
-        // THIS FOLLOWING PART *SHOULD* pass - but doesn't! Need unit tests on
-        // tiles & tile loading - to ensure that tiles' walls are symmetric
-        let next_position = super::MapPosition { x: 1, y: 1 };
-        let test_move = super::Move {
-            heister_color,
-            position: next_position.clone(),
-        };
+    /// TODO: must be generalized for any tile placement
+    /// currently only works for initial second tile Orange North tile 1a placement
+    fn place_first_tile_for_color(
+        game: &mut Game,
+        _heister_color: HeisterColor,
+        tile_entrance: MapPosition,
+    ) -> MoveValidity {
+        // needs to assert that heister color is correct, etc. or not! i don't care
+        let tile_placement = super::PlaceTile { tile_entrance };
         let message = MainMessage {
-            body: Some(super::Body::Move(test_move.to_proto())),
+            body: Some(super::Body::PlaceTile(tile_placement.to_proto())),
         };
         let validity = game.handle_message(message);
         assert_eq!(validity, super::MoveValidity::Valid);
-        curr_yellow_pos = game
-            .get_heister_from_vec(super::HeisterColor::Yellow)
-            .unwrap();
-        assert_eq!(&curr_yellow_pos.map_position, &next_position);
+
+        for tile in &game.game_state.tiles {
+            if tile.name == "1a".to_string() {
+                let mp_00 = MapPosition { x: 0, y: 0 };
+                assert_eq!(tile.position, mp_00);
+            } else {
+                // No matter the tile name, if we use this path to draw it, its
+                // position should be here.
+                let mp_1neg3 = MapPosition { x: 1, y: -4 };
+                assert_eq!(tile.position, mp_1neg3);
+            }
+        }
+        validity
+    }
+
+    /// Assuming that Yellow starts at 1, 1
+    /// This test tries to move it up (safe),
+    /// Then back down to its starting square
+    /// Checks that the moves are accepted as valid
+    #[test]
+    pub fn test_can_move_to_free_square() -> () {
+        let handle = "test can move to free square".to_string();
+        let mut game = setup_game(handle);
+        let _ = env_logger::builder().is_test(true).try_init();
+
+        // Confirm yellow heister is where we expect it to be to begin with.
+        let heister_color = super::HeisterColor::Yellow;
+        let heister_pos = &game
+            .get_heister_from_vec(heister_color)
+            .unwrap()
+            .map_position;
+        assert_eq!(heister_pos.x, 1);
+        assert_eq!(heister_pos.y, 1);
+
+        // Move Yellow Up into a free space
+        let validity = move_heister_in_dir(
+            &mut game,
+            heister_color,
+            MoveDirection::North,
+            MoveValidity::Valid,
+        );
+        assert_eq!(validity, super::MoveValidity::Valid);
+
+        // Move Yellow back down into the space it occupied - that should be safe
+        let validity = move_heister_in_dir(
+            &mut game,
+            heister_color,
+            MoveDirection::South,
+            MoveValidity::Valid,
+        );
+        assert_eq!(validity, super::MoveValidity::Valid);
     }
 
     #[test]
     pub fn heister_collision_is_invalid() -> () {
         let handle = "heister collision is invalid".to_string();
         let mut game = setup_game(handle);
-        // Assuming that Yellow starts at 1, 1
-        // This test tries to move it up (safe),
-        // Then back down to its starting square
-        // Checks that the moves are accepted as valid
+        // Assuming that Green starts at 1, 1 and Orange at 2, 1
+        // This test tries to move it up and expects an invalid move
+        // because Orange is there
 
         // Confirm green heister is where we expect it to be to begin with.
         let src_position = super::MapPosition { x: 2, y: 2 };
         let heister_color = super::HeisterColor::Green;
-        assert_eq!(
-            game.get_heister_from_vec(heister_color)
-                .unwrap()
-                .map_position
-                .x,
-            src_position.x
-        );
-        assert_eq!(
-            game.get_heister_from_vec(heister_color)
-                .unwrap()
-                .map_position
-                .y,
-            src_position.y
-        );
+        let heister_pos = &game
+            .get_heister_from_vec(heister_color)
+            .unwrap()
+            .map_position;
+        assert_eq!(heister_pos.x, src_position.x);
+        assert_eq!(heister_pos.y, src_position.y);
 
         let dest_position = super::MapPosition { x: 2, y: 1 };
-        // defined here to avoid borrow issues if used later
         let expected_msg = format!(
             "Heister {:?} is on {:?}",
             HeisterColor::Orange,
             dest_position
         );
-        let test_move = super::Move {
-            heister_color,
-            position: dest_position,
-        };
-        let message = MainMessage {
-            body: Some(super::Body::Move(test_move.to_proto())),
-        };
-        let validity = game.handle_message(message);
-        assert_eq!(validity, super::MoveValidity::Invalid(expected_msg));
+        let expected_validity = super::MoveValidity::Invalid(expected_msg);
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Green,
+            MoveDirection::North,
+            expected_validity,
+        );
         let curr_green_pos = game
             .get_heister_from_vec(super::HeisterColor::Green)
             .unwrap();
@@ -708,53 +773,22 @@ pub mod tests {
     pub fn test_tile_draw() -> () {
         let handle = "grid walls align".to_string();
         let mut game = setup_game(handle);
+        let first_tile_entrance = MapPosition { x: 2, y: -1 };
 
-        // setup to move orange to its orange door (one move from starting pos)
-        let dest_position = super::MapPosition { x: 2, y: 0 };
-        let test_move = super::Move {
-            heister_color: HeisterColor::Orange,
-            position: dest_position,
-        };
-        let message = MainMessage {
-            body: Some(super::Body::Move(test_move.to_proto())),
-        };
-        let validity = game.handle_message(message);
-        assert_eq!(validity, super::MoveValidity::Valid);
-        let expected_orange_door_loc = super::MapPosition { x: 2, y: 0 };
-        let actual_orange = game
-            .get_heister_from_vec(super::HeisterColor::Orange)
-            .unwrap();
-        let actual_orange_loc = &actual_orange.map_position;
-        assert_eq!(&expected_orange_door_loc, actual_orange_loc);
-        // orange movement done
-
-        // Let's create & execute the tile placement move
-        let tile_entrance = super::MapPosition { x: 2, y: -1 };
-        let test_tile_placement = super::PlaceTile { tile_entrance };
-        let message = MainMessage {
-            body: Some(super::Body::PlaceTile(test_tile_placement.to_proto())),
-        };
-        let validity = game.handle_message(message);
-        assert_eq!(validity, super::MoveValidity::Valid);
-
-        for tile in game.game_state.tiles {
-            if tile.name == "1a".to_string() {
-                let mp_00 = MapPosition { x: 0, y: 0 };
-                assert_eq!(tile.position, mp_00);
-            } else {
-                // No matter the tile name, if we use this path to draw it, its
-                // position should be here.
-                let mp_1neg3 = MapPosition { x: 1, y: -4 };
-                assert_eq!(tile.position, mp_1neg3);
-            }
-        }
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::North,
+            MoveValidity::Valid,
+        );
+        place_first_tile_for_color(&mut game, HeisterColor::Orange, first_tile_entrance);
     }
 
     /// Ensure that we generate possible placements that are correct for the color
     /// of heister & door.
     #[test]
     pub fn possible_placements_no_mismatched_results() -> () {
-        let handle = "grid walls align".to_string();
+        let handle = "possible placements no mismatched results".to_string();
         let mut game = setup_game(handle);
         // Set up the game such that many heisters are at matching doors
 
@@ -777,6 +811,7 @@ pub mod tests {
             heisters.push(h);
         }
 
+        // Move heister in place
         game.game_state.heisters = heisters;
         let dest_position = super::MapPosition { x: 2, y: 0 };
         let test_move = super::Move {
@@ -794,5 +829,36 @@ pub mod tests {
         // because PP is the tile entrance, not the heister pos.
         // could short circuit it by directly calling the functioning returning the
         // dict?
+    }
+
+    /// We test with initial game state (1a), move Orange one square north,
+    /// and then send a drawTile message.
+    #[test]
+    pub fn test_new_tile_crossing() -> () {
+        let handle = "new tile crossing".to_string();
+        let mut game = setup_game(handle);
+        let first_tile_entrance = MapPosition { x: 2, y: -1 };
+
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::North,
+            MoveValidity::Valid,
+        );
+        place_first_tile_for_color(&mut game, HeisterColor::Orange, first_tile_entrance);
+
+        // Next, we want to move orange UP, then down.
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::North,
+            MoveValidity::Valid,
+        );
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::South,
+            MoveValidity::Valid,
+        );
     }
 }
