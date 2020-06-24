@@ -295,9 +295,6 @@ pub fn tile_3() -> Tile {
         west_wall: WallType::Impassable,
         square_type: SquareType::Filled,
     };
-    my_squares.push(blocked_square);
-    // square 01 is also blocked
-    my_squares.push(blocked_square.clone());
 
     let sq00 = Square {
         north_wall: WallType::Impassable,
