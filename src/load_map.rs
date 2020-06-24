@@ -172,6 +172,7 @@ pub fn tile_1a() -> Tile {
         squares: my_squares,
         position: my_pos,
         name: "1a".to_string(),
+        num_rotations: 0,
     }
 }
 
@@ -281,6 +282,7 @@ pub fn tile_2() -> Tile {
         squares: my_squares,
         position: my_pos,
         name: "2".to_string(),
+        num_rotations: 0,
     }
 }
 
@@ -427,6 +429,7 @@ pub fn tile_3() -> Tile {
         squares: my_squares,
         position: my_pos,
         name: "3".to_string(),
+        num_rotations: 0,
     }
 }
 
