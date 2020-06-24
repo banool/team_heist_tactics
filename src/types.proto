@@ -51,6 +51,8 @@ message Tile {
   repeated Square squares = 1;
   MapPosition position = 2;
   string name = 3;
+  // The number of times the tile has been rotated 90 deg clockwise (0-3)
+  uint32 num_rotations = 4;
 }
 
 // Describes a square, which is 1 of 16 units of a tile.
