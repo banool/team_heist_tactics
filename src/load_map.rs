@@ -15,6 +15,8 @@ pub fn load_tiles_from_json() -> Vec<Tile> {
     // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
     let mut tile_map: Vec<Tile> = Vec::new();
     tile_map.push(tile_2());
+    tile_map.push(tile_3());
+    tile_map.push(tile_4());
     tile_map
 }
 
@@ -429,6 +431,125 @@ pub fn tile_3() -> Tile {
         squares: my_squares,
         position: my_pos,
         name: "3".to_string(),
+        num_rotations: 0,
+    }
+}
+
+pub fn tile_4() -> Tile {
+    // Generate the object for Tile 3
+    let mut my_squares: Vec<Square> = Vec::new();
+
+    let blocked_square = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Filled,
+    };
+
+    // first two squares (00, 01) are both blocked
+    my_squares.push(blocked_square);
+    my_squares.push(blocked_square);
+
+    let sq02 = Square {
+        north_wall: WallType::PurpleDoor,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq02);
+
+    let sq03 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::YellowTeleportPad,
+    };
+    my_squares.push(sq03);
+
+    // suqare 10 is blokced
+    my_squares.push(blocked_square);
+
+    let sq11 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::TimerFlip,
+    };
+    my_squares.push(sq11);
+
+    let sq12 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq12);
+
+    // suqare 13 is blokced
+    my_squares.push(blocked_square);
+
+    let sq20 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::OrangeTeleportPad,
+    };
+    my_squares.push(sq20);
+
+    let sq21 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq21);
+
+    let sq22 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq22);
+
+    let sq23 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::GreenDoor,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq23);
+
+    // square 30 is blocked
+    my_squares.push(blocked_square);
+
+    let sq31 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq31);
+
+    // 3233 are also filled
+    my_squares.push(blocked_square);
+    my_squares.push(blocked_square);
+
+    let my_pos = MapPosition { x: 0, y: 0 };
+    Tile {
+        squares: my_squares,
+        position: my_pos,
+        name: "4".to_string(),
         num_rotations: 0,
     }
 }
