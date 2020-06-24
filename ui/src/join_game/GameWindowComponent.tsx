@@ -68,6 +68,7 @@ const Tile = ({ proto_tile }: TileProps) => {
         offsetY={offset}
         x={canvas_position.x}
         y={canvas_position.y}
+        rotation={proto_tile.getNumRotations() * 90}
       />
     );
   } else if (status === "loading") {
