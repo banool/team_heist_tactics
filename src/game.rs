@@ -320,11 +320,11 @@ impl Game {
         self.game_state.possible_placements = v;
     }
 
+    /// From a tile entrance and move direction of the tile's orientation,
+    /// return the MapPosition for that new tile to place it in the absolute grid
+    /// This is doable since every tile has an entry square in some rotation of
+    /// (1, 3) - except for starting tiles
     fn new_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
-        // From a tile entrance and move direction of the tile's orientation,
-        // return the MapPosition for that new tile to place it in the absolute grid
-        // This is doable since every tile has an entry square in some rotation of
-        // (1, 3) - except for starting tiles
         match dir {
             MoveDirection::North => MapPosition {
                 x: position.x - 1,
@@ -339,6 +339,32 @@ impl Game {
                 y: position.y,
             },
             MoveDirection::West => MapPosition {
+                x: position.x - 3,
+                y: position.y - 2,
+            },
+        }
+    }
+
+    /// From a tile exit square (one from which a player might initiate a PlaceTile move),
+    /// figure out the MapPosition of the tile that the heister is on.
+    /// (Useful for looking up which tile a heister might currently be on)
+    /// * You might notice - this is the same as new_tile_position, but with opposite
+    /// directions swapped. That's true! That's the magic of the game.
+    fn current_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
+        match dir {
+            MoveDirection::North => MapPosition {
+                x: position.x - 2,
+                y: position.y,
+            },
+            MoveDirection::West => MapPosition {
+                x: position.x,
+                y: position.y - 1,
+            },
+            MoveDirection::South => MapPosition {
+                x: position.x - 1,
+                y: position.y - 3,
+            },
+            MoveDirection::East => MapPosition {
                 x: position.x - 3,
                 y: position.y - 2,
             },
@@ -413,6 +439,46 @@ impl Game {
         }
     }
 
+    /// in order to update the door to be a clear wall, we need a few things:
+    /// 1. we need a reference to the tile in self.tiles that contains the heister_square
+    /// 2. we need to be able to know which wall on which square  to update
+    /// 3. we need to replace that square wth one who has a clear wall instead of a door
+    fn open_door(&mut self, door_pos: MapPosition, src_square: Square, dir: &MoveDirection) -> () {
+        let current_tile_position = Self::current_tile_position(&door_pos, &dir);
+        let mut tile = &mut Tile::default();
+        for t in &mut self.game_state.tiles {
+            if t.position == current_tile_position {
+                tile = t;
+                break;
+            }
+        }
+        if tile.squares.len() == 0 {
+            panic!("No tile found at pos {:?}", door_pos);
+        }
+
+        for mut square in &mut tile.squares {
+            if square == &src_square {
+                // Open The Door
+                match dir {
+                    MoveDirection::North => {
+                        square.north_wall = WallType::Clear;
+                    }
+                    MoveDirection::East => {
+                        square.east_wall = WallType::Clear;
+                    }
+                    MoveDirection::South => {
+                        square.south_wall = WallType::Clear;
+                    }
+                    MoveDirection::West => {
+                        square.west_wall = WallType::Clear;
+                    }
+                }
+                return;
+            }
+        }
+        panic!("When opening a door, we expect the square to have a door to open");
+    }
+
     fn process_tile_placement(&mut self, pt: PlaceTile) -> MoveValidity {
         let grid = self.get_absolute_grid();
         let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
@@ -434,6 +500,7 @@ impl Game {
         let dir = &Self::get_door_direction(heister_square)
             .expect("Heister must be on a square with a door");
 
+        self.open_door(heister_pos.clone(), *heister_square, dir);
         self.place_tile(&pt.tile_entrance, dir)
     }
 
