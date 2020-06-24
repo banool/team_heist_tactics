@@ -246,6 +246,9 @@ const GameWindowComponent = () => {
   // to place tiles could place tiles.
   // TODO: Only render this if the player has the ability to place tiles.
   const getPossiblePlacements = () => {
+    if (game_state!.getRemainingTiles() == 0) {
+      return [];
+    }
     var proto_possible_placements = game_state!.getPossiblePlacementsList();
     var possiblePlacements: JSX.Element[] = [];
     for (let i = 0; i < proto_possible_placements.length; i++) {
