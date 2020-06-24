@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
-use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
+use std::collections::HashMap;
+use std::convert::TryInto;
 
 use crate::load_map;
 use crate::manager::{GameHandle, GameOptions};
@@ -16,7 +16,7 @@ use log::{info, trace};
 pub struct Game {
     pub game_handle: GameHandle,
     pub game_state: GameState,
-    pub tile_deck: HashMap<String, Tile>,
+    pub tile_deck: Vec<Tile>,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -28,8 +28,7 @@ pub enum MoveValidity {
 impl Game {
     pub fn new(game_handle: GameHandle, _game_options: GameOptions) -> Game {
         let game_state = GameState::new(game_handle.clone());
-        // TODO: implement proper decks & base them off of GameOptions
-        let tile_deck = load_map::load_tiles_from_json();
+        let tile_deck: Vec<Tile> = load_map::load_tiles_from_json();
         Game {
             game_handle,
             game_state,
@@ -37,22 +36,10 @@ impl Game {
         }
     }
 
-    fn draw_tile(&mut self) -> Option<&Tile> {
-        // TODO: shuffle tiles
-        match self.game_state.remaining_tiles {
-            0 => None,
-            _wildcard => {
-                let used_tile_names: HashSet<String> =
-                    HashSet::from_iter(self.game_state.tiles.iter().map(|t| t.name.clone()));
-                let all_tile_names = self.tile_deck.keys();
-                let unused_tile_names =
-                    Vec::from_iter(all_tile_names.filter(|t| !used_tile_names.contains(t.clone())));
-                let drawn_tile_name = unused_tile_names.first();
-
-                self.game_state.remaining_tiles -= 1;
-                self.tile_deck.get(drawn_tile_name.unwrap().clone())
-            }
-        }
+    fn draw_tile(&mut self) -> Option<Tile> {
+        let tile = self.tile_deck.pop();
+        self.game_state.remaining_tiles = self.tile_deck.len().try_into().unwrap();
+        tile
     }
 
     pub fn add_player(&mut self, name: String) -> Result<()> {
@@ -394,13 +381,13 @@ impl Game {
             Some(t) => {
                 let new_pos = Self::new_tile_position(position, direction);
                 let num_rotations = match direction {
-                    MoveDirection::North => 1,
-                    MoveDirection::East => 2,
-                    MoveDirection::South => 3,
-                    MoveDirection::West => 4,
+                    MoveDirection::North => 0,
+                    MoveDirection::East => 1,
+                    MoveDirection::South => 2,
+                    MoveDirection::West => 3,
                 };
                 let mut m: Vec<Vec<Square>> = t.to_matrix();
-                for _ in 0..num_rotations {
+                for _ in 0..=num_rotations {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
 
@@ -413,23 +400,30 @@ impl Game {
                 );
                 MoveValidity::Valid
             }
-            None => MoveValidity::Invalid("Couldn't draw tile from deck".to_string()),
+            None => MoveValidity::Invalid("No tiles left in deck to draw".to_string()),
         }
     }
 
     fn process_tile_placement(&mut self, pt: PlaceTile) -> MoveValidity {
         let grid = self.get_absolute_grid();
         let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
-        let heister_pos = heister_to_tile_entrance_locs
+        let maybe_heister_pos_tuple = heister_to_tile_entrance_locs
             .iter()
-            .find(|&(_, te)| te == &pt.tile_entrance)
-            .expect("When placing a tile, the heister must be at a tile-reveal door")
-            .0;
+            .find(|&(_, te)| te == &pt.tile_entrance);
+        let heister_pos = match maybe_heister_pos_tuple {
+            Some(pos_tuple) => pos_tuple.0,
+            None => {
+                return MoveValidity::Invalid(
+                    "When placing a tile, the heister must be at a tile-reveal door".to_string(),
+                );
+            }
+        };
 
         let heister_square = grid
             .get(heister_pos)
             .expect("Heister must be on valid square");
-        let dir = &Self::get_door_direction(heister_square).unwrap();
+        let dir = &Self::get_door_direction(heister_square)
+            .expect("Heister must be on a square with a door");
 
         self.place_tile(&pt.tile_entrance, dir)
     }
@@ -628,10 +622,10 @@ pub mod tests {
         info!("All walls line up");
     }
 
+    /// We test with initial game state (1a), move Orange one square north,
+    /// and then send a drawTile message.
     #[test]
     pub fn test_tile_draw() -> () {
-        // We test with initial game state (1a), move Orange one square north,
-        // and then send a drawTile message.
         let _ = env_logger::builder().is_test(true).try_init();
         let game_handle = GameHandle("test_grid_walls_align".to_string());
         let game_options = GameOptions::default();

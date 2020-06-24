@@ -3,17 +3,19 @@
 use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
 use log::info;
 use serde_json::json;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-pub fn load_tiles_from_json() -> HashMap<String, Tile> {
-    // TODO
+/// This is the default deck function, so far.
+/// Should return all tiles for a default game, minus the starting tile
+/// Because right now we always start with tile_1a hardcoded.
+pub fn load_tiles_from_json() -> Vec<Tile> {
+    // TODO: shuffle tiles?
+    // TODO - finish transcribing all the tiles AND ensure they're oriented correctly
     // Ideally takes a path (like data/tiles/), and returns a hashmap of Tiles
-    let mut tile_map: HashMap<String, Tile> = HashMap::new();
-    tile_map.insert("1a".to_string(), tile_1a());
-    tile_map.insert("2".to_string(), tile_2());
+    let mut tile_map: Vec<Tile> = Vec::new();
+    tile_map.push(tile_2());
     tile_map
 }
 
