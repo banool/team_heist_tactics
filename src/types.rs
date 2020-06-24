@@ -42,6 +42,13 @@ pub const DOOR_TYPES: [&'static WallType; 4] = [
     &WallType::YellowDoor,
 ];
 
+pub const HEISTER_COLORS: [&'static HeisterColor; 4] = [
+    &HeisterColor::Purple,
+    &HeisterColor::Orange,
+    &HeisterColor::Green,
+    &HeisterColor::Yellow,
+];
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
     x: u32,
