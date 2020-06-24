@@ -1,7 +1,6 @@
 // Load the map from data/tiles/*.json
 
 use crate::types::{MapPosition, SerializableTile, Square, SquareType, Tile, WallType};
-use log::info;
 use serde_json::json;
 use std::fs::File;
 use std::io::BufReader;
@@ -29,10 +28,11 @@ pub fn load_tile_json_from_path(s: String) -> Tile {
     t
 }
 
+/// Function for helping when we write new tiles, and want to print them to stdout
+/// on a one-off basis to store them in files.
 pub fn print_tile_json() -> () {
-    // Function for helping when we write new tiles, and want to print them to stdout
-    // on a one-off basis to store them in files.
-    info!("\n{}\n", json!(SerializableTile::from(tile_2())));
+    println!("\n{}\n", tile_2().pp());
+    println!("\n{}\n", json!(SerializableTile::from(tile_2())));
 }
 
 pub fn tile_1a() -> Tile {
@@ -128,7 +128,7 @@ pub fn tile_1a() -> Tile {
         east_wall: WallType::GreenDoor,
         south_wall: WallType::Impassable,
         west_wall: WallType::Impassable,
-        square_type: SquareType::Normal,
+        square_type: SquareType::Escalator,
     };
     my_squares.push(sq23);
 
@@ -155,7 +155,7 @@ pub fn tile_1a() -> Tile {
         east_wall: WallType::Impassable,
         south_wall: WallType::Impassable,
         west_wall: WallType::Clear,
-        square_type: SquareType::Normal,
+        square_type: SquareType::Escalator,
     };
     my_squares.push(sq32);
 
@@ -178,14 +178,6 @@ pub fn tile_1a() -> Tile {
 pub fn tile_2() -> Tile {
     // Generate the object for Tile 2
     let mut my_squares: Vec<Square> = Vec::new();
-    let sq00 = Square {
-        north_wall: WallType::Impassable,
-        east_wall: WallType::Impassable,
-        south_wall: WallType::Clear,
-        west_wall: WallType::Impassable,
-        square_type: SquareType::PurpleEscape,
-    };
-    my_squares.push(sq00);
 
     let blocked_square = Square {
         north_wall: WallType::Impassable,
@@ -195,85 +187,95 @@ pub fn tile_2() -> Tile {
         square_type: SquareType::Filled,
     };
     my_squares.push(blocked_square);
-
-    // square 02 is also blocked
-    my_squares.push(blocked_square.clone());
-    // square 03 is also blocked
+    // square 01 is also blocked
     my_squares.push(blocked_square.clone());
 
-    let sq10 = Square {
-        north_wall: WallType::Clear,
-        east_wall: WallType::Impassable,
+    let sq02 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
         south_wall: WallType::Impassable,
         west_wall: WallType::Impassable,
-        square_type: SquareType::Normal,
+        square_type: SquareType::Escalator,
+    };
+    my_squares.push(sq02);
+
+    let sq03 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::PurpleEscape,
+    };
+    my_squares.push(sq03);
+
+    let sq10 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::OrangeDoor,
+        square_type: SquareType::Escalator,
     };
     my_squares.push(sq10);
 
-    // square 11 and 12 are also blocked
+    // square 11 is also blocked
     my_squares.push(blocked_square.clone());
+    // square 12 is also blocked
+    my_squares.push(blocked_square.clone());
+    // square 13 is also blocked
     my_squares.push(blocked_square.clone());
 
-    let sq13 = Square {
+    let sq20 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq20);
+
+    let sq21 = Square {
         north_wall: WallType::Impassable,
         east_wall: WallType::Impassable,
         south_wall: WallType::Clear,
-        west_wall: WallType::Impassable,
-        square_type: SquareType::PurpleTeleportPad,
-    };
-    my_squares.push(sq13);
-
-    // square 20, 21 are both blocked
-    my_squares.push(blocked_square.clone());
-    my_squares.push(blocked_square.clone());
-
-    let sq22 = Square {
-        north_wall: WallType::Impassable,
-        east_wall: WallType::Clear,
-        south_wall: WallType::Clear,
-        west_wall: WallType::Impassable,
-        square_type: SquareType::Normal,
-    };
-    my_squares.push(sq22);
-
-    let sq23 = Square {
-        north_wall: WallType::Clear,
-        east_wall: WallType::Clear,
-        south_wall: WallType::Impassable,
         west_wall: WallType::Clear,
         square_type: SquareType::Normal,
     };
-    my_squares.push(sq23);
+    my_squares.push(sq21);
 
-    // square 30 is blocked
+    // square 22 is also blocked
+    my_squares.push(blocked_square.clone());
+    // square 23 is also blocked
     my_squares.push(blocked_square.clone());
 
+    let sq30 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::GreenTeleportPad,
+    };
+    my_squares.push(sq30);
     let sq31 = Square {
-        north_wall: WallType::Impassable,
+        north_wall: WallType::Clear,
         east_wall: WallType::Clear,
-        south_wall: WallType::OrangeDoor,
+        south_wall: WallType::Clear,
         west_wall: WallType::Impassable,
         square_type: SquareType::Normal,
     };
     my_squares.push(sq31);
 
     let sq32 = Square {
-        north_wall: WallType::Clear,
-        east_wall: WallType::Clear,
-        south_wall: WallType::Impassable,
-        west_wall: WallType::Clear,
-        square_type: SquareType::Normal,
-    };
-    my_squares.push(sq32);
-
-    let sq33 = Square {
         north_wall: WallType::Impassable,
         east_wall: WallType::Impassable,
         south_wall: WallType::Impassable,
         west_wall: WallType::Clear,
-        square_type: SquareType::GreenTeleportPad,
+        square_type: SquareType::PurpleTeleportPad,
     };
-    my_squares.push(sq33);
+    my_squares.push(sq32);
+
+    // square 33 is also blocked
+    my_squares.push(blocked_square.clone());
+
     let my_pos = MapPosition { x: 0, y: 0 };
     Tile {
         squares: my_squares,
@@ -288,6 +290,7 @@ mod tests {
     pub fn test_1a_and_json_match() {
         let code1a = super::tile_1a();
         let json1a = super::load_tile_json_from_path("data/tiles/1a.json".to_string());
+        super::print_tile_json();
         assert_eq!(code1a, json1a)
     }
 }
