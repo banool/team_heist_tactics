@@ -317,7 +317,7 @@ impl Game {
         for val in heister_to_tile_entrance_locs.values() {
             v.push(val.clone());
         }
-        self.game_state.possible_placements = v.clone();
+        self.game_state.possible_placements = v;
     }
 
     fn new_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
@@ -375,7 +375,6 @@ impl Game {
                     .get_mut_heister_from_vec(heister_color.clone())
                     .unwrap();
                 heister.map_position = dest_pos;
-                self.update_possible_placements();
             }
             validity
         } else {
@@ -437,9 +436,7 @@ impl Game {
         let dir = &Self::get_door_direction(heister_square)
             .expect("Heister must be on a square with a door");
 
-        let validity = self.place_tile(&pt.tile_entrance, dir);
-        self.update_possible_placements();
-        validity
+        self.place_tile(&pt.tile_entrance, dir);
     }
 
     pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
@@ -456,6 +453,7 @@ impl Game {
                 MoveValidity::Invalid("InvalidRequest Message is invalid from players".to_string())
             }
         };
+        self.update_possible_placements();
         validity
     }
 }
