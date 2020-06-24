@@ -427,7 +427,7 @@ impl Game {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
                 let rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
-                debug!(
+                info!(
                     "Added Tile {} at {:?} to Game map",
                     rotated_tile.name, rotated_tile.position
                 );
