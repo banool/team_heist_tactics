@@ -17,6 +17,11 @@ pub fn load_tiles_from_json() -> Vec<Tile> {
     tile_map.push(tile_2());
     tile_map.push(tile_3());
     tile_map.push(tile_4());
+    tile_map.push(tile_5());
+    tile_map.push(tile_6());
+    tile_map.push(tile_7());
+    tile_map.push(tile_8());
+    tile_map.push(tile_9());
     tile_map
 }
 
@@ -33,8 +38,8 @@ pub fn load_tile_json_from_path(s: String) -> Tile {
 /// Function for helping when we write new tiles, and want to print them to stdout
 /// on a one-off basis to store them in files.
 pub fn print_tile_json() -> () {
-    println!("\n{}\n", tile_2().pp());
-    println!("\n{}\n", json!(SerializableTile::from(tile_2())));
+    println!("\n{}\n", tile_9().pp());
+    println!("\n{}\n", json!(SerializableTile::from(tile_9())));
 }
 
 pub fn tile_1a() -> Tile {
@@ -823,6 +828,404 @@ pub fn tile_6() -> Tile {
         num_rotations: 0,
     }
 }
+
+pub fn tile_7() -> Tile {
+    // Generate the object for Tile 3
+    let mut my_squares: Vec<Square> = Vec::new();
+
+    let blocked_square = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Filled,
+    };
+
+    // 00, 01 are blocked
+    my_squares.push(blocked_square);
+    my_squares.push(blocked_square);
+
+    let sq02 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::GreenTeleportPad,
+    };
+    my_squares.push(sq02);
+
+    // sq03 is blocked!
+    my_squares.push(blocked_square);
+
+    let sq10 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq10);
+
+    let sq11 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq11);
+
+    let sq12 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Escalator,
+    };
+    my_squares.push(sq12);
+
+    let sq13 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq13);
+
+    let sq20 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::OrangeItem,
+    };
+    my_squares.push(sq20);
+
+    // squares 21, 22 are blocked
+    my_squares.push(blocked_square);
+    my_squares.push(blocked_square);
+
+    let sq23 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::PurpleDoor,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq23);
+
+    // square 30 is blocked
+    my_squares.push(blocked_square);
+
+    let sq31 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Escalator,
+    };
+    my_squares.push(sq31);
+
+    // square 32 is blocked
+    my_squares.push(blocked_square);
+
+    let sq33 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::YellowTeleportPad,
+    };
+    my_squares.push(sq33);
+
+    let my_pos = MapPosition { x: 0, y: 0 };
+    Tile {
+        squares: my_squares,
+        position: my_pos,
+        name: "7".to_string(),
+        num_rotations: 0,
+    }
+}
+
+pub fn tile_8() -> Tile {
+    // Generate the object for Tile 3
+    let mut my_squares: Vec<Square> = Vec::new();
+
+    let blocked_square = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Filled,
+    };
+
+    let sq00 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq00);
+
+    let sq01 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq01);
+
+    let sq02 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq02);
+
+    let sq03 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq03);
+
+    let sq10 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::OrangeDoor,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq10);
+
+    // square 11 is blocked
+    my_squares.push(blocked_square);
+
+    let sq12 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::YellowTeleportPad,
+    };
+    my_squares.push(sq12);
+
+    let sq13 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq13);
+
+    // squares 20, 21, 22 are all blocked
+    for _ in 0..3 {
+        my_squares.push(blocked_square);
+    }
+
+    let sq23 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::PurpleDoor,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq23);
+
+    let sq30 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::GreenItem,
+    };
+    my_squares.push(sq30);
+
+    let sq31 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq31);
+
+    let sq32 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq32);
+
+    let sq33 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq33);
+
+    let my_pos = MapPosition { x: 0, y: 0 };
+    Tile {
+        squares: my_squares,
+        position: my_pos,
+        name: "8".to_string(),
+        num_rotations: 0,
+    }
+}
+
+pub fn tile_9() -> Tile {
+    // Generate the object for Tile 3
+    let mut my_squares: Vec<Square> = Vec::new();
+
+    let blocked_square = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Filled,
+    };
+
+    let sq00 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq00);
+
+    let sq01 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq01);
+
+    let sq02 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq02);
+
+    let sq03 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq03);
+
+    let sq10 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq10);
+
+    // square 11 is blocked
+    my_squares.push(blocked_square);
+
+    let sq12 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::OrangeTeleportPad,
+    };
+    my_squares.push(sq12);
+
+    let sq13 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq13);
+
+    let sq20 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq20);
+
+    let sq21 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq21);
+
+    // suqare 22 is blocked
+    my_squares.push(blocked_square);
+
+    let sq23 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::YellowDoor,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq23);
+
+    // square 30 is blocked
+    my_squares.push(blocked_square);
+
+    let sq31 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq31);
+
+    // square 32 is blocked
+    my_squares.push(blocked_square);
+
+    let sq33 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::PurpleItem,
+    };
+    my_squares.push(sq33);
+
+    let my_pos = MapPosition { x: 0, y: 0 };
+    Tile {
+        squares: my_squares,
+        position: my_pos,
+        name: "9".to_string(),
+        num_rotations: 0,
+    }
+}
+
 
 #[allow(dead_code, unused_imports)]
 mod tests {
