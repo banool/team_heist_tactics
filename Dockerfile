@@ -29,9 +29,6 @@ RUN rustup default nightly-2020-06-11
 # Copy in HTML templates
 COPY templates templates
 
-# Copy in images
-COPY static/images static/images
-
 # Copy in npm artifacts from previous iamge
 COPY --from=builder /npm/dist/index.html /${app}/templates/play.html
 COPY --from=builder /npm/dist/static /${app}/static
@@ -51,12 +48,18 @@ COPY build.rs .
 RUN set -x && cargo build --release
 COPY prod_run.sh .
 
+# Copy in images
+COPY static/images /${app}/static/images
+
 # Copy out the built binary into the distroless build
 FROM gcr.io/distroless/cc:debug
 COPY --from=build /tht/target/release/team_heist_tactics /
 COPY --from=build /tht/templates /templates
 COPY --from=build /tht/static /static
 COPY --from=build /tht/prod_run.sh /
+
+# Copy in data
+COPY data data
 
 # Finally run it all
 EXPOSE 19996
@@ -65,4 +68,5 @@ ENV THT_PORT=19996
 ENV THT_DEPLOYMENT_MODE=prod
 ENV RUST_LOG=debug
 ENV RUST_LOG_STYLE=always
+ENV HANDLES_FILE="data/handles.txt"
 CMD ["./prod_run.sh"]

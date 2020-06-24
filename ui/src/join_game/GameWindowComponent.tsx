@@ -190,8 +190,8 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
-      fill={colors.background}
-      shadowBlur={8}
+      // fill={colors.background}
+      shadowBlur={5}
       shadowColor="black"
       shadowEnabled={shadowEnabled}
     />

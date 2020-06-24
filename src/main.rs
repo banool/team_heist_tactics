@@ -1,7 +1,10 @@
 // Generic imports.
 use log::{error, info};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::env;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 use std::str::FromStr;
 use std::sync::RwLock;
 
@@ -13,8 +16,12 @@ use actix_web::{web, App, HttpServer};
 use team_heist_tactics::endpoints;
 use team_heist_tactics::manager::{GameManager, GameManagerWrapper, GameOptions};
 
-const REQUIRED_ENV_VARS: &'static [&'static str] =
-    &["THT_IP_ADDRESS", "THT_PORT", "THT_DEPLOYMENT_MODE"];
+const REQUIRED_ENV_VARS: &'static [&'static str] = &[
+    "THT_IP_ADDRESS",
+    "THT_PORT",
+    "THT_DEPLOYMENT_MODE",
+    "HANDLES_FILE",
+];
 
 fn validate_env() -> bool {
     for s in REQUIRED_ENV_VARS.iter() {
@@ -44,6 +51,20 @@ impl FromStr for DeploymentMode {
     }
 }
 
+fn get_possible_handles() -> HashSet<String> {
+    let filename = env::var("HANDLES_FILE").unwrap();
+    let file = File::open(filename).expect("Could not read handles file");
+    let buf_reader = BufReader::new(file);
+    let mut words = HashSet::new();
+    for line in buf_reader.lines() {
+        let w = line.unwrap();
+        let w = w.replace(" ", "");
+        let w = w.replace("-", "");
+        words.insert(w);
+    }
+    words
+}
+
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
@@ -53,10 +74,10 @@ async fn main() -> std::io::Result<()> {
     }
     info!("All environment variables set");
 
+    let possible_handles = get_possible_handles();
+
     let games = HashMap::new();
-    let words = vec!["meme", "yolo", "otherhandle", "anotherhandle"];
-    let words = words.into_iter().map(String::from).collect();
-    let game_manager = GameManager::new(games, words);
+    let game_manager = GameManager::new(games, possible_handles);
     let game_manager = RwLock::new(game_manager);
     let game_manager_wrapper = GameManagerWrapper { game_manager };
     let game_manager_wrapper = web::Data::new(game_manager_wrapper);
