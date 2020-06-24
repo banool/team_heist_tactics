@@ -277,7 +277,7 @@ impl Game {
                     }
                 }
                 WallType::YellowDoor => {
-                    if color == HeisterColor::Purple {
+                    if color == HeisterColor::Yellow {
                         placement_locations.push(heister.map_position.clone());
                     }
                 }
@@ -463,22 +463,29 @@ impl Game {
 pub mod tests {
     use crate::manager::{GameHandle, GameOptions};
     use crate::types::{
-        HeisterColor, Internal, MainMessage, MapPosition, Move, MoveDirection, Player, Square,
-        WallType,
+        Heister, HeisterColor, Internal, MainMessage, MapPosition, Move, MoveDirection, Player,
+        Square, WallType, HEISTER_COLORS,
     };
     use log::{info, warn};
     use std::collections::HashMap;
 
+    fn setup_game(handle: String) -> super::Game {
+        let _ = env_logger::builder().is_test(true).try_init();
+        let game_handle = GameHandle(handle);
+        let game_options = GameOptions::default();
+        let game = super::Game::new(game_handle, game_options);
+        game
+    }
+
     #[test]
     pub fn test_can_move_to_free_square() -> () {
+        let handle = "test can move to free square".to_string();
+        let mut game = setup_game(handle);
         let _ = env_logger::builder().is_test(true).try_init();
         // Assuming that Yellow starts at 1, 1
         // This test tries to move it up (safe),
         // Then back down to its starting square
         // Checks that the moves are accepted as valid
-        let game_handle = super::GameHandle("test_can_move_to_free_square".to_string());
-        let game_options = super::GameOptions::default();
-        let mut game = super::Game::new(game_handle, game_options);
 
         // Confirm yellow heister is where we expect it to be to begin with.
         let heister_color = super::HeisterColor::Yellow;
@@ -532,14 +539,12 @@ pub mod tests {
 
     #[test]
     pub fn heister_collision_is_invalid() -> () {
-        let _ = env_logger::builder().is_test(true).try_init();
+        let handle = "heister collision is invalid".to_string();
+        let mut game = setup_game(handle);
         // Assuming that Yellow starts at 1, 1
         // This test tries to move it up (safe),
         // Then back down to its starting square
         // Checks that the moves are accepted as valid
-        let game_handle = super::GameHandle("test_can_move_to_free_square".to_string());
-        let game_options = super::GameOptions::default();
-        let mut game = super::Game::new(game_handle, game_options);
 
         // Confirm green heister is where we expect it to be to begin with.
         let src_position = super::MapPosition { x: 2, y: 2 };
@@ -583,10 +588,8 @@ pub mod tests {
 
     #[test]
     pub fn grid_walls_align() -> () {
-        let _ = env_logger::builder().is_test(true).try_init();
-        let game_handle = GameHandle("test_grid_walls_align".to_string());
-        let game_options = GameOptions::default();
-        let game = super::Game::new(game_handle, game_options);
+        let handle = "grid walls align".to_string();
+        let game = setup_game(handle);
         let grid: HashMap<MapPosition, Square> = game.get_absolute_grid();
 
         for (mp, square) in grid.iter() {
@@ -638,11 +641,8 @@ pub mod tests {
     /// and then send a drawTile message.
     #[test]
     pub fn test_tile_draw() -> () {
-        let _ = env_logger::builder().is_test(true).try_init();
-        let game_handle = GameHandle("test_grid_walls_align".to_string());
-        let game_options = GameOptions::default();
-        let mut game = super::Game::new(game_handle, game_options);
-        // game setup done
+        let handle = "grid walls align".to_string();
+        let mut game = setup_game(handle);
 
         // setup to move orange to its orange door (one move from starting pos)
         let dest_position = super::MapPosition { x: 2, y: 0 };
@@ -683,5 +683,51 @@ pub mod tests {
                 assert_eq!(tile.position, mp_1neg3);
             }
         }
+    }
+
+    /// Ensure that we generate possible placements that are correct for the color
+    /// of heister & door.
+    #[test]
+    pub fn possible_placements_no_mismatched_results() -> () {
+        let handle = "grid walls align".to_string();
+        let mut game = setup_game(handle);
+        // Set up the game such that many heisters are at matching doors
+
+        // Set up correct, happy, matching case first:
+        let orange_door_pos = MapPosition { x: 2, y: 0 };
+        let purple_door_pos = MapPosition { x: 0, y: 1 };
+        let yellow_door_pos = MapPosition { x: 1, y: 3 };
+        let green_door_pos = MapPosition { x: 3, y: 2 };
+        let mut color_to_door_pos: HashMap<HeisterColor, MapPosition> = HashMap::new();
+        color_to_door_pos.insert(HeisterColor::Orange, orange_door_pos);
+        color_to_door_pos.insert(HeisterColor::Purple, purple_door_pos);
+        color_to_door_pos.insert(HeisterColor::Yellow, yellow_door_pos);
+        color_to_door_pos.insert(HeisterColor::Green, green_door_pos);
+
+        let mut heisters: Vec<Heister> = Vec::new();
+        for hc in HEISTER_COLORS.iter() {
+            let mut h = Heister::default();
+            h.heister_color = *hc.clone();
+            h.map_position = color_to_door_pos.get(hc).unwrap().clone();
+            heisters.push(h);
+        }
+
+        game.game_state.heisters = heisters;
+        let dest_position = super::MapPosition { x: 2, y: 0 };
+        let test_move = super::Move {
+            heister_color: HeisterColor::Orange,
+            position: dest_position,
+        };
+        let message = MainMessage {
+            body: Some(super::Body::Move(test_move.to_proto())),
+        };
+        game.handle_message(message); // don't care if this move is valid
+
+        let pp = game.game_state.possible_placements;
+        assert_eq!(pp.len(), 4);
+        // TODO: assert the positions in PP are as expected, this is annoying
+        // because PP is the tile entrance, not the heister pos.
+        // could short circuit it by directly calling the functioning returning the
+        // dict?
     }
 }
