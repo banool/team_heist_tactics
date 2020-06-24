@@ -309,6 +309,17 @@ impl Game {
         tile_entrance_positions
     }
 
+    fn update_possible_placements(&mut self) -> () {
+        let grid = self.get_absolute_grid();
+        let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
+
+        let mut v = Vec::new();
+        for val in heister_to_tile_entrance_locs.values() {
+            v.push(val.clone());
+        }
+        self.game_state.possible_placements = v;
+    }
+
     fn new_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
         // From a tile entrance and move direction of the tile's orientation,
         // return the MapPosition for that new tile to place it in the absolute grid
@@ -442,6 +453,7 @@ impl Game {
                 MoveValidity::Invalid("InvalidRequest Message is invalid from players".to_string())
             }
         };
+        self.update_possible_placements();
         validity
     }
 }

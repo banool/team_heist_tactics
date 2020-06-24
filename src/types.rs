@@ -500,6 +500,7 @@ pub struct GameState {
     pub remaining_tiles: u32,
     pub game_status: GameStatus,
     pub players: Vec<Player>,
+    pub possible_placements: Vec<MapPosition>,
 }
 
 impl Internal for GameState {
@@ -523,6 +524,11 @@ impl Internal for GameState {
             .map(|p| Player::from_proto(p.clone()))
             .collect();
         let game_status = GameStatus::from_i32(proto.game_status).unwrap(); // TODO Handle this gracefully?
+        let possible_placements = proto
+            .possible_placements
+            .iter()
+            .map(|pp| MapPosition::from_proto(pp.clone()))
+            .collect();
         GameState {
             game_name,
             game_started: proto.game_started,
@@ -533,6 +539,7 @@ impl Internal for GameState {
             remaining_tiles: proto.remaining_tiles,
             game_status,
             players,
+            possible_placements,
         }
     }
 
@@ -540,6 +547,11 @@ impl Internal for GameState {
         let tiles = self.tiles.iter().map(|t| t.to_proto()).collect();
         let heisters = self.heisters.iter().map(|h| h.to_proto()).collect();
         let players = self.players.iter().map(|p| p.to_proto()).collect();
+        let possible_placements = self
+            .possible_placements
+            .iter()
+            .map(|pp| pp.to_proto())
+            .collect();
         let game_status = i32::from(self.game_status);
         proto_types::GameState {
             game_name: self.game_name.0.to_string(),
@@ -551,6 +563,7 @@ impl Internal for GameState {
             remaining_tiles: self.remaining_tiles,
             game_status,
             players,
+            possible_placements,
         }
     }
 }
@@ -581,6 +594,7 @@ impl GameState {
             HeisterColor::Orange,
             &starting_tile_enum,
         ));
+        let possible_placements: Vec<MapPosition> = Vec::new();
         GameState {
             game_name,
             game_started,
@@ -591,6 +605,7 @@ impl GameState {
             remaining_tiles: 8,
             game_status: GameStatus::Staging,
             players: vec![],
+            possible_placements,
         }
     }
 }
