@@ -7,6 +7,7 @@ fn main() {
         )
         .type_attribute(".types.InvalidRequest", "#[derive(Serialize, Deserialize)]")
         .type_attribute(".types.Move", "#[derive(Serialize, Deserialize)]")
+        .type_attribute(".types.PlaceTile", "#[derive(Serialize, Deserialize)]")
         .type_attribute(".types.GameState", "#[derive(Serialize, Deserialize)]")
         .type_attribute(".types.GameStatus", "#[derive(Serialize, Deserialize)]")
         .type_attribute(".types.Player", "#[derive(Serialize, Deserialize)]")
