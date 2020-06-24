@@ -309,6 +309,17 @@ impl Game {
         tile_entrance_positions
     }
 
+    fn update_possible_placements(&mut self) -> () {
+        let grid = self.get_absolute_grid();
+        let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
+
+        let mut v = Vec::new();
+        for val in heister_to_tile_entrance_locs.values() {
+            v.push(val.clone());
+        }
+        self.game_state.possible_placements = v.clone();
+    }
+
     fn new_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
         // From a tile entrance and move direction of the tile's orientation,
         // return the MapPosition for that new tile to place it in the absolute grid
@@ -364,6 +375,7 @@ impl Game {
                     .get_mut_heister_from_vec(heister_color.clone())
                     .unwrap();
                 heister.map_position = dest_pos;
+                self.update_possible_placements();
             }
             validity
         } else {
@@ -425,7 +437,9 @@ impl Game {
         let dir = &Self::get_door_direction(heister_square)
             .expect("Heister must be on a square with a door");
 
-        self.place_tile(&pt.tile_entrance, dir)
+        let validity = self.place_tile(&pt.tile_entrance, dir);
+        self.update_possible_placements();
+        validity
     }
 
     pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {

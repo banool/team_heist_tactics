@@ -166,6 +166,9 @@ message GameState {
 
   // Players connected to the game.
   repeated Player players = 9;
+
+  // Possible tile entrances for placing new tiles
+  repeated MapPosition possible_placements = 10;
 }
 
 message Move {
