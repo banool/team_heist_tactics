@@ -5,8 +5,6 @@ use crate::utils::get_current_time_secs;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::From;
-// TEMP TODO
-use log::info;
 
 // Import all the proto types in this private module.
 mod proto_types {
@@ -186,8 +184,6 @@ impl Tile {
                 i += 1;
             }
         }
-        info!("{:?}", m);
-        info!("len {:?}", m.len());
         m
     }
 
@@ -199,7 +195,6 @@ impl Tile {
                 squares.push(*square);
             }
         }
-        info!("Size of squares: expected 16 - {}", squares.len());
         Tile {
             position,
             squares,
@@ -223,7 +218,6 @@ impl Tile {
                 rotated[b][y - a] = k.rotate_clockwise();
             }
         }
-        info!("{:?}", rotated);
         rotated
     }
 }
