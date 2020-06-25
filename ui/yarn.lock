@@ -2768,10 +2768,10 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-konva@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/konva/-/konva-6.0.0.tgz#9b3d13a4622f353c4ce736fbf1fa4b6483240649"
-  integrity sha512-YTwmtz3KzbzdC0KDRHWLzuk0KXB4NUdaQqytrxacXE1C39V6wCk7Nnu0wgq+GdGbG6m8A1qiEU9TSJ19qdIzDw==
+konva@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/konva/-/konva-7.0.0.tgz#4a04841f0f55a6296fd1cb1e2f1b08dbddf88187"
+  integrity sha512-5ruDq2JeTtL+eqso9konl0tiTQG9Jko6wOWZERwZbggNauCbYYnTHgSZlMep2dcCu0965kIEyPDRdmDC2XaLXQ==
 
 loader-runner@^2.4.0:
   version "2.4.0"
