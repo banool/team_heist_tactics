@@ -1,10 +1,8 @@
+import { useState, useEffect } from 'react';
 import { MapPosition } from "../generated/types_pb";
 import {
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
-  TILE_SIZE,
 } from "../constants/other";
 import { CanvasPosition } from "./types";
 
@@ -27,11 +25,13 @@ export const mapPositionToCanvasPosition = (
   pixel_offset: number,
   tile_offset_x: number,
   tile_offset_y: number,
+  canvas_width: number,
+  canvas_height: number,
 ): CanvasPosition => {
   var map_x = map_position.getX();
   var map_y = map_position.getY();
-  var canvas_x = mapPositionToCanvasPositionSingle(map_x, pixel_offset, CANVAS_WIDTH, tile_offset_x);
-  var canvas_y = mapPositionToCanvasPositionSingle(map_y, pixel_offset, CANVAS_HEIGHT, tile_offset_y);
+  var canvas_x = mapPositionToCanvasPositionSingle(map_x, pixel_offset, canvas_width, tile_offset_x);
+  var canvas_y = mapPositionToCanvasPositionSingle(map_y, pixel_offset, canvas_height, tile_offset_y);
   return { x: canvas_x, y: canvas_y };
 };
 
@@ -69,20 +69,46 @@ const canvasCoordToMapCoord = (
 
 export const canvasPositionToMapPosition = (
   canvas_position: CanvasPosition,
-  pixel_offset: number
+  pixel_offset: number,
+  canvas_width: number,
+  canvas_height: number,
 ): MapPosition => {
   var map_x = canvasCoordToMapCoord(
     canvas_position.x,
     pixel_offset,
-    CANVAS_WIDTH
+    canvas_width,
   );
   var map_y = canvasCoordToMapCoord(
     canvas_position.y,
     pixel_offset,
-    CANVAS_HEIGHT
+    canvas_height,
   );
   var out = new MapPosition();
   out.setX(map_x);
   out.setY(map_y);
   return out;
 };
+
+
+function getWindowDimensions() {
+  const { innerWidth: width, innerHeight: height } = window;
+  return {
+    width,
+    height
+  };
+}
+
+export function useWindowDimensions() {
+  const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowDimensions(getWindowDimensions());
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return windowDimensions;
+}

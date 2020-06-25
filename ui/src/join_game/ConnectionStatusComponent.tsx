@@ -9,9 +9,7 @@ const ConnectionStatusComponent = () => {
   const connection_status = useSelector(connectionStatusSelector);
 
   return (
-    <div>
-      <p>Connection Status: {ConnectionStatus[connection_status]}</p>
-    </div>
+    <p>Connection Status: {ConnectionStatus[connection_status]}</p>
   );
 };
 

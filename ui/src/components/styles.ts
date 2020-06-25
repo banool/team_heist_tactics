@@ -1,32 +1,26 @@
 import * as colors from "../constants/colors";
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../constants/other";
 
 const styles: { [key: string]: React.CSSProperties } = {
   //https://css-tricks.com/snippets/css/a-guide-to-flexbox
-  root: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
+  mainPage: {
+    fontFamily: "'Crimson Text', serif",
   },
-  content: {
-    marginTop: 0,
-    width: CANVAS_WIDTH,
-    backgroundColor: colors.backgroundLight,
-  },
-  layoutTable: {
-    border: "2px solid #333",
-  },
-  contentCell: {
-    border: "2px solid #333",
-    width: "100%",
-    padding: "5px 10px",
-    verticalAlign: "top",
+  joinGameForm: {
+    position: "absolute",
+    //width: 800,
+    backgroundColor: colors.formBackground,
+    padding: 30,
+    boxShadow: `10px 10px ${colors.formShadow}`,
+    top: "30%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
   },
   gameWindowComponent: {
-    width: CANVAS_WIDTH,
-    height: CANVAS_HEIGHT,
+    width: "100%",
+    height: "100%",
     backgroundColor: colors.background,
-    position: "relative",
+    position: "absolute",
+    margin: "auto",
   },
   gameWindowComponentWrapper: {
     position: "absolute",
@@ -35,10 +29,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: "100%",
   },
   resetGameWindowOverlay: {
-    zIndex: 2,
+    zIndex: 4,
     position: "absolute",
-    bottom: 20,
-    right: 20,
+    right: 30,
+    bottom: 30,
+  },
+  connectionStatusOverlay: {
+    zIndex: 5,
+    position: "absolute",
+    left: 30,
+    bottom: 10,
   },
   // CSS for the second canvas we put on top of the first canvas.
   // This makes clicks "pass through" so we can just use it to display stuff.

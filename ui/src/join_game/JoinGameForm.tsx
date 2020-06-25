@@ -5,6 +5,7 @@ import store from "../common/store";
 import { useDispatch } from "react-redux";
 import { joinGame } from "./api";
 import { JoinGameThing, StagingJoinGameThing } from "./types";
+import styles from "../components/styles";
 
 // TODO Hide this component when the websocket comes up.
 // TODO Make a connection status component.
@@ -71,10 +72,10 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
 
   return (
     <div>
-      <h3>Let's goooooo!!!!!!!!!!!!!!!!!!!!!!!!!!</h3>
       <form>
+        <br/>
         <label>
-          <b>Join Game --{">"}&emsp;</b>
+          <h3>Join Game</h3>
           Name:
           <input
             type="text"
@@ -90,6 +91,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             maxLength={100}
           />
         </label>
+        <br/>
         <label>
           Handle:
           <input
@@ -105,6 +107,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             minLength={1}
           />
         </label>
+        <br/>
         <input type="button" value="Submit" onClick={onSubmit} />
       </form>
     </div>

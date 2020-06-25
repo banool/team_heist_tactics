@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import * as colors from "../constants/colors";
 import { useDispatch, useSelector, Provider, connect } from "react-redux";
 import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
 import {
   Tile as ProtoTile,
   Heister as ProtoHeister,
   HeisterColor,
-  HeisterColorMap,
   MapPosition,
 } from "../generated/types_pb";
 import { moveHeisterReal, placeTile, getColor } from "./api";
@@ -19,20 +17,19 @@ import {
   TILE_SIZE,
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
 } from "../constants/other";
 import {
   mapPositionToCanvasPosition,
   canvasPositionToMapPosition,
+  useWindowDimensions,
 } from "./helpers";
-import { CanvasPosition } from "./types";
 import store from "../common/store";
 import {
   ResetMapComponent,
   ActiveHeisterKeyboardComponent,
 } from "./overlay_components";
 import styles from "../components/styles";
+import ConnectionStatusComponent from "./ConnectionStatusComponent";
 
 type TileProps = {
   proto_tile: ProtoTile;
@@ -50,7 +47,8 @@ const Tile = ({ proto_tile }: TileProps) => {
   const pixel_offset = -INTERNAL_TILE_OFFSET;
 
   var map_position = proto_tile.getPosition()!;
-  var canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset, 1, 3);
+  var { width, height } = useWindowDimensions();
+  var canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset, 1, 3, width, height);
 
   var num_rotations = proto_tile.getNumRotations();
 
@@ -100,11 +98,13 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   // const tile_offset_x = -Math.floor(map_position.getY() / 4);
   const tile_offset_x = 0;
   const tile_offset_y = 0;
+  var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
     pixel_offset,
     tile_offset_x,
     tile_offset_y,
+    width, height
   );
 
   console.log(
@@ -124,7 +124,9 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     var intended_canvas_position = { x: x, y: y };
     var intended_map_position = canvasPositionToMapPosition(
       intended_canvas_position,
-      pixel_offset
+      pixel_offset,
+      width,
+      height
     );
     console.log(
       `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
@@ -164,11 +166,14 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
   const pixel_offset = -INTERNAL_SQUARE_SIZE * 2.2;
   console.log("pixel offset", pixel_offset);
 
+  var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
     pixel_offset,
     0,
     0,
+    width,
+    height
   );
 
   console.log(
@@ -218,9 +223,6 @@ const Heisters = ({ heisters }) => <>{heisters.map((h: any) => h)}</>;
 const PossiblePlacements = ({ possible_placements }) => <>{possible_placements.map((p: any) => p)}</>;
 
 const GameWindowComponent = () => {
-  const width = CANVAS_WIDTH;
-  const height = CANVAS_HEIGHT;
-
   const game_state = useSelector(gameStateSelector);
 
   // By making this invalid move counter part of the state relevant to this component,
@@ -292,6 +294,8 @@ const GameWindowComponent = () => {
   const GREEN_HEISTER_KEYBOARD_ICON = 100;
   const ORANGE_HEISTER_KEYBOARD_ICON = 135;
 
+  var { width, height } = useWindowDimensions();
+
   // <div style={{ width: "90%", transform: "translate(+5%, 0%)", backgroundColor: "#ffffff" }}>
 
   // Use position only for transformsEnabled since we don't scale or rotate.
@@ -319,9 +323,6 @@ const GameWindowComponent = () => {
             <PossiblePlacements possible_placements={getPossiblePlacements()} />
           </Layer>
         </Stage>
-      </div>
-      <div style={styles.resetGameWindowOverlay}>
-        <ResetMapComponent reset_parent_func={resetMap} />
       </div>
       <div
         style={{
@@ -354,6 +355,12 @@ const GameWindowComponent = () => {
         }}
       >
         4
+      </div>
+      <div style={styles.resetGameWindowOverlay}>
+        <ResetMapComponent reset_parent_func={resetMap} />
+      </div>
+      <div style={styles.connectionStatusOverlay}>
+        <ConnectionStatusComponent />
       </div>
       <div style={styles.overlayCanvas}>
         <Stage

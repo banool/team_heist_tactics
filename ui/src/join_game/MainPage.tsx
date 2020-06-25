@@ -12,9 +12,10 @@ import { ConnectionStatus } from "./types";
 
 import { handleKeyInput } from "./api";
 import GameWindowComponent from "./GameWindowComponent";
+import styles from "../components/styles";
 
-type JoinGamePageProps = {};
-const JoinGamePage = ({}: JoinGamePageProps) => {
+type MainGameProps = {};
+const MainGame = ({}: MainGameProps) => {
   const connection_status = useSelector(connectionStatusSelector);
 
   const dispatch = useDispatch();
@@ -56,18 +57,19 @@ const JoinGamePage = ({}: JoinGamePageProps) => {
     document.addEventListener("keydown", handleKeyDown, { once: true });
   };
 
+  // <ConnectionStatusComponent />
+
   return (
     <div>
       {connection_status != ConnectionStatus.Connected ? (
-        <h1>Team Heist Tactics</h1>
-      ) : null}
-      {connection_status != ConnectionStatus.Connected ? (
-        <JoinGameForm />
+        <div style={styles.joinGameForm}>
+          <h1 style={{ fontSize: 52, fontFamily: "'Damion', cursive" }}>Team Heist Tactics</h1>
+          <JoinGameForm />
+        </div>
       ) : null}
       {connection_status == ConnectionStatus.Connected && game_state ? (
         <GameComponent />
       ) : null}
-      <ConnectionStatusComponent />
     </div>
   );
 };
@@ -75,4 +77,4 @@ const JoinGamePage = ({}: JoinGamePageProps) => {
 // <GameWindowComponent />
 // TODO Get rid of GameWindowComponent from here.
 
-export default JoinGamePage;
+export default MainGame;
