@@ -211,11 +211,11 @@ impl Game {
     fn get_tile_from_position(&self, position: &MapPosition) -> Option<Tile> {
         for t in &self.game_state.tiles {
             let x_distance = position.x - t.position.x;
-            let x_distance_within_tile = x_distance > 0 && x_distance < 3;
+            let x_distance_within_tile = x_distance > 0 && x_distance < 4;
             match x_distance_within_tile {
                 true => {
                     let y_distance = position.y - t.position.y;
-                    let y_distance_within_tile = y_distance > 0 && y_distance < 3;
+                    let y_distance_within_tile = y_distance > 0 && y_distance < 4;
                     match y_distance_within_tile {
                         true => return Some(t.clone()),
                         false => continue,
