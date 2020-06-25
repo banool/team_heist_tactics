@@ -1,5 +1,6 @@
 # UI stage of the build
 FROM node:14 as builder
+
 WORKDIR /npm
 COPY ui/ .
 COPY src/types.proto .
@@ -12,9 +13,9 @@ RUN unzip protoc-${protocversion}-linux-x86_64.zip -d protoc_dl
 RUN cp protoc_dl/bin/protoc /usr/bin
 
 # Generate types and build UI
-RUN npm ci --only=production
+RUN yarn install --frozen-lockfile
 RUN ./generate_types.sh
-RUN npm run prodbuild
+RUN yarn run prodbuild
 
 # Server stage of the build
 # FROM rust:1.44-alpine3.11 as build

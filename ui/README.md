@@ -1,6 +1,8 @@
 # UI
 
 ## Developing
+First, make sure you have [yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable).
+
 Generate typescript from protobuf definitions:
 ```
 ./generate_types.sh

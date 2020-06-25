@@ -15,12 +15,12 @@ rm -rf dist
 cp ../src/types.proto .
 ./generate_types.sh
 rm types.proto
+echo 'Note: Not running npm install'
 if [ "$DEV_MODE" = "dev" ]; then
-    echo 'Note: Not running npm install'
-    npm run devbuild
+    yarn run devbuild
 elif [ "$DEV_MODE" = "prod" ]; then
-    npm ci --only=production
-    npm run prodbuild
+    echo 'Note: Instead of using prodbuild from this script, build the docker image'
+    yarn run prodbuild
 else 
     echo 'Invalid dev mode';
     exit;
