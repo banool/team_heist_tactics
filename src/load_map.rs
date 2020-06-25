@@ -38,8 +38,8 @@ pub fn load_tile_json_from_path(s: String) -> Tile {
 /// Function for helping when we write new tiles, and want to print them to stdout
 /// on a one-off basis to store them in files.
 pub fn print_tile_json() -> () {
-    println!("\n{}\n", tile_9().pp());
-    println!("\n{}\n", json!(SerializableTile::from(tile_9())));
+    println!("\n{}\n", tile_2().pp());
+    println!("\n{}\n", json!(SerializableTile::from(tile_2())));
 }
 
 pub fn tile_1a() -> Tile {
@@ -218,15 +218,23 @@ pub fn tile_2() -> Tile {
 
     let sq10 = Square {
         north_wall: WallType::Impassable,
-        east_wall: WallType::Impassable,
+        east_wall: WallType::Clear,
         south_wall: WallType::Clear,
         west_wall: WallType::OrangeDoor,
-        square_type: SquareType::Escalator,
+        square_type: SquareType::Normal,
     };
     my_squares.push(sq10);
 
-    // square 11 is also blocked
-    my_squares.push(blocked_square.clone());
+    // NOTE: square 11 is NOT blocked
+    let sq11 = Square {
+        north_wall: WallType::Impassable,
+        east_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
+        west_wall: WallType::Clear,
+        square_type: SquareType::Escalator,
+    };
+    my_squares.push(sq11);
+
     // square 12 is also blocked
     my_squares.push(blocked_square.clone());
     // square 13 is also blocked
@@ -242,7 +250,7 @@ pub fn tile_2() -> Tile {
     my_squares.push(sq20);
 
     let sq21 = Square {
-        north_wall: WallType::Impassable,
+        north_wall: WallType::Clear,
         east_wall: WallType::Impassable,
         south_wall: WallType::Clear,
         west_wall: WallType::Clear,
@@ -1232,6 +1240,7 @@ mod tests {
     pub fn test_1a_and_json_match() {
         let code1a = super::tile_1a();
         let json1a = super::load_tile_json_from_path("data/tiles/1a.json".to_string());
+        super::print_tile_json();
         assert_eq!(code1a, json1a)
     }
 }
