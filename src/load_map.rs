@@ -713,7 +713,6 @@ pub fn tile_5() -> Tile {
 }
 
 pub fn tile_6() -> Tile {
-    // Generate the object for Tile 3
     let mut my_squares: Vec<Square> = Vec::new();
 
     let blocked_square = Square {
@@ -752,7 +751,7 @@ pub fn tile_6() -> Tile {
     let sq11 = Square {
         north_wall: WallType::Impassable,
         east_wall: WallType::Clear,
-        south_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
         west_wall: WallType::Clear,
         square_type: SquareType::Normal,
     };
@@ -772,7 +771,7 @@ pub fn tile_6() -> Tile {
     my_squares.push(blocked_square);
 
     let sq21 = Square {
-        north_wall: WallType::Impassable,
+        north_wall: WallType::Clear,
         east_wall: WallType::Clear,
         south_wall: WallType::Clear,
         west_wall: WallType::Impassable,
