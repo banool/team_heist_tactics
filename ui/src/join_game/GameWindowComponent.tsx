@@ -91,13 +91,20 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   const offset = HEISTER_SIZE;
   const pixel_offset = -INTERNAL_SQUARE_SIZE - HEISTER_SIZE * 2 + 3;
 
+  // TODO Don't tell the client the walls unless we wanna do client side validation.
+
   const heister_color = proto_heister.getHeisterColor();
   const map_position = proto_heister.getMapPosition()!;
+  // This sort of helped. I think I really just need the position of the tile I am on.
+  // const tile_offset_y = -Math.floor(map_position.getX() / 4);
+  // const tile_offset_x = -Math.floor(map_position.getY() / 4);
+  const tile_offset_x = 0;
+  const tile_offset_y = 0;
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
     pixel_offset,
-    0,
-    0
+    tile_offset_x,
+    tile_offset_y,
   );
 
   console.log(
@@ -127,6 +134,7 @@ const Heister = ({ proto_heister }: HeisterProps) => {
 
   // If x changes but y doesn't, y won't update, only x will.
   // Introducing some jitter makes sure they always change.
+  // TODO Do this only when a reset toggle flips.
   var random_x = Math.random() * 0.001 + 0.001;
   var random_y = Math.random() * 0.001 + 0.001;
 
