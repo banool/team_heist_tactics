@@ -86,19 +86,3 @@ export const canvasPositionToMapPosition = (
   out.setY(map_y);
   return out;
 };
-
-// NOTE: TODO: This fails at big numbers (251 and 252).
-// Unit test of sorts.
-var mp = new MapPosition();
-mp.setX(1);
-mp.setY(2);
-console.log("map x y", mp.getX(), mp.getY());
-var a = mapPositionToCanvasPosition(mp, 20, 0, 0);
-console.log("canvas x y", a.x, a.y);
-var b = canvasPositionToMapPosition(a, 20);
-console.log("back to map x y", b.getX(), b.getY());
-if (b.getX() != 1 || b.getY() != 2) {
-  var msg = "Map -> canvas -> map position is wrong";
-  console.error(msg);
-  throw msg;
-}
