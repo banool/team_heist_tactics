@@ -73,7 +73,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
   return (
     <div>
       <form>
-        <br/>
+        <br />
         <label>
           <h3>Join Game</h3>
           Name:
@@ -91,7 +91,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             maxLength={100}
           />
         </label>
-        <br/>
+        <br />
         <label>
           Handle:
           <input
@@ -107,7 +107,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
             minLength={1}
           />
         </label>
-        <br/>
+        <br />
         <input type="button" value="Submit" onClick={onSubmit} />
       </form>
     </div>

@@ -8,9 +8,7 @@ import { ConnectionStatus } from "./types";
 const ConnectionStatusComponent = () => {
   const connection_status = useSelector(connectionStatusSelector);
 
-  return (
-    <p>Connection Status: {ConnectionStatus[connection_status]}</p>
-  );
+  return <p>Connection Status: {ConnectionStatus[connection_status]}</p>;
 };
 
 export default ConnectionStatusComponent;

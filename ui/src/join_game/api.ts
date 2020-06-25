@@ -253,7 +253,9 @@ export function placeTile(map_position: MapPosition) {
   return async (dispatch) => {
     var place_tile = new PlaceTile();
     place_tile.setTileEntrance(map_position);
-    console.log(`Dispatching action to place tile at ${map_position.toObject()}`);
+    console.log(
+      `Dispatching action to place tile at ${map_position.toObject()}`
+    );
     var main_message = new MainMessage();
     main_message.setPlaceTile(place_tile);
     console.debug("Dispatching websocket send of PlaceTile", place_tile);

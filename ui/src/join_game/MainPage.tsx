@@ -61,7 +61,9 @@ const MainGame = ({}: MainGameProps) => {
     <div>
       {connection_status != ConnectionStatus.Connected ? (
         <div style={styles.joinGameForm}>
-          <h1 style={{ fontSize: 52, fontFamily: "'Damion', cursive" }}>Team Heist Tactics</h1>
+          <h1 style={{ fontSize: 52, fontFamily: "'Damion', cursive" }}>
+            Team Heist Tactics
+          </h1>
           <JoinGameForm />
         </div>
       ) : null}

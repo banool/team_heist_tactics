@@ -18,7 +18,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   gameWindowComponent: {
     width: "100%",
     height: "100%",
-    backgroundColor: colors.background,
     position: "absolute",
     margin: "auto",
   },

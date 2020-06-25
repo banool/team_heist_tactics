@@ -1,24 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { MapPosition } from "../generated/types_pb";
-import {
-  INTERNAL_SQUARE_SIZE,
-  INTERNAL_TILE_OFFSET,
-} from "../constants/other";
+import { INTERNAL_SQUARE_SIZE, INTERNAL_TILE_OFFSET } from "../constants/other";
 import { CanvasPosition } from "./types";
 
 export const mapPositionToCanvasPositionSingle = (
   n: number,
   pixel_offset: number,
-  canvas_dimension_size_px: number,  // CANVAS_WIDTH or CANVAS_HEIGHT
+  canvas_dimension_size_px: number, // CANVAS_WIDTH or CANVAS_HEIGHT
   tile_offset: number
 ): number => {
   var num_tiles_away_from_center = Math.floor((n + tile_offset) / 4);
   var corner_canvas =
     (num_tiles_away_from_center * 2 + 1) * INTERNAL_TILE_OFFSET +
     n * INTERNAL_SQUARE_SIZE;
-  var adjusted_canvas = corner_canvas + pixel_offset + canvas_dimension_size_px / 2;
+  var adjusted_canvas =
+    corner_canvas + pixel_offset + canvas_dimension_size_px / 2;
   return adjusted_canvas;
-}
+};
 
 export const mapPositionToCanvasPosition = (
   map_position: MapPosition,
@@ -26,12 +24,22 @@ export const mapPositionToCanvasPosition = (
   tile_offset_x: number,
   tile_offset_y: number,
   canvas_width: number,
-  canvas_height: number,
+  canvas_height: number
 ): CanvasPosition => {
   var map_x = map_position.getX();
   var map_y = map_position.getY();
-  var canvas_x = mapPositionToCanvasPositionSingle(map_x, pixel_offset, canvas_width, tile_offset_x);
-  var canvas_y = mapPositionToCanvasPositionSingle(map_y, pixel_offset, canvas_height, tile_offset_y);
+  var canvas_x = mapPositionToCanvasPositionSingle(
+    map_x,
+    pixel_offset,
+    canvas_width,
+    tile_offset_x
+  );
+  var canvas_y = mapPositionToCanvasPositionSingle(
+    map_y,
+    pixel_offset,
+    canvas_height,
+    tile_offset_y
+  );
   return { x: canvas_x, y: canvas_y };
 };
 
@@ -71,17 +79,17 @@ export const canvasPositionToMapPosition = (
   canvas_position: CanvasPosition,
   pixel_offset: number,
   canvas_width: number,
-  canvas_height: number,
+  canvas_height: number
 ): MapPosition => {
   var map_x = canvasCoordToMapCoord(
     canvas_position.x,
     pixel_offset,
-    canvas_width,
+    canvas_width
   );
   var map_y = canvasCoordToMapCoord(
     canvas_position.y,
     pixel_offset,
-    canvas_height,
+    canvas_height
   );
   var out = new MapPosition();
   out.setX(map_x);
@@ -89,25 +97,26 @@ export const canvasPositionToMapPosition = (
   return out;
 };
 
-
 function getWindowDimensions() {
   const { innerWidth: width, innerHeight: height } = window;
   return {
     width,
-    height
+    height,
   };
 }
 
 export function useWindowDimensions() {
-  const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+  const [windowDimensions, setWindowDimensions] = useState(
+    getWindowDimensions()
+  );
 
   useEffect(() => {
     function handleResize() {
       setWindowDimensions(getWindowDimensions());
     }
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return windowDimensions;
