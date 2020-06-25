@@ -10,8 +10,8 @@ Generate typescript from protobuf definitions:
 
 Build js:
 ```
-npm i
-npm run build
+yarn install
+yarn run devbuild
 ```
 Run the web UI:
 ```
@@ -21,7 +21,7 @@ python3 -m http.server --directory dist
 
 Make things pretty with this:
 ```
-npm run style-fix
+yarn run style-fix
 ```
 
 ## TODO
