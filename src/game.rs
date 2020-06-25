@@ -7,7 +7,7 @@ use crate::manager::{GameHandle, GameOptions};
 use crate::types::main_message::Body;
 use crate::types::{
     GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition, Move,
-    MoveDirection, PlaceTile, Player, Square, Tile, WallType, DOOR_TYPES,
+    MoveDirection, PlaceTile, Player, Square, SquareType, Tile, WallType, DOOR_TYPES,
 };
 
 use log::{info, trace};
@@ -187,6 +187,77 @@ impl Game {
             }
         }
         return MoveValidity::Valid;
+    }
+
+    fn position_is_escalator(
+        grid: &HashMap<MapPosition, Square>,
+        pos: &MapPosition,
+    ) -> MoveValidity {
+        match grid.get(&pos) {
+            Some(square) => match square.square_type {
+                SquareType::Escalator => MoveValidity::Valid,
+                _wildcard => {
+                    let msg = format!("Square at {:?} is not escalator", pos);
+                    MoveValidity::Invalid(msg)
+                }
+            },
+            None => {
+                let msg = format!("Position {:?} not found in grid", pos);
+                MoveValidity::Invalid(msg)
+            }
+        }
+    }
+
+    fn get_tile_from_position(&self, position: &MapPosition) -> Option<Tile> {
+        for t in &self.game_state.tiles {
+            let x_distance = position.x - t.position.x;
+            let x_distance_within_tile = x_distance > 0 && x_distance < 3;
+            match x_distance_within_tile {
+                true => {
+                    let y_distance = position.y - t.position.y;
+                    let y_distance_within_tile = y_distance > 0 && y_distance < 3;
+                    match y_distance_within_tile {
+                        true => return Some(t.clone()),
+                        false => continue,
+                    }
+                }
+                false => continue,
+            }
+        }
+        None
+    }
+
+    /// To validate an escalator move, we need to do a few checks:
+    /// 1. is the dest position on an escalator square?
+    /// 2. is the heister on an escalator square?
+    /// 3. is the heister in the same tile as the dest escalator?
+    fn validate_escalator_move(
+        &self,
+        grid: &HashMap<MapPosition, Square>,
+        heister_pos: &MapPosition,
+        dest_pos: &MapPosition,
+    ) -> MoveValidity {
+        match Self::position_is_escalator(grid, dest_pos) {
+            MoveValidity::Valid => {
+                match grid.get(&heister_pos).unwrap().square_type {
+                    SquareType::Escalator => {
+                        // last check: is the heister & dest on the same tile?
+                        let ht = self.get_tile_from_position(heister_pos);
+                        let dt = self.get_tile_from_position(dest_pos);
+                        match ht == dt {
+                            true => MoveValidity::Valid,
+                            false => MoveValidity::Invalid(
+                                "Heister and dest escalator are on different tiles".to_string(),
+                            ),
+                        }
+                    }
+                    _wildcard => {
+                        MoveValidity::Invalid("Heister is not on an escalator".to_string())
+                    }
+                }
+            }
+            _invalid => _invalid,
+        }
     }
 
     fn get_door_wall(square: &Square) -> Option<WallType> {
@@ -402,10 +473,23 @@ impl Game {
                 heister.map_position = dest_pos;
             }
             validity
+        } else if Self::position_is_escalator(&grid, &dest_pos) == MoveValidity::Valid {
+            let validity = self.validate_escalator_move(&grid, heister_pos, &dest_pos);
+            match validity.clone() {
+                MoveValidity::Valid => {
+                    // if valid, let's do the update
+                    let mut heister = self
+                        .get_mut_heister_from_vec(heister_color.clone())
+                        .unwrap();
+                    heister.map_position = dest_pos;
+                }
+                _invalid => {}
+            }
+            validity
         } else {
             // If they're not adjacent, then we can check whether the destination is a
             // matching teleport, and whether teleportation is allowed right now
-            return MoveValidity::Invalid("Teleports & Escalators not implemented yet".to_string());
+            MoveValidity::Invalid("Teleports not implemented yet".to_string())
         }
     }
 
