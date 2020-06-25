@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 import JoinGameForm from "./JoinGameForm";
-import ConnectionStatusComponent from "./ConnectionStatusComponent";
-import GameComponent from "./GameComponent";
+import GameWindowComponent from "./GameWindowComponent";
 import { useDispatch } from "react-redux";
 import { gameStateSelector, heisterSelectedSelector } from "./slice";
 
@@ -11,7 +10,6 @@ import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
 
 import { handleKeyInput } from "./api";
-import GameWindowComponent from "./GameWindowComponent";
 import styles from "../components/styles";
 
 type MainGameProps = {};
@@ -68,7 +66,7 @@ const MainGame = ({}: MainGameProps) => {
         </div>
       ) : null}
       {connection_status == ConnectionStatus.Connected && game_state ? (
-        <GameComponent />
+        <GameWindowComponent />
       ) : null}
     </div>
   );
