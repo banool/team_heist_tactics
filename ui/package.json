@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "UNLICENSED",
+  "engines": {
+    "npm": "please-use-yarn",
+    "yarn": ">= 1.22.4",
+    "node": ">= 14.4.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "devbuild": "webpack --config webpack.dev.js",
@@ -20,7 +25,6 @@
     "@babel/plugin-transform-react-jsx": "^7.10.3",
     "@babel/preset-typescript": "^7.10.1",
     "@giantmachines/redux-websocket": "^1.2.1",
-    "@hot-loader/react-dom": "^16.11.0",
     "@reduxjs/toolkit": "^1.4.0",
     "@types/google-protobuf": "^3.7.2",
     "@types/react": "^16.9.38",

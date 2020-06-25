@@ -7,6 +7,7 @@ For UI specific stuff see ui/
 ## Developing
 First, make sure you have all this stuff:
 
+- Node (>= v14, use nvm to help with this)
 - Yarn (https://classic.yarnpkg.com/en/docs/install/)
 - Cargo (https://rustup.rs/)
 - Rust nightly-2020-06-11 (try `rustup default nightly-2020-06-11`)

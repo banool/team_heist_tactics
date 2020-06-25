@@ -15,7 +15,7 @@ rm -rf dist
 cp ../src/types.proto .
 ./generate_types.sh
 rm types.proto
-echo 'Note: Not running npm install'
+echo 'Note: Not running yarn install'
 if [ "$DEV_MODE" = "dev" ]; then
     yarn run devbuild
 elif [ "$DEV_MODE" = "prod" ]; then
