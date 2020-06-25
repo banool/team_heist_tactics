@@ -4,26 +4,35 @@ import {
   CANVAS_HEIGHT,
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
+  TILE_SIZE,
 } from "../constants/other";
 import { CanvasPosition } from "./types";
 
+export const mapPositionToCanvasPositionSingle = (
+  n: number,
+  pixel_offset: number,
+  canvas_dimension_size_px: number,  // CANVAS_WIDTH or CANVAS_HEIGHT
+  tile_offset: number
+): number => {
+  var num_tiles_away_from_center = Math.floor((n + tile_offset) / 4);
+  var corner_canvas =
+    (num_tiles_away_from_center * 2 + 1) * INTERNAL_TILE_OFFSET +
+    n * INTERNAL_SQUARE_SIZE;
+  var adjusted_canvas = corner_canvas + pixel_offset + canvas_dimension_size_px / 2;
+  return adjusted_canvas;
+}
+
 export const mapPositionToCanvasPosition = (
   map_position: MapPosition,
-  pixel_offset: number
+  pixel_offset: number,
+  tile_offset_x: number,
+  tile_offset_y: number,
 ): CanvasPosition => {
   var map_x = map_position.getX();
   var map_y = map_position.getY();
-  var num_tiles_away_from_center_x = Math.floor(map_x / 4);
-  var num_tiles_away_from_center_y = Math.floor(map_y / 4);
-  var corner_canvas_x =
-    (num_tiles_away_from_center_x * 2 + 1) * INTERNAL_TILE_OFFSET +
-    map_x * INTERNAL_SQUARE_SIZE;
-  var corner_canvas_y =
-    (num_tiles_away_from_center_y * 2 + 1) * INTERNAL_TILE_OFFSET +
-    map_y * INTERNAL_SQUARE_SIZE;
-  var adjusted_canvas_x = corner_canvas_x + pixel_offset + CANVAS_WIDTH / 2;
-  var adjusted_canvas_y = corner_canvas_y + pixel_offset + CANVAS_HEIGHT / 2;
-  return { x: adjusted_canvas_x, y: adjusted_canvas_y };
+  var canvas_x = mapPositionToCanvasPositionSingle(map_x, pixel_offset, CANVAS_WIDTH, tile_offset_x);
+  var canvas_y = mapPositionToCanvasPositionSingle(map_y, pixel_offset, CANVAS_HEIGHT, tile_offset_y);
+  return { x: canvas_x, y: canvas_y };
 };
 
 const canvasCoordToMapCoord = (
@@ -84,7 +93,7 @@ var mp = new MapPosition();
 mp.setX(1);
 mp.setY(2);
 console.log("map x y", mp.getX(), mp.getY());
-var a = mapPositionToCanvasPosition(mp, 20);
+var a = mapPositionToCanvasPosition(mp, 20, 0, 0);
 console.log("canvas x y", a.x, a.y);
 var b = canvasPositionToMapPosition(a, 20);
 console.log("back to map x y", b.getX(), b.getY());

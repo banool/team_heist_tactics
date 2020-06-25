@@ -50,17 +50,19 @@ const Tile = ({ proto_tile }: TileProps) => {
   const pixel_offset = -INTERNAL_TILE_OFFSET;
 
   var map_position = proto_tile.getPosition()!;
-  var canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset);
+  var canvas_position = mapPositionToCanvasPosition(map_position, pixel_offset, 1, 3);
+
+  var num_rotations = proto_tile.getNumRotations();
 
   console.log(
-    `tile at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
+    `fuck tile at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position} rotated ${num_rotations} times`
   );
 
   var comp: JSX.Element;
   if (status === "loaded") {
     comp = (
       <Image
-        shadowBlur={10}
+        //shadowBlur={10}
         image={image}
         width={size}
         height={size}
@@ -68,7 +70,7 @@ const Tile = ({ proto_tile }: TileProps) => {
         offsetY={offset}
         x={canvas_position.x}
         y={canvas_position.y}
-        rotation={proto_tile.getNumRotations() * 90}
+        rotation={num_rotations * 90}
       />
     );
   } else if (status === "loading") {
@@ -93,7 +95,9 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   const map_position = proto_heister.getMapPosition()!;
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
-    pixel_offset
+    pixel_offset,
+    0,
+    0
   );
 
   console.log(
@@ -154,7 +158,9 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
 
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
-    pixel_offset
+    pixel_offset,
+    0,
+    0,
   );
 
   console.log(
