@@ -12,7 +12,6 @@ test('map_position translation both directions for 0,0 should return 0,0', () =>
   expect(b.getY()).toBe(center.getY());
 })
 
-
 test('map position translation in both directions at non-center should work, too', () => {
   // NOTE: TODO: This fails at big numbers (251 and 252).
   // Unit test of sorts.
