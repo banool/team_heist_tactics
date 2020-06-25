@@ -1,9 +1,9 @@
-import { hot } from "react-hot-loader/root";
 import React from "react";
-
 import Footer from "./Footer";
 import JoinGamePage from "../join_game/JoinGamePage";
 import styles from "./styles";
+import { Provider } from "react-redux";
+import store from "../common/store";
 
 const App = ({}) => {
   return (
@@ -18,4 +18,13 @@ const App = ({}) => {
   );
 };
 
-export default hot(App);
+const AppWrapper = () => {
+  return (
+    <Provider store={store}>
+      <App />
+    </Provider>
+  )
+}
+
+
+export default AppWrapper;
