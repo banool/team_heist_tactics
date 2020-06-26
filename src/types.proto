@@ -18,18 +18,10 @@ enum HeisterColor {
 
 // The symbol of a heister. This is just used for flavour / accessibility.
 enum HeisterSymbol {
-  SWORD = 0;
-  VIAL = 1;
-  BOW = 2;
-  AXE = 3;
-}
-
-// The name of a heister. This is just used for flavour / accessibility.
-enum HeisterName {
-  BARBARIAN = 0;
-  MAGE = 1;
-  ELF = 2;
-  DWARF = 3;
+  CROWN = 0;
+  PAINTING = 1;
+  SKULL = 2;
+  VASE = 3;
 }
 
 // This is used to describe the position of a heister on a tile.

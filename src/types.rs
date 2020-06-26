@@ -16,7 +16,6 @@ mod proto_types {
 pub use proto_types::Ability;
 pub use proto_types::GameStatus;
 pub use proto_types::HeisterColor;
-pub use proto_types::HeisterName;
 pub use proto_types::HeisterSymbol;
 pub use proto_types::SquareType;
 pub use proto_types::WallType;
