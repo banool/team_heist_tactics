@@ -13,7 +13,7 @@ const reduxWebsocketMiddleware = reduxWebsocket({
   serializer: customSerializer,
   prefix: WEBSOCKET_ACTION_PREFIX,
   reconnectOnClose: true,
-  reconnectInterval: 1000,
+  reconnectInterval: 10000,
   // Modify the websocket so it returns arraybuffers instead of blobs.
   onOpen: (socket: WebSocket) => (socket.binaryType = "arraybuffer"),
 });

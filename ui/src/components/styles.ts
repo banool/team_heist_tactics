@@ -55,6 +55,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "black",
     fontSize: 18,
   },
+  invalidMessages: {
+  },
+  invalidMessagesOverlay: {
+    zIndex: 5,
+    position: "absolute",
+    right: 30,
+    top: 10,
+    height: 120,
+  },
 };
 
 export default styles;

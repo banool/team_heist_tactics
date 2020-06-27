@@ -31,6 +31,7 @@ import {
 import styles from "../components/styles";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
 import { CanvasPosition } from "./types";
+import InvalidMessagesComponent from "./InvalidMessagesComponent";
 
 type GetTileShadowSquareProps = {
   proto_tile: ProtoTile;
@@ -437,8 +438,8 @@ const GameWindowComponent = () => {
       <div style={styles.resetGameWindowOverlay}>
         <ResetMapComponent reset_parent_func={resetMap} />
       </div>
-      <div style={styles.connectionStatusOverlay}>
-        <ConnectionStatusComponent />
+      <div style={styles.invalidMessagesOverlay}>
+        <InvalidMessagesComponent />
       </div>
       <div style={styles.overlayCanvas}>
         <Stage

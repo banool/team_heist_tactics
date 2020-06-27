@@ -11,6 +11,8 @@ import { ConnectionStatus } from "./types";
 
 import { handleKeyInput } from "./api";
 import styles from "../components/styles";
+import InvalidMessagesComponent from "./InvalidMessagesComponent";
+import ConnectionStatusComponent from "./ConnectionStatusComponent";
 
 type MainGameProps = {};
 const MainGame = ({}: MainGameProps) => {
@@ -65,11 +67,15 @@ const MainGame = ({}: MainGameProps) => {
             Team Heist Tactics
           </h1>
           <JoinGameForm />
+          <InvalidMessagesComponent />
         </div>
       ) : null}
       {connection_status == ConnectionStatus.Connected && game_state ? (
         <GameWindowComponent />
       ) : null}
+      <div style={styles.connectionStatusOverlay}>
+        <ConnectionStatusComponent />
+      </div>
     </div>
   );
 };
