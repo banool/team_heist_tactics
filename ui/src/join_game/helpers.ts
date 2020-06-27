@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { MapPosition } from "../generated/types_pb";
-import { INTERNAL_SQUARE_SIZE, INTERNAL_TILE_OFFSET } from "../constants/other";
+import { INTERNAL_SQUARE_SIZE, INTERNAL_TILE_OFFSET, TILE_SIZE } from "../constants/other";
 import { CanvasPosition } from "./types";
 
 export const mapPositionToCanvasPositionSingle = (
   n: number,
   pixel_offset: number,
   canvas_dimension_size_px: number, // CANVAS_WIDTH or CANVAS_HEIGHT
-  tile_offset: number
+  _tile_offset: number
 ): number => {
-  var num_tiles_away_from_center = Math.floor((n + tile_offset) / 4);
+  var num_tiles_away_from_center = Math.floor(n / 4);
+  // Corner Canvas - this is the relative distance n from 0,0 in pixels
   var corner_canvas =
-    (num_tiles_away_from_center * 2 + 1) * INTERNAL_TILE_OFFSET +
+    (num_tiles_away_from_center * 2) * INTERNAL_TILE_OFFSET +
     n * INTERNAL_SQUARE_SIZE;
+  // Adjusted Canvas - this translates 0,0 to match the center of the canvas, plus pixel offset
   var adjusted_canvas =
     corner_canvas + pixel_offset + canvas_dimension_size_px / 2;
   return adjusted_canvas;
@@ -48,31 +50,20 @@ const canvasCoordToMapCoord = (
   pixel_offset: number,
   canvas_dimension_size_px: number // CANVAS_WIDTH or CANVAS_HEIGHT
 ): number => {
-  // We start this function with a canvas coordinate, and we want to translate it back to a MapPosition
-  // The first thing we can do is reverse the last step -
-  // we will subtract pixel offset, and the CANVAS center offset
-  var adjusted_canvas_val = coord;
-  // This value, corner_canvas_val, is how far away the position is from the corner of the canvas
-  // If the corner of the canvas (0,0) was actually the center.
-  var corner_canvas_val =
-    adjusted_canvas_val - pixel_offset - canvas_dimension_size_px / 2;
+  // Translate the point so that its origin is at 0,0 - not at CANVAS_DIM / 2
+  var corner_canvas_val = coord - pixel_offset - canvas_dimension_size_px / 2;
+
   // We know that corner_canvas_val is the _sum_ of tile_offset and square_offset.
   // We need to get both of those values separately from this value, corner_canvas_val
+  var num_tiles_offset = Math.floor(corner_canvas_val / TILE_SIZE);
+  var canvas_square_offset = corner_canvas_val - (TILE_SIZE * num_tiles_offset);
 
-  // I *think* we can get the tile offset first, and then use the remainder to determine the square offset
-  var tile_offset = Math.floor(
-    (corner_canvas_val / INTERNAL_TILE_OFFSET - 1) / 2
-  );
-  var canvas_square_offset = corner_canvas_val - tile_offset;
-  var square_offset = Math.floor(canvas_square_offset / INTERNAL_SQUARE_SIZE);
+  // We should repeat the process (square offset = floor of current val (canvas_square_offset) / square_size)
+  var num_squares_offset = Math.floor(canvas_square_offset / INTERNAL_SQUARE_SIZE);
 
-  // Now that we have these, what do we really need next?
-  // We need: num_tiles_away_from_center_val
-  // ... now that I am reading this, I think we ought to rename it from num_tiles_away... to num_squares_away...
-  var num_squares_away_from_center_val = /*tile_offset * 4 + */ square_offset;
   // For each tile, we're moved 4 away. For each square, it's 1 worth
-  var map_coord = num_squares_away_from_center_val;
-  return map_coord;
+  var num_squares_away_from_center = num_tiles_offset * 4 + num_squares_offset;
+  return num_squares_away_from_center;
 };
 
 export const canvasPositionToMapPosition = (

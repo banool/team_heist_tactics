@@ -61,7 +61,7 @@ const get_tile_and_shadow_tile = ({
 
   console.log(
     `fuck tile at canvas.x/y ${canvas_position.x} ${
-      canvas_position.y
+    canvas_position.y
     } map ${map_position.getX()} ${map_position.getY()} rotated ${num_rotations} times`
   );
 
@@ -79,10 +79,10 @@ const get_tile_and_shadow_tile = ({
   var st = (
     <Rect
       key={`${tile_name}_square`}
-      x={canvas_position.x+5}
-      y={canvas_position.y+5}
-      width={TILE_SIZE-10}
-      height={TILE_SIZE-10}
+      x={canvas_position.x + 5}
+      y={canvas_position.y + 5}
+      width={TILE_SIZE - 10}
+      height={TILE_SIZE - 10}
       shadowBlur={20}
       shadowColor="black"
       shadowEnabled={true}
