@@ -13,8 +13,8 @@
     "devbuild": "webpack --config webpack.dev.js",
     "prodbuild": "webpack --config webpack.prod.js",
     "start": "Please use run.sh in the root directory",
-    "style-check": "prettier --check 'src/**/*.{js,jsx,ts,tsx}' ",
-    "style-fix": "prettier --write 'src/**/*.{js,jsx,ts,tsx}' ",
+    "style-check": "prettier --check 'src/**/*.{js,jsx,ts,tsx}'",
+    "style-fix": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
     "type-check": "tsc"
   },
   "dependencies": {
