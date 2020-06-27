@@ -63,7 +63,7 @@ const get_tile_and_shadow_tile = ({
 
   console.log(
     `fuck tile at canvas.x/y ${canvas_position.x} ${
-    canvas_position.y
+      canvas_position.y
     } map ${map_position.getX()} ${map_position.getY()} rotated ${num_rotations} times`
   );
 
