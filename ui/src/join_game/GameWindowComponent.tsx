@@ -32,6 +32,7 @@ import styles from "../components/styles";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
 import { CanvasPosition } from "./types";
 import InvalidMessagesComponent from "./InvalidMessagesComponent";
+import TimerComponent from "./TimerComponent";
 
 type GetTileShadowSquareProps = {
   proto_tile: ProtoTile;
@@ -80,10 +81,10 @@ const get_tile_and_shadow_tile = ({
   var st = (
     <Rect
       key={`${tile_name}_square`}
-      x={canvas_position.x+5}
-      y={canvas_position.y+5}
-      width={TILE_SIZE-10}
-      height={TILE_SIZE-10}
+      x={canvas_position.x + 5}
+      y={canvas_position.y + 5}
+      width={TILE_SIZE - 10}
+      height={TILE_SIZE - 10}
       shadowBlur={20}
       shadowColor="black"
       shadowEnabled={true}
@@ -440,6 +441,9 @@ const GameWindowComponent = () => {
       </div>
       <div style={styles.invalidMessagesOverlay}>
         <InvalidMessagesComponent />
+      </div>
+      <div style={styles.timerOverlay}>
+        <TimerComponent />
       </div>
       <div style={styles.overlayCanvas}>
         <Stage

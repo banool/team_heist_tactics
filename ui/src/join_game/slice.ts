@@ -36,7 +36,9 @@ const WEBSOCKET_MESSAGE_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
 );
 const WEBSOCKET_OPEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_OPEN);
 const WEBSOCKET_SEND_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_SEND);
-const WEBSOCKET_ERROR_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(WEBSOCKET_ERROR);
+const WEBSOCKET_ERROR_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
+  WEBSOCKET_ERROR
+);
 
 interface GameInfo {
   connection_status: ConnectionStatus;
@@ -56,7 +58,7 @@ const pushToPlayerMessageQueue = (queue: string[], msg: string) => {
   if (queue.length > MAX_PLAYER_MESSAGES) {
     queue.shift();
   }
-}
+};
 
 interface SelectKeyboardHeisterAction {
   // HeisterColor.
@@ -115,7 +117,10 @@ const joinGameSlice = createSlice({
       );
       state.connection_status = ConnectionStatus.NotConnected;
       state.player_message_queue = [];
-      pushToPlayerMessageQueue(state.player_message_queue, "Lost connection to server!");
+      pushToPlayerMessageQueue(
+        state.player_message_queue,
+        "Lost connection to server!"
+      );
     },
     [WEBSOCKET_CLOSED_FULL]: (state, _action) => {
       console.log(
@@ -145,7 +150,7 @@ const joinGameSlice = createSlice({
       console.debug("Sending message over websocket");
     },
     [WEBSOCKET_ERROR_FULL]: (state, action) => {
-      let msg = `Failed to join. Is the game handle valid?`
+      let msg = `Failed to join. Is the game handle valid?`;
       pushToPlayerMessageQueue(state.player_message_queue, msg);
     },
   },
@@ -164,5 +169,7 @@ export const heisterSelectedSelector = (state: RootState): any | null =>
   state.joinGame.heister_selected_keyboard;
 export const playerMessageQueueSelector = (state: RootState): string[] =>
   state.joinGame.player_message_queue;
+export const timerRunsOutSelector = (state: RootState): number =>
+  state.joinGame.game_state!.getTimerRunsOut();
 
 export default joinGameSlice.reducer;

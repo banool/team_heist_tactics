@@ -55,14 +55,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "black",
     fontSize: 18,
   },
-  invalidMessages: {
-  },
+  invalidMessages: {},
   invalidMessagesOverlay: {
     zIndex: 5,
     position: "absolute",
     right: 30,
     top: 10,
     height: 120,
+  },
+  timerOverlay: {
+    zIndex: 5,
+    position: "absolute",
+    left: 20,
+    top: 60,
+    height: 120,
+    fontSize: 20,
   },
 };
 
