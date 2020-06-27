@@ -18,7 +18,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   gameWindowComponent: {
     width: "100%",
     height: "100%",
-    position: "absolute",
+    position: "relative",
     margin: "auto",
   },
   gameWindowComponentWrapper: {
@@ -65,11 +65,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   timerOverlay: {
     zIndex: 5,
-    position: "absolute",
-    left: 20,
-    top: 60,
-    height: 120,
+    position: "relative",
     fontSize: 20,
+    textAlign: "center",
   },
 };
 

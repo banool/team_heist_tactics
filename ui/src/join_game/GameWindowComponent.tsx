@@ -386,55 +386,92 @@ const GameWindowComponent = () => {
   // move "the map". The second is for overlay elements that shouldn't move
   // even when the user drags the map around.
   return (
-    <div style={styles.gameWindowComponent}>
-      <div style={styles.gameWindowComponentWrapper}>
-        <Stage
-          x={stageX}
-          y={stageY}
-          width={width}
-          height={height}
-          draggable={true}
-          transformsEnabled={"position"}
+    <div>
+      <div style={styles.gameWindowComponent}>
+        <div style={styles.gameWindowComponentWrapper}>
+          <Stage
+            x={stageX}
+            y={stageY}
+            width={width}
+            height={height}
+            draggable={true}
+            transformsEnabled={"position"}
+          >
+            <Layer>
+              <ShadowTiles shadow_tiles={shadow_tiles} />
+              <Tiles tiles={tiles} />
+              <Heisters heisters={getHeisters()} />
+              <PossiblePlacements possible_placements={getPossiblePlacements()} />
+            </Layer>
+          </Stage>
+        </div>
+        <div
+          style={{
+            ...styles.keyboardHeisterNumber,
+            ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 5 },
+          }}
         >
-          <Layer>
-            <ShadowTiles shadow_tiles={shadow_tiles} />
-            <Tiles tiles={tiles} />
-            <Heisters heisters={getHeisters()} />
-            <PossiblePlacements possible_placements={getPossiblePlacements()} />
-          </Layer>
-        </Stage>
-      </div>
-      <div
-        style={{
-          ...styles.keyboardHeisterNumber,
-          ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 5 },
-        }}
-      >
-        1
-      </div>
-      <div
-        style={{
-          ...styles.keyboardHeisterNumber,
-          ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 5 },
-        }}
-      >
-        2
-      </div>
-      <div
-        style={{
-          ...styles.keyboardHeisterNumber,
-          ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 5 },
-        }}
-      >
-        3
-      </div>
-      <div
-        style={{
-          ...styles.keyboardHeisterNumber,
-          ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 5 },
-        }}
-      >
-        4
+          1
+        </div>
+        <div
+          style={{
+            ...styles.keyboardHeisterNumber,
+            ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 5 },
+          }}
+        >
+          2
+        </div>
+        <div
+          style={{
+            ...styles.keyboardHeisterNumber,
+            ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 5 },
+          }}
+        >
+          3
+        </div>
+        <div
+          style={{
+            ...styles.keyboardHeisterNumber,
+            ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 5 },
+          }}
+        >
+          4
+        </div>
+        <div style={styles.overlayCanvas}>
+          <Stage
+            x={stageX}
+            y={stageY}
+            width={width}
+            height={height}
+            draggable={false}
+            transformsEnabled={"none"}
+          >
+            <Layer>
+              <Provider store={store}>
+                <ActiveHeisterKeyboardComponent
+                  x={YELLOW_HEISTER_KEYBOARD_ICON}
+                  y={KEYBOARD_ITEM_Y}
+                  heister_color={HeisterColor.YELLOW}
+                />
+                <ActiveHeisterKeyboardComponent
+                  x={PURPLE_HEISTER_KEYBOARD_ICON}
+                  y={KEYBOARD_ITEM_Y}
+                  heister_color={HeisterColor.PURPLE}
+                />
+                <ActiveHeisterKeyboardComponent
+                  x={GREEN_HEISTER_KEYBOARD_ICON}
+                  y={KEYBOARD_ITEM_Y}
+                  heister_color={HeisterColor.GREEN}
+                />
+                <ActiveHeisterKeyboardComponent
+                  x={ORANGE_HEISTER_KEYBOARD_ICON}
+                  y={KEYBOARD_ITEM_Y}
+                  heister_color={HeisterColor.ORANGE}
+                />
+              </Provider>
+            </Layer>
+          </Stage>
+        </div>
       </div>
       <div style={styles.resetGameWindowOverlay}>
         <ResetMapComponent reset_parent_func={resetMap} />
@@ -444,41 +481,6 @@ const GameWindowComponent = () => {
       </div>
       <div style={styles.timerOverlay}>
         <TimerComponent />
-      </div>
-      <div style={styles.overlayCanvas}>
-        <Stage
-          x={stageX}
-          y={stageY}
-          width={width}
-          height={height}
-          draggable={false}
-          transformsEnabled={"none"}
-        >
-          <Layer>
-            <Provider store={store}>
-              <ActiveHeisterKeyboardComponent
-                x={YELLOW_HEISTER_KEYBOARD_ICON}
-                y={KEYBOARD_ITEM_Y}
-                heister_color={HeisterColor.YELLOW}
-              />
-              <ActiveHeisterKeyboardComponent
-                x={PURPLE_HEISTER_KEYBOARD_ICON}
-                y={KEYBOARD_ITEM_Y}
-                heister_color={HeisterColor.PURPLE}
-              />
-              <ActiveHeisterKeyboardComponent
-                x={GREEN_HEISTER_KEYBOARD_ICON}
-                y={KEYBOARD_ITEM_Y}
-                heister_color={HeisterColor.GREEN}
-              />
-              <ActiveHeisterKeyboardComponent
-                x={ORANGE_HEISTER_KEYBOARD_ICON}
-                y={KEYBOARD_ITEM_Y}
-                heister_color={HeisterColor.ORANGE}
-              />
-            </Provider>
-          </Layer>
-        </Stage>
       </div>
     </div>
   );
