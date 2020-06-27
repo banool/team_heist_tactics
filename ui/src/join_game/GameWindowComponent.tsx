@@ -401,7 +401,9 @@ const GameWindowComponent = () => {
               <ShadowTiles shadow_tiles={shadow_tiles} />
               <Tiles tiles={tiles} />
               <Heisters heisters={getHeisters()} />
-              <PossiblePlacements possible_placements={getPossiblePlacements()} />
+              <PossiblePlacements
+                possible_placements={getPossiblePlacements()}
+              />
             </Layer>
           </Stage>
         </div>

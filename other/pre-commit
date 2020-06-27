@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if ! cargo fmt -- --check > /dev/null; then
+    echo 'The backend is not formatted properly, please run this from the root:'
+    echo './style.sh'
+    exit 1
+fi
+
+cd ui
+if ! yarn run style-check; then
+    echo 'The UI is not formatted properly, please run this from the root:'
+    echo './style.sh'
+    exit 1
+fi
+

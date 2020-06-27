@@ -1233,7 +1233,6 @@ pub fn tile_9() -> Tile {
     }
 }
 
-
 #[allow(dead_code, unused_imports)]
 mod tests {
     #[test]

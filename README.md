@@ -5,6 +5,15 @@ Yayyy!!!!!!!!
 For UI specific stuff see ui/
 
 ## Developing
+Before anything, install the pre-commit hook:
+
+```
+cd .git/hooks
+ln -s ../../other/pre-commit
+```
+
+This makes sure that you format your code before you commit.
+
 First, make sure you have all this stuff:
 
 - Node (>= v14, use nvm to help with this)
