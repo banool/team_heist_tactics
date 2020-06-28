@@ -885,9 +885,9 @@ pub fn tile_7() -> Tile {
     let sq12 = Square {
         north_wall: WallType::Clear,
         east_wall: WallType::Clear,
-        south_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
         west_wall: WallType::Clear,
-        square_type: SquareType::Escalator,
+        square_type: SquareType::Normal,
     };
     my_squares.push(sq12);
 
@@ -909,9 +909,17 @@ pub fn tile_7() -> Tile {
     };
     my_squares.push(sq20);
 
-    // squares 21, 22 are blocked
+    // squares 21 is blocked
     my_squares.push(blocked_square);
-    my_squares.push(blocked_square);
+
+    let sq22 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Escalator,
+    };
+    my_squares.push(sq22);
 
     let sq23 = Square {
         north_wall: WallType::Clear,
