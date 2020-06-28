@@ -63,7 +63,8 @@ const get_tile_and_shadow_tile = ({
     1,
     3,
     width,
-    height
+    height,
+    1
   );
   var num_rotations = proto_tile.getNumRotations();
   var tile_name = proto_tile.getName();
@@ -178,7 +179,8 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     tile_offset_x,
     tile_offset_y,
     width,
-    height
+    height,
+    0
   );
 
   console.log(
@@ -200,7 +202,8 @@ const Heister = ({ proto_heister }: HeisterProps) => {
       intended_canvas_position,
       pixel_offset,
       width,
-      height
+      height,
+      0
     );
     console.log(
       `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
@@ -247,7 +250,8 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
     0,
     0,
     width,
-    height
+    height,
+    0
   );
 
   console.log(
