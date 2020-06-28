@@ -16,3 +16,6 @@ export const INTERNAL_SQUARE_SIZE = (REAL_TILE_SQUARE_SIZE / 1600) * TILE_SIZE;
 
 // Make the heister the size of a square / 2 minus a bit.
 export const HEISTER_SIZE = INTERNAL_SQUARE_SIZE / 2 - 10;
+
+// Number of messages to store in the log / queue.
+export const MAX_PLAYER_MESSAGES = 3;

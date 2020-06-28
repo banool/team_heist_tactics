@@ -59,8 +59,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   invalidMessagesOverlay: {
     zIndex: 5,
     position: "absolute",
-    right: 30,
-    top: 10,
+    left: 30,
+    bottom: 50,
     height: 120,
   },
   timerOverlay: {

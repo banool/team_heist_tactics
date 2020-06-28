@@ -1,17 +1,27 @@
 import React from "react";
-
 import { useSelector } from "react-redux";
-
 import { playerMessageQueueSelector } from "./slice";
 import styles from "../components/styles";
+import { MAX_PLAYER_MESSAGES } from "../constants/other";
 
 const InvalidMessagesComponent = () => {
   const player_message_queue = useSelector(playerMessageQueueSelector);
 
+  const LOWEST_OPACITY = 0.6;
+
   return (
     <div style={styles.invalidMessages}>
-      {player_message_queue.map((msg) => (
-        <p key={msg}>{msg}</p>
+      {player_message_queue.map((msg, i) => (
+        <p
+          style={{
+            opacity:
+              LOWEST_OPACITY +
+              i * (i - LOWEST_OPACITY) * (1 / MAX_PLAYER_MESSAGES),
+          }}
+          key={msg}
+        >
+          {msg}
+        </p>
       ))}
     </div>
   );

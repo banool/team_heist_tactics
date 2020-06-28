@@ -6,7 +6,10 @@ import { JoinGameThing, ConnectionStatus } from "./types";
 
 import { GameState, MainMessage } from "../generated/types_pb";
 
-import { WEBSOCKET_ACTION_PREFIX_FULL } from "../constants/other";
+import {
+  WEBSOCKET_ACTION_PREFIX_FULL,
+  MAX_PLAYER_MESSAGES,
+} from "../constants/other";
 
 import {
   WEBSOCKET_BROKEN,
@@ -50,7 +53,6 @@ interface GameInfo {
   player_message_queue: string[];
 }
 
-const MAX_PLAYER_MESSAGES = 3;
 const pushToPlayerMessageQueue = (queue: string[], msg: string) => {
   const date = new Date();
   let message = `[${date.toLocaleTimeString()}] ${msg}`;
@@ -58,6 +60,15 @@ const pushToPlayerMessageQueue = (queue: string[], msg: string) => {
   if (queue.length > MAX_PLAYER_MESSAGES) {
     queue.shift();
   }
+};
+
+const pushInitialMessages = (queue: string[]) => {
+  pushToPlayerMessageQueue(
+    queue,
+    "Joined game. Welcome to Team Heist Tactics!!!"
+  );
+  pushToPlayerMessageQueue(queue, "Made by Fatema, Kelly, and Daniel :)");
+  pushToPlayerMessageQueue(queue, "Good luck have fun!");
 };
 
 interface SelectKeyboardHeisterAction {
@@ -108,7 +119,7 @@ const joinGameSlice = createSlice({
       );
       state.connection_status = ConnectionStatus.Connected;
       state.player_message_queue = [];
-      pushToPlayerMessageQueue(state.player_message_queue, "Joined game!!!");
+      pushInitialMessages(state.player_message_queue);
     },
     [WEBSOCKET_BROKEN_FULL]: (state, _action) => {
       console.log(
