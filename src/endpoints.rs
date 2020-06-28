@@ -3,7 +3,7 @@ use crate::game::MoveValidity;
 use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
 
-use log::{debug, info, warn};
+use log::{debug, info, trace, warn};
 use std::fs::File;
 use std::io::{BufReader, Read};
 
@@ -84,6 +84,7 @@ pub async fn play_game(
     stream: web::Payload,
     game_manager_wrapper: web::Data<GameManagerWrapper>,
 ) -> impl Responder {
+    debug!("Player {} joining game {}", info.name, info.handle);
     let mut game_manager = game_manager_wrapper.game_manager.write().unwrap();
     let handle = GameHandle(info.handle.to_string());
     let join_options = JoinOptions {
@@ -99,15 +100,27 @@ pub async fn play_game(
     let my_ws = MyWs {
         game_wrapper: game_wrapper.clone(),
     };
+    debug!(
+        "Created actor for player {} joining game {}",
+        info.name, info.handle
+    );
 
     let res = ws::start_with_addr(my_ws, &req, stream);
     let (addr, resp) = match res {
         Ok(res) => res,
         Err(e) => return HttpResponse::from_error(e),
     };
+    debug!(
+        "Registering actor for player {} joining game {}",
+        info.name, info.handle
+    );
     game_manager.register_actor(handle, addr);
-    // Push initial state / update other clients that there is a new player.
-    game_wrapper.read().unwrap().push_state().unwrap();
+    trace!(
+        "Registered actor for player {} joining game {}",
+        info.name,
+        info.handle
+    );
+
     debug!(
         "Websocket for player {} in game {} upgraded successfully",
         info.name, info.handle
