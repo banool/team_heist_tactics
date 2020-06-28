@@ -25,14 +25,6 @@ impl From<anyhow::Error> for MyError {
     }
 }
 
-impl From<askama::Error> for MyError {
-    fn from(err: askama::Error) -> MyError {
-        MyError {
-            err: anyhow::Error::new(err),
-        }
-    }
-}
-
 impl From<actix_web::error::UrlGenerationError> for MyError {
     fn from(err: actix_web::error::UrlGenerationError) -> MyError {
         MyError {

@@ -10,24 +10,21 @@ use std::io::{BufReader, Read};
 use actix::{Actor, Handler, StreamHandler};
 use actix_web::{http::header, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
-use askama::Template;
 use serde::Deserialize;
 use std::sync::{Arc, RwLock};
 
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate<'a> {
-    adjective: &'a str,
-}
-
 pub async fn index() -> impl Responder {
-    // TODO Use random adjective from the adjective list on GameManager.
-    let index = IndexTemplate { adjective: "lit" };
-    let body = match index.render() {
+    let file = File::open("templates/index.html");
+    let file = match file {
         Ok(body) => body,
-        Err(e) => return HttpResponse::from_error(MyError::from(e).into()),
+        Err(e) => return HttpResponse::from_error(e.into()),
     };
-    HttpResponse::Ok().body(body)
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = String::new();
+    buf_reader
+        .read_to_string(&mut contents)
+        .expect("Failed to read play.html into buffer");
+    HttpResponse::Ok().body(contents)
 }
 
 pub async fn play() -> impl Responder {
