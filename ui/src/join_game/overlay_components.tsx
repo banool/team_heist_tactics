@@ -31,6 +31,10 @@ export const ActiveHeisterKeyboardComponent = ({
   const heister_selected = useSelector(heisterSelectedSelector);
 
   const color = getColor(heister_color);
+
+  // Pretty sure this is the only component that needs
+  // perfectDrawEnabled to be true (which is the default).
+  // Without it, the circle looks weird.
   return (
     <Circle
       x={x}
@@ -42,6 +46,7 @@ export const ActiveHeisterKeyboardComponent = ({
       shadowBlur={8}
       shadowColor="black"
       shadowEnabled={heister_color === heister_selected}
+      perfectDrawEnabled={true}
     />
   );
 };

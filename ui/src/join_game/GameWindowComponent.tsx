@@ -134,6 +134,7 @@ const Tile = ({
         x={canvas_position.x}
         y={canvas_position.y}
         rotation={num_rotations * 90}
+        perfectDrawEnabled={false}
       />
     );
   } else if (status === "loading") {
@@ -208,7 +209,6 @@ const Heister = ({ proto_heister }: HeisterProps) => {
 
   return (
     <Circle
-      shadowBlur={1}
       x={canvas_position.x + random_x}
       y={canvas_position.y + random_y}
       stroke="black"
@@ -219,6 +219,7 @@ const Heister = ({ proto_heister }: HeisterProps) => {
       offsetY={offset}
       draggable={true}
       onDragEnd={onDragEnd}
+      perfectDrawEnabled={false}
     />
   );
 };
@@ -279,6 +280,7 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
       shadowBlur={5}
       shadowColor="black"
       shadowEnabled={shadowEnabled}
+      perfectDrawEnabled={false}
     />
   );
 };
@@ -385,6 +387,8 @@ const GameWindowComponent = () => {
   // There are two stages. The first here is for things that should move when
   // move "the map". The second is for overlay elements that shouldn't move
   // even when the user drags the map around.
+
+  // We set `listening={false}` on Layers that don't need to receive clicks.
   return (
     <div>
       <div style={styles.gameWindowComponent}>
@@ -397,10 +401,14 @@ const GameWindowComponent = () => {
             draggable={true}
             transformsEnabled={"position"}
           >
-            <Layer>
+            <Layer listening={false}>
               <ShadowTiles shadow_tiles={shadow_tiles} />
               <Tiles tiles={tiles} />
+            </Layer>
+            <Layer>
               <Heisters heisters={getHeisters()} />
+            </Layer>
+            <Layer>
               <PossiblePlacements
                 possible_placements={getPossiblePlacements()}
               />
@@ -448,7 +456,7 @@ const GameWindowComponent = () => {
             draggable={false}
             transformsEnabled={"none"}
           >
-            <Layer>
+            <Layer listening={false}>
               <Provider store={store}>
                 <ActiveHeisterKeyboardComponent
                   x={YELLOW_HEISTER_KEYBOARD_ICON}
