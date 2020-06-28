@@ -20,6 +20,13 @@ First, make sure you have all this stuff:
 - Yarn (https://classic.yarnpkg.com/en/docs/install/)
 - Cargo (https://rustup.rs/)
 - Rust nightly-2020-06-11 (try `rustup default nightly-2020-06-11`)
+- Protoc (http://google.github.io/proto-lens/installing-protoc.html)
+
+Getting all the JS dependencies:
+```
+cd ui
+yarn install
+```
 
 Building the UI, generating protobuf types, building the server, and then running it:
 ```
