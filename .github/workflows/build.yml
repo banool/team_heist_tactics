@@ -15,13 +15,3 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
         image_name: team_heist_tactics
-    - name: Build and publish team_heist_tactics to GitHub Packages
-      uses: docker/build-push-action@master
-      with:
-        repository: banool/team_heist_tactics/team_heist_tactics
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        registry: docker.pkg.github.com
-        dockerfile: Dockerfile
-        tags: latest
-        always_pull: true

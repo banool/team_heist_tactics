@@ -7,6 +7,17 @@
 /ui/dist
 /ui/node_modules
 
+# Other generated stuff
+/ui/src/generated/*
+/ui/yarn-error.log
+
+# More
+/other
+/README.md
+/IDEAS.md
+/style.sh
+/run.sh
+
 # Krita files
 /data/krita
 
