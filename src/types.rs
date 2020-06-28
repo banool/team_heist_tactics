@@ -431,8 +431,8 @@ impl Heister {
             // | |p|g| |
             // | | | | |
             StartingTile::A(_) => match heister_color {
-                HeisterColor::Yellow => MapPosition { x: 1, y: 1 },
-                HeisterColor::Purple => MapPosition { x: 1, y: 2 },
+                HeisterColor::Yellow => MapPosition { x: 1, y: 2 },
+                HeisterColor::Purple => MapPosition { x: 1, y: 1 },
                 HeisterColor::Green => MapPosition { x: 2, y: 2 },
                 HeisterColor::Orange => MapPosition { x: 2, y: 1 },
             },
