@@ -9,8 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - uses: whoan/docker-build-with-cache-action@v5
       with:
-        lfs: true
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        image_name: team_heist_tactics
     - name: Build and publish team_heist_tactics to GitHub Packages
       uses: docker/build-push-action@master
       with:
