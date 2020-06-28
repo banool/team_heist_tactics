@@ -45,6 +45,7 @@ const WEBSOCKET_ERROR_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
 
 interface GameInfo {
   connection_status: ConnectionStatus;
+  player_name: string | null;
   game_state: GameState | null;
   num_invalid_move_attempts: number;
   // HeisterColor for whichever is selected, or null if none are.
@@ -76,12 +77,13 @@ interface SelectKeyboardHeisterAction {
   heister_color: number;
 }
 
-interface GetCandleSuccessAction {
-  candle: JoinGameThing;
+interface RegisterPlayerNameAction {
+  player_name: string;
 }
 
 let initialState: GameInfo = {
   connection_status: ConnectionStatus.NotConnected,
+  player_name: null,
   game_state: null,
   num_invalid_move_attempts: 0,
   heister_selected_keyboard: null,
@@ -92,6 +94,13 @@ const joinGameSlice = createSlice({
   name: "joinGame",
   initialState,
   reducers: {
+    registerPlayerName: (
+      state,
+      action: PayloadAction<RegisterPlayerNameAction>
+    ) => {
+      const { player_name } = action.payload;
+      state.player_name = player_name;
+    },
     selectKeyboardHeister: (
       state,
       action: PayloadAction<SelectKeyboardHeisterAction>
@@ -165,7 +174,10 @@ const joinGameSlice = createSlice({
   },
 });
 
-export const { selectKeyboardHeister } = joinGameSlice.actions;
+export const {
+  registerPlayerName,
+  selectKeyboardHeister,
+} = joinGameSlice.actions;
 
 export const connectionStatusSelector = (state: RootState): ConnectionStatus =>
   state.joinGame.connection_status;

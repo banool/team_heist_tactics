@@ -12,7 +12,7 @@ import {
 import { connect, send } from "@giantmachines/redux-websocket";
 
 import { MoveDirection } from "./types";
-import { selectKeyboardHeister } from "./slice";
+import { registerPlayerName, selectKeyboardHeister } from "./slice";
 
 export function joinGame(join_game_thing: StagingJoinGameThing) {
   return async (dispatch) => {
@@ -34,6 +34,7 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
     var serverUrl = new URL(urlString);
     serverUrl.searchParams.set("name", join_game_thing.name);
     serverUrl.searchParams.set("handle", join_game_thing.handle);
+    dispatch(registerPlayerName({ player_name: join_game_thing.name }));
     dispatch(connect(serverUrl.toString()));
     console.log("Dispatched action to join game");
   };
