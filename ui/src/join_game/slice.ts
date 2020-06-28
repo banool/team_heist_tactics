@@ -118,7 +118,6 @@ const joinGameSlice = createSlice({
         ConnectionStatus[ConnectionStatus.Connected]
       );
       state.connection_status = ConnectionStatus.Connected;
-      state.player_message_queue = [];
       pushInitialMessages(state.player_message_queue);
     },
     [WEBSOCKET_BROKEN_FULL]: (state, _action) => {
@@ -127,7 +126,6 @@ const joinGameSlice = createSlice({
         ConnectionStatus[ConnectionStatus.NotConnected]
       );
       state.connection_status = ConnectionStatus.NotConnected;
-      state.player_message_queue = [];
       pushToPlayerMessageQueue(
         state.player_message_queue,
         "Lost connection to server!"
