@@ -294,6 +294,7 @@ const PossiblePlacements = ({ possible_placements }) => (
 const ShadowTiles = ({ shadow_tiles }) => (
   <>{shadow_tiles.map((st: any) => st)}</>
 );
+const Abilities = ({ abilities }) => <>{abilities.map((a: any) => a)}</>;
 
 const GameWindowComponent = () => {
   const game_state = useSelector(gameStateSelector);
@@ -360,6 +361,10 @@ const GameWindowComponent = () => {
     return possiblePlacements;
   };
 
+  const getAbilities = () => {
+    return [];
+  };
+
   const [stageX, setStageX] = useState(0);
   const [stageY, setStageY] = useState(0);
 
@@ -419,15 +424,15 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 12, top: 10 },
+            ...{ right: BASE_KEYBOARD_ICON + 5, top: 10 },
           }}
         >
-          You're moving:
+          You're moving
         </div>
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 4 },
+            ...{ right: YELLOW_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           1
@@ -435,7 +440,7 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 4 },
+            ...{ right: PURPLE_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           2
@@ -443,7 +448,7 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 4 },
+            ...{ right: GREEN_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           3
@@ -451,7 +456,7 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 4 },
+            ...{ right: ORANGE_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           4
@@ -468,22 +473,22 @@ const GameWindowComponent = () => {
             <Layer listening={false}>
               <Provider store={store}>
                 <ActiveHeisterKeyboardComponent
-                  x={YELLOW_HEISTER_KEYBOARD_ICON}
+                  x={width - YELLOW_HEISTER_KEYBOARD_ICON}
                   y={KEYBOARD_ITEM_Y}
                   heister_color={HeisterColor.YELLOW}
                 />
                 <ActiveHeisterKeyboardComponent
-                  x={PURPLE_HEISTER_KEYBOARD_ICON}
+                  x={width - PURPLE_HEISTER_KEYBOARD_ICON}
                   y={KEYBOARD_ITEM_Y}
                   heister_color={HeisterColor.PURPLE}
                 />
                 <ActiveHeisterKeyboardComponent
-                  x={GREEN_HEISTER_KEYBOARD_ICON}
+                  x={width - GREEN_HEISTER_KEYBOARD_ICON}
                   y={KEYBOARD_ITEM_Y}
                   heister_color={HeisterColor.GREEN}
                 />
                 <ActiveHeisterKeyboardComponent
-                  x={ORANGE_HEISTER_KEYBOARD_ICON}
+                  x={width - ORANGE_HEISTER_KEYBOARD_ICON}
                   y={KEYBOARD_ITEM_Y}
                   heister_color={HeisterColor.ORANGE}
                 />
@@ -500,6 +505,9 @@ const GameWindowComponent = () => {
       </div>
       <div style={styles.timerOverlay}>
         <TimerComponent />
+      </div>
+      <div style={styles.abilitiesOverlay}>
+        <Abilities abilities={getAbilities()} />
       </div>
     </div>
   );
