@@ -69,6 +69,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: 20,
     textAlign: "center",
   },
+  playerAbilitiesOverlay: {
+    zIndex: 5,
+    position: "absolute",
+    left: 20,
+    top: 0,
+    fontSize: 18,
+  },
 };
 
 export default styles;

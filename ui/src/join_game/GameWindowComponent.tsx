@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector, Provider, connect } from "react-redux";
-import { gameStateSelector, numInvalidMoveAttemptsSelector } from "./slice";
+import {
+  gameStateSelector,
+  numInvalidMoveAttemptsSelector,
+  playerNameSelector,
+} from "./slice";
 import {
   Tile as ProtoTile,
   Heister as ProtoHeister,
@@ -27,6 +31,7 @@ import store from "../common/store";
 import {
   ResetMapComponent,
   ActiveHeisterKeyboardComponent,
+  PlayerAbilities,
 } from "./overlay_components";
 import styles from "../components/styles";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
@@ -294,10 +299,13 @@ const PossiblePlacements = ({ possible_placements }) => (
 const ShadowTiles = ({ shadow_tiles }) => (
   <>{shadow_tiles.map((st: any) => st)}</>
 );
-const Abilities = ({ abilities }) => <>{abilities.map((a: any) => a)}</>;
+const ListOfPlayerAbilities = ({ player_abilities }) => (
+  <>{player_abilities.map((a: any) => a)}</>
+);
 
 const GameWindowComponent = () => {
   const game_state = useSelector(gameStateSelector);
+  const player_name = useSelector(playerNameSelector);
 
   // By making this invalid move counter part of the state relevant to this component,
   // the component will get updated whenever there is an invalid move attempt.
@@ -361,8 +369,39 @@ const GameWindowComponent = () => {
     return possiblePlacements;
   };
 
-  const getAbilities = () => {
-    return [];
+  const getPlayerAbilities = () => {
+    // Make sure their own abilities appear at the top.
+    var proto_players = game_state!.getPlayersList();
+    var player_abilities: JSX.Element[] = [];
+    var self: JSX.Element | null = null;
+    for (let i = 0; i < proto_players.length; i++) {
+      var proto_player = proto_players[i];
+      var name_prefix: string;
+      var proto_name = proto_player.getName();
+      if (proto_name === player_name) {
+        name_prefix = "Your";
+      } else {
+        name_prefix = `${proto_name}'s`;
+      }
+      var as = (
+        <Provider key={i} store={store}>
+          <PlayerAbilities
+            key={i + 300}
+            name_prefix={name_prefix}
+            proto_abilities={proto_player.getAbilitiesList()}
+          />
+        </Provider>
+      );
+      if (proto_name === player_name) {
+        self = as;
+      } else {
+        player_abilities.push(as);
+      }
+    }
+    if (self) {
+      player_abilities.unshift(self);
+    }
+    return player_abilities;
   };
 
   const [stageX, setStageX] = useState(0);
@@ -376,10 +415,10 @@ const GameWindowComponent = () => {
 
   const KEYBOARD_ITEM_Y = 50;
   const BASE_KEYBOARD_ICON = 30;
-  const YELLOW_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 0;
-  const PURPLE_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 1;
-  const GREEN_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 2;
-  const ORANGE_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 3;
+  const ORANGE_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 0;
+  const GREEN_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 1;
+  const PURPLE_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 2;
+  const YELLOW_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 3;
 
   var { tiles, shadow_tiles } = getTiles();
 
@@ -506,8 +545,8 @@ const GameWindowComponent = () => {
       <div style={styles.timerOverlay}>
         <TimerComponent />
       </div>
-      <div style={styles.abilitiesOverlay}>
-        <Abilities abilities={getAbilities()} />
+      <div style={styles.playerAbilitiesOverlay}>
+        <ListOfPlayerAbilities player_abilities={getPlayerAbilities()} />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { Stage, Layer, Circle, Text } from "react-konva";
 import { getColor } from "./api";
 import { heisterSelectedSelector } from "./slice";
 import { useSelector } from "react-redux";
+import { Ability } from "../generated/types_pb";
 
 // The offset makes the center of the image be the center of the canvas element.
 type ResetMapComponentProps = {
@@ -48,5 +49,50 @@ export const ActiveHeisterKeyboardComponent = ({
       shadowEnabled={heister_color === heister_selected}
       perfectDrawEnabled={true}
     />
+  );
+};
+
+type PlayerAbilitiesProps = {
+  name_prefix: string;
+  proto_abilities: number[];
+};
+export const PlayerAbilities = ({
+  name_prefix,
+  proto_abilities,
+}: PlayerAbilitiesProps) => {
+  const getAbilityEmoji = (proto_ability: number): string => {
+    switch (+proto_ability) {
+      case Ability.MOVE_NORTH:
+        return "⬆️";
+      case Ability.MOVE_EAST:
+        return "➡️";
+      case Ability.MOVE_SOUTH:
+        return "⬇️";
+      case Ability.MOVE_WEST:
+        return "⬅️";
+      case Ability.TELEPORT:
+        return "♋️";
+      case Ability.REVEAL_TILES:
+        return "🔎";
+      case Ability.USE_ESCALATOR:
+        return "🎢";
+      default:
+        console.error("Unexpected Ability");
+        return "?";
+    }
+  };
+
+  var abilities_string: string = "";
+  for (var a in proto_abilities) {
+    console.log("SDFLKSDFJKLDSKFL", a);
+    abilities_string = abilities_string.concat(" ", getAbilityEmoji(a));
+  }
+
+  console.log("FINDFLSKDF", abilities_string);
+
+  return (
+    <p>
+      {name_prefix} abilities: {abilities_string}
+    </p>
   );
 };

@@ -192,5 +192,7 @@ export const playerMessageQueueSelector = (state: RootState): string[] =>
   state.joinGame.player_message_queue;
 export const timerRunsOutSelector = (state: RootState): number =>
   state.joinGame.game_state!.getTimerRunsOut();
+export const playerNameSelector = (state: RootState): string | null =>
+  state.joinGame.player_name;
 
 export default joinGameSlice.reducer;
