@@ -51,9 +51,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   keyboardHeisterNumber: {
     zIndex: 2,
     position: "absolute",
-    top: 15,
+    top: 40,
     color: "black",
-    fontSize: 18,
+    fontSize: 17,
   },
   invalidMessages: {},
   invalidMessagesOverlay: {

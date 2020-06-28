@@ -370,10 +370,11 @@ const GameWindowComponent = () => {
   };
 
   const KEYBOARD_ITEM_Y = 50;
-  const YELLOW_HEISTER_KEYBOARD_ICON = 30;
-  const PURPLE_HEISTER_KEYBOARD_ICON = 65;
-  const GREEN_HEISTER_KEYBOARD_ICON = 100;
-  const ORANGE_HEISTER_KEYBOARD_ICON = 135;
+  const BASE_KEYBOARD_ICON = 30;
+  const YELLOW_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 0;
+  const PURPLE_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 1;
+  const GREEN_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 2;
+  const ORANGE_HEISTER_KEYBOARD_ICON = BASE_KEYBOARD_ICON + 35 * 3;
 
   var { tiles, shadow_tiles } = getTiles();
 
@@ -418,7 +419,15 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 5 },
+            ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 12, top: 10 },
+          }}
+        >
+          You're moving:
+        </div>
+        <div
+          style={{
+            ...styles.keyboardHeisterNumber,
+            ...{ left: YELLOW_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           1
@@ -426,7 +435,7 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 5 },
+            ...{ left: PURPLE_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           2
@@ -434,7 +443,7 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 5 },
+            ...{ left: GREEN_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           3
@@ -442,7 +451,7 @@ const GameWindowComponent = () => {
         <div
           style={{
             ...styles.keyboardHeisterNumber,
-            ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 5 },
+            ...{ left: ORANGE_HEISTER_KEYBOARD_ICON - 4 },
           }}
         >
           4
