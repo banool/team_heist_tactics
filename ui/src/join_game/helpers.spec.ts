@@ -30,7 +30,8 @@ test("tile placement map_position reversible translations", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   expect(a.x).toBe(800);
   expect(a.y).toBe(500);
@@ -55,7 +56,8 @@ test("tile 1,-4 map_position reversible translation", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   // For this simple case, I can guess what the resulting canvas value is. TODO - is this assumption correct?
   expect(a.x).toBe(CANVAS_WIDTH / 2 + INTERNAL_SQUARE_SIZE);
@@ -81,9 +83,10 @@ test("tile -1,4 map_position reversible translation", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
-  // expect(a.x).toBe(CANVAS_WIDTH / 2 - INTERNAL_SQUARE_SIZE); // -- BROKEN
+  expect(a.x).toBe(CANVAS_WIDTH / 2 - INTERNAL_SQUARE_SIZE); // -- BROKEN
   expect(a.y).toBe(CANVAS_HEIGHT / 2 + TILE_SIZE);
   let b = canvasPositionToMapPosition(
     a,
@@ -106,14 +109,13 @@ test("tile -4,-1 map_position reversible translation", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   expect(a.x).toBe(
     CANVAS_WIDTH / 2 - (2 * INTERNAL_TILE_OFFSET + 4 * INTERNAL_SQUARE_SIZE)
   );
-  // expect(a.y).toBe(
-  //   CANVAS_HEIGHT / 2 - INTERNAL_SQUARE_SIZE
-  // ); // -- BROKEN
+  expect(a.y).toBe(CANVAS_HEIGHT / 2 - INTERNAL_SQUARE_SIZE); // -- BROKEN
   let b = canvasPositionToMapPosition(
     a,
     pixel_offset,
@@ -135,7 +137,8 @@ test("tile 4,1 map_position reversible translation", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   expect(a.x).toBe(
     CANVAS_WIDTH / 2 + (2 * INTERNAL_TILE_OFFSET + 4 * INTERNAL_SQUARE_SIZE)
@@ -162,7 +165,8 @@ test("tile 4,-16 map_position reversible translation", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   let b = canvasPositionToMapPosition(
     a,
@@ -187,7 +191,8 @@ test("map position translation in both directions at non-center should work, too
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   var b = canvasPositionToMapPosition(
     a,
@@ -209,7 +214,8 @@ test("doors align y-axis on western draw", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   var tile_center_west_door_val = get_door_canvas_yval_from_tile_corner(
     tile00_pos,
@@ -229,7 +235,8 @@ test("doors align y-axis on western draw", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   var tile_west_door_yval = get_door_canvas_yval_from_tile_corner(tile_west, 3); // its east door aligns with center door
 
@@ -246,7 +253,8 @@ test("doors align y-axis on western draw", () => {
     0,
     0,
     CANVAS_WIDTH,
-    CANVAS_HEIGHT
+    CANVAS_HEIGHT,
+    1
   );
   var tile_east_door_yval = get_door_canvas_yval_from_tile_corner(
     tile_east_pos,
