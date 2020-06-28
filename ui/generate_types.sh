@@ -1,8 +1,10 @@
 # Path to this plugin
-PROTOC_GEN_TS_PATH="./node_modules/.bin/protoc-gen-ts"
+export PROTOC_GEN_TS_PATH="./node_modules/.bin/protoc-gen-ts"
 
 # Directory to write generated code to (.js and .d.ts files)
-OUT_DIR="./src/generated"
+export OUT_DIR="./src/generated"
+
+ls $PROTOC_GEN_TS_PATH
 
 protoc \
     --plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \

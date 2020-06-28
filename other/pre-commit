@@ -7,7 +7,7 @@ if ! cargo fmt -- --check > /dev/null; then
 fi
 
 cd ui
-if ! yarn run style-check; then
+if ! yarn run style-check > /dev/null; then
     echo 'The UI is not formatted properly, please run this from the root:'
     echo './style.sh'
     exit 1
