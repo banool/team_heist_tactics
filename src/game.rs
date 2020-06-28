@@ -6,8 +6,8 @@ use crate::load_map;
 use crate::manager::{GameHandle, GameOptions};
 use crate::types::main_message::Body;
 use crate::types::{
-    GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition, Move,
-    MoveDirection, PlaceTile, Player, Square, SquareType, Tile, WallType, DOOR_TYPES,
+    Ability, GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition,
+    Move, MoveDirection, PlaceTile, Player, Square, SquareType, Tile, WallType, DOOR_TYPES,
 };
 
 use log::{info, trace};
@@ -48,7 +48,15 @@ impl Game {
         }
         self.game_state.players.push(Player {
             name,
-            abilities: vec![],
+            abilities: vec![
+                Ability::MoveNorth,
+                Ability::MoveEast,
+                Ability::MoveSouth,
+                Ability::MoveWest,
+                Ability::Teleport,
+                Ability::RevealTiles,
+                Ability::UseEscalator,
+            ],
         });
         Ok(())
     }
