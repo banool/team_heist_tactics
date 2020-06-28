@@ -1,5 +1,5 @@
 # Get pre-compiled binary for protoc separately
-FROM curlimages/curl:7.71.0 as protoc_builder
+FROM curlimages/curl:7.71.0 as protoc_build
 
 WORKDIR /tmp
 ENV protocversion=3.12.3
@@ -8,10 +8,10 @@ RUN mkdir protoc_dl
 RUN unzip protoc.zip -d protoc_dl
 
 # UI stage of the build
-FROM node:14 as builder
+FROM node:14 as frontend_build
 
 # Copy in protoc
-COPY --from=protoc_builder /tmp/protoc_dl/bin/protoc /usr/bin
+COPY --from=protoc_build /tmp/protoc_dl/bin/protoc /usr/bin
 
 WORKDIR /npm
 COPY ui/ .
@@ -24,20 +24,13 @@ RUN yarn run prodbuild
 
 # Server stage of the build
 # FROM rust:1.44-alpine3.11 as build
-FROM rust:1.44 as build
+FROM rust:1.44 as backend_build
 
 ENV app=tht
 WORKDIR /${app}
 
 # Use nightly
 RUN rustup default nightly-2020-06-11 
-
-# Copy in HTML templates
-COPY templates templates
-
-# Copy in npm artifacts from previous iamge
-COPY --from=builder /npm/dist/index.html /${app}/templates/play.html
-COPY --from=builder /npm/dist/static /${app}/static
 
 # Files listing dependencies
 COPY Cargo.toml Cargo.lock ./
@@ -52,20 +45,25 @@ RUN set -x\
 COPY src/ src/
 COPY build.rs .
 RUN set -x && cargo build --release
-COPY prod_run.sh .
 
 # Copy in images
 COPY static/images /${app}/static/images
 
-# Copy out the built binary into the distroless build
+# Final stage
 FROM gcr.io/distroless/cc:debug
-COPY --from=build /tht/target/release/team_heist_tactics /
-COPY --from=build /tht/templates /templates
-COPY --from=build /tht/static /static
-COPY --from=build /tht/prod_run.sh /
 
-# Copy in data
+# Copy out the built binary into the distroless build
+COPY --from=backend_build /tht/target/release/team_heist_tactics /
+
+# Copy in templates, data, static content, and more
+COPY templates templates
 COPY data data
+COPY static/images static/images
+COPY prod_run.sh .
+
+# Copy the frontend in from the frontend build stage
+COPY --from=frontend_build /npm/dist/index.html /templates/play.html
+COPY --from=frontend_build /npm/dist/static/* /static/
 
 # Finally run it all
 EXPOSE 19996

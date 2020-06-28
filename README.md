@@ -42,6 +42,8 @@ Run container:
 docker run -p 19996:19996 -it team_heist_tactics:latest
 ```
 
+Note: Running it won't work locally on its own unless you set `THT_DEPLOYMENT_MODE` to `dev` in the Dockerfile.
+
 ## Properly deploying
 Use https://github.com/banool/server-setup with something like this:
 ```
