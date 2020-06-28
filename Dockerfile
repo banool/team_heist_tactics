@@ -1,16 +1,21 @@
+# Get pre-compiled binary for protoc separately
+FROM curlimages/curl:7.71.0 as protoc_builder
+
+WORKDIR /tmp
+ENV protocversion=3.12.3
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v${protocversion}/protoc-${protocversion}-linux-x86_64.zip --output protoc.zip
+RUN mkdir protoc_dl
+RUN unzip protoc.zip -d protoc_dl
+
 # UI stage of the build
 FROM node:14 as builder
+
+# Copy in protoc
+COPY --from=protoc_builder /tmp/protoc_dl/bin/protoc /usr/bin
 
 WORKDIR /npm
 COPY ui/ .
 COPY src/types.proto .
-
-# Get pre-compiled binary for protoc
-ENV protocversion=3.12.3
-RUN wget -q https://github.com/protocolbuffers/protobuf/releases/download/v${protocversion}/protoc-${protocversion}-linux-x86_64.zip
-RUN mkdir protoc_dl
-RUN unzip protoc-${protocversion}-linux-x86_64.zip -d protoc_dl
-RUN cp protoc_dl/bin/protoc /usr/bin
 
 # Generate types and build UI
 RUN yarn install --frozen-lockfile
