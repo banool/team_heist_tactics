@@ -1,12 +1,16 @@
 name: Frontend style check
 
+defaults:
+  run:
+    working-directory: ui
+
 on:
   pull_request:
     branches: [ master ]
 
 jobs:
-  build_and_test:
-    name: Run yarn run tsc
+  frontend_style:
+    name: yarn run style-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         lfs: true
-    - name: Build and publish team_heist_tactics to Github Packages
+    - name: Build and publish team_heist_tactics to GitHub Packages
       uses: docker/build-push-action@master
       with:
         repository: banool/team_heist_tactics/team_heist_tactics

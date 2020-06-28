@@ -5,16 +5,10 @@ on:
     branches: [ master ]
 
 jobs:
-  build_and_test:
-    name: Run cargo fmt -- --check
+  backend_style:
+    name: cargo fmt -- --check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2020-06-11
-          default: true
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt -- --check
+      - run: rustup toolchain install nightly-2020-06-26 --profile minimal --component rustfmt
+      - run: cargo +nightly-2020-06-26 fmt -- --check
