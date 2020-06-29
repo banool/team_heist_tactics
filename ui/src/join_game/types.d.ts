@@ -27,3 +27,8 @@ export interface CanvasPosition {
   x: number;
   y: number;
 }
+
+export interface TileCoords {
+  x: number;
+  y: number;
+}
