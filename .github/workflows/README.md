@@ -1,9 +1,9 @@
 # GitHub Actions
 
-There are two main types of actions.
+There are two main types of jobs. They are all in `all_actions.yml`.
 
 ## Run on push
-Only one action is set to run on push, the build action. This action builds the docker image and pushes it to GitHub packages.
+Only one job is set to run on push, the `build_image` job. This job builds the docker image and pushes it to GitHub packages. It will only run if the style checks and tests pass.
 
-## Run on pull request
-All other actions fall into this category. These run on pull request, and the PR author should make sure they all pass before merging (rebasing) their PR.
+## Run on push and pull request
+All other jobs fall into this category. These run on push and pull requests, and the PR author should make sure they all pass before merging (rebasing) their PR.
