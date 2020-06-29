@@ -53,6 +53,7 @@ interface GameInfo {
   heister_selected_keyboard: any | null;
   // A queue containing messages to display to the player.
   player_message_queue: string[];
+  player_is_spectator: boolean;
 }
 
 const pushToPlayerMessageQueue = (queue: string[], msg: string) => {
@@ -94,6 +95,7 @@ let initialState: GameInfo = {
   num_invalid_move_attempts: 0,
   heister_selected_keyboard: null,
   player_message_queue: [],
+  player_is_spectator: true,
 };
 
 const joinGameSlice = createSlice({
@@ -170,6 +172,10 @@ const joinGameSlice = createSlice({
         pushToPlayerMessageQueue(state.player_message_queue, msg);
       }
       state.game_state = game_state;
+      if (state.game_state) {
+        let players = state.game_state.getPlayersList().map((p) => p.getName());
+        state.player_is_spectator = !players.includes(state.player_name!);
+      }
     },
     [WEBSOCKET_SEND_FULL]: (_state, _action) => {
       console.debug("Sending message over websocket");
@@ -203,5 +209,7 @@ export const playerNameSelector = (state: RootState): string | null =>
   state.joinGame.player_name;
 export const gameHandleSelector = (state: RootState): string | null =>
   state.joinGame.game_handle;
+export const playerIsSpectatorSelector = (state: RootState): boolean =>
+  state.joinGame.player_is_spectator;
 
 export default joinGameSlice.reducer;

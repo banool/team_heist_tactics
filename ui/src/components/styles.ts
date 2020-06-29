@@ -76,6 +76,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: 0,
     fontSize: 18,
   },
+  pulse: {
+    WebkitAnimation: "pulsate 2s ease-in",
+    WebkitAnimationIterationCount: "infinite",
+    opacity: "0.5",
+  },
 };
 
 export default styles;

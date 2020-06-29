@@ -4,12 +4,14 @@ import {
   gameStateSelector,
   numInvalidMoveAttemptsSelector,
   playerNameSelector,
+  playerIsSpectatorSelector,
 } from "./slice";
 import {
   Tile as ProtoTile,
   Heister as ProtoHeister,
   HeisterColor,
   MapPosition,
+  Player,
 } from "../generated/types_pb";
 import { moveHeisterReal, placeTile, getColor } from "./api";
 import { Stage, Layer, Circle, Text, Rect } from "react-konva";
@@ -306,6 +308,7 @@ const ListOfPlayerAbilities = ({ player_abilities }) => (
 const GameWindowComponent = () => {
   const game_state = useSelector(gameStateSelector);
   const player_name = useSelector(playerNameSelector);
+  const player_is_spectator = useSelector(playerIsSpectatorSelector);
 
   // By making this invalid move counter part of the state relevant to this component,
   // the component will get updated whenever there is an invalid move attempt.
@@ -450,57 +453,62 @@ const GameWindowComponent = () => {
               <ShadowTiles shadow_tiles={shadow_tiles} />
               <Tiles tiles={tiles} />
             </Layer>
-            <Layer>
+            <Layer listening={!player_is_spectator}>
               <Heisters heisters={getHeisters()} />
             </Layer>
-            <Layer>
+            <Layer listening={!player_is_spectator}>
               <PossiblePlacements
                 possible_placements={getPossiblePlacements()}
               />
             </Layer>
           </Stage>
         </div>
-        <div
-          style={{
-            ...styles.keyboardHeisterNumber,
-            ...{ right: BASE_KEYBOARD_ICON + 5, top: 10 },
-          }}
-        >
-          You're moving
+        <div className={player_is_spectator ? "hidden" : ""}>
+          <div
+            style={{
+              ...styles.keyboardHeisterNumber,
+              ...{ right: BASE_KEYBOARD_ICON + 5, top: 10 },
+            }}
+          >
+            You're moving
+          </div>
+          <div
+            style={{
+              ...styles.keyboardHeisterNumber,
+              ...{ right: YELLOW_HEISTER_KEYBOARD_ICON - 4 },
+            }}
+          >
+            1
+          </div>
+          <div
+            style={{
+              ...styles.keyboardHeisterNumber,
+              ...{ right: PURPLE_HEISTER_KEYBOARD_ICON - 4 },
+            }}
+          >
+            2
+          </div>
+          <div
+            style={{
+              ...styles.keyboardHeisterNumber,
+              ...{ right: GREEN_HEISTER_KEYBOARD_ICON - 4 },
+            }}
+          >
+            3
+          </div>
+          <div
+            style={{
+              ...styles.keyboardHeisterNumber,
+              ...{ right: ORANGE_HEISTER_KEYBOARD_ICON - 4 },
+            }}
+          >
+            4
+          </div>
         </div>
         <div
-          style={{
-            ...styles.keyboardHeisterNumber,
-            ...{ right: YELLOW_HEISTER_KEYBOARD_ICON - 4 },
-          }}
+          className={player_is_spectator ? "hidden" : ""}
+          style={styles.overlayCanvas}
         >
-          1
-        </div>
-        <div
-          style={{
-            ...styles.keyboardHeisterNumber,
-            ...{ right: PURPLE_HEISTER_KEYBOARD_ICON - 4 },
-          }}
-        >
-          2
-        </div>
-        <div
-          style={{
-            ...styles.keyboardHeisterNumber,
-            ...{ right: GREEN_HEISTER_KEYBOARD_ICON - 4 },
-          }}
-        >
-          3
-        </div>
-        <div
-          style={{
-            ...styles.keyboardHeisterNumber,
-            ...{ right: ORANGE_HEISTER_KEYBOARD_ICON - 4 },
-          }}
-        >
-          4
-        </div>
-        <div style={styles.overlayCanvas}>
           <Stage
             x={stageX}
             y={stageY}
@@ -547,6 +555,17 @@ const GameWindowComponent = () => {
       </div>
       <div style={styles.playerAbilitiesOverlay}>
         <ListOfPlayerAbilities player_abilities={getPlayerAbilities()} />
+      </div>
+      <div className={player_is_spectator ? "" : "hidden"}>
+        <div
+          style={{
+            ...styles.timerOverlay,
+            ...styles.pulse,
+            ...{ top: 0 },
+          }}
+        >
+          Spectating
+        </div>
       </div>
     </div>
   );

@@ -4,7 +4,11 @@ import { useSelector } from "react-redux";
 import JoinGameForm from "./JoinGameForm";
 import GameWindowComponent from "./GameWindowComponent";
 import { useDispatch } from "react-redux";
-import { gameStateSelector, heisterSelectedSelector } from "./slice";
+import {
+  gameStateSelector,
+  heisterSelectedSelector,
+  playerIsSpectatorSelector,
+} from "./slice";
 
 import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
@@ -18,13 +22,12 @@ import LobbyForm from "./LobbyForm";
 
 type MainGameProps = {};
 const MainGame = ({}: MainGameProps) => {
-  const connection_status = useSelector(connectionStatusSelector);
-
   const dispatch = useDispatch();
 
   const game_state = useSelector(gameStateSelector);
-
   const heister_selected_keyboard = useSelector(heisterSelectedSelector);
+  const connection_status = useSelector(connectionStatusSelector);
+  const player_is_spectator = useSelector(playerIsSpectatorSelector);
 
   // Bind key listener on mount, and unbind on unmount.
   // See https://reactjs.org/docs/hooks-effect.html.
@@ -43,7 +46,9 @@ const MainGame = ({}: MainGameProps) => {
   });
 
   const handleKeyDown = (event) => {
-    console.debug("Key event", event);
+    if (player_is_spectator) {
+      return;
+    }
     dispatch(
       handleKeyInput(
         game_state,

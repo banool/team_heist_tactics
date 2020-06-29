@@ -53,7 +53,8 @@ impl Game {
 
     pub fn add_player(&mut self, name: String) -> Result<()> {
         if self.game_state.game_status != GameStatus::Staging {
-            return Err(anyhow!("Cannot join game that is already in progress"));
+            // If the game is already in progress, don't actually register the player.
+            return Ok(());
         }
         self.game_state.players.push(Player {
             name,
