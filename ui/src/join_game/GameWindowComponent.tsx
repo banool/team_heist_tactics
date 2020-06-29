@@ -43,12 +43,14 @@ import TimerComponent from "./TimerComponent";
 
 type GetTileShadowSquareProps = {
   proto_tile: ProtoTile;
+  proto_tiles: ProtoTile[];
   width: number;
   height: number;
 };
 
 const get_tile_and_shadow_tile = ({
   proto_tile,
+  proto_tiles,
   width,
   height,
 }: GetTileShadowSquareProps) => {
@@ -64,7 +66,8 @@ const get_tile_and_shadow_tile = ({
     3,
     width,
     height,
-    1
+    1,
+    proto_tiles
   );
   var num_rotations = proto_tile.getNumRotations();
   var tile_name = proto_tile.getName();
@@ -180,7 +183,8 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     tile_offset_y,
     width,
     height,
-    0
+    0,
+    []
   );
 
   console.log(
@@ -251,7 +255,8 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
     0,
     width,
     height,
-    0
+    0,
+    []
   );
 
   console.log(
@@ -330,6 +335,7 @@ const GameWindowComponent = () => {
       var proto_tile = proto_tiles[i];
       var { tile, shadow_tile } = get_tile_and_shadow_tile({
         proto_tile: proto_tile,
+        proto_tiles: proto_tiles,
         width: width,
         height: height,
       });

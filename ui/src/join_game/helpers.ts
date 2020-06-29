@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPosition } from "../generated/types_pb";
+import { MapPosition, Tile as ProtoTile } from "../generated/types_pb";
 import {
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
@@ -10,8 +10,8 @@ import { CanvasPosition } from "./types";
 export const howManyWallsTile = (n: number): number => {
   if (n % 4 == 0) {
     return n / 2;
-  } else if (((n +1)  % 4) == 0) {
-    return (n+1)/2;
+  } else if ((n + 1) % 4 == 0) {
+    return (n + 1) / 2;
   } else {
     return 2 * Math.floor(n / 4);
   }
@@ -58,18 +58,16 @@ export const tileMapPositionToCanvasPosition = (
   y: number,
   canvas_width: number,
   canvas_height: number
-
 ): CanvasPosition => {
   var center_x = canvas_width / 2;
   var center_y = canvas_height / 2;
   var wall = INTERNAL_TILE_OFFSET;
-  var x_px = x + (2*wall * (4*x - y))/17;
+  var x_px = x + (2 * wall * (4 * x - y)) / 17;
   console.log(x_px);
-  var y_px = y + (2*wall * (4*y - x))/17;
+  var y_px = y + (2 * wall * (4 * y - x)) / 17;
   console.log(y_px);
   return { x: center_x + x_px, y: center_y + y_px };
-
-}
+};
 
 export const mapPositionToCanvasPosition = (
   map_position: MapPosition,
@@ -78,12 +76,21 @@ export const mapPositionToCanvasPosition = (
   tile_offset_y: number,
   canvas_width: number,
   canvas_height: number,
-  tile: number
+  tile: number,
+  proto_tiles: ProtoTile[]
 ): CanvasPosition => {
+  // This is all the map positions.
+  var map_positions = proto_tiles.map((pt) => pt.getPosition());
+
   var map_x = map_position.getX();
   var map_y = map_position.getY();
   if (tile == 1) {
-    return tileMapPositionToCanvasPosition(map_x, map_y, canvas_width, canvas_height);
+    return tileMapPositionToCanvasPosition(
+      map_x,
+      map_y,
+      canvas_width,
+      canvas_height
+    );
   }
   var canvas_x = mapPositionToCanvasPositionSingle(
     map_x,
