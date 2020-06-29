@@ -10,8 +10,10 @@ import { CanvasPosition } from "./types";
 export const howManyWallsTile = (n: number): number => {
   if (n % 4 == 0) {
     return n / 2;
+  } else if (((n +1)  % 4) == 0) {
+    return (n+1)/2;
   } else {
-    return 2 * Math.floor(n / 4) + 1;
+    return 2 * Math.floor(n / 4);
   }
 };
 
@@ -24,6 +26,7 @@ export const mapPositionToCanvasPositionSingle = (
   pixel_offset: number,
   canvas_dimension_size_px: number, // CANVAS_WIDTH or CANVAS_HEIGHT
   _tile_offset: number,
+  secondary: number,
   tile: number
 ): number => {
   var neg = false;
@@ -40,22 +43,33 @@ export const mapPositionToCanvasPositionSingle = (
   var num_walls = 0;
   if (tile == 1) {
     num_walls = howManyWallsTile(n);
-    console.log("tile");
   } else {
     num_walls = howManyWallsHeister(n);
-    center_px = center_px - TILE_SIZE / 2;
-    console.log("heister");
   }
-  console.log(n);
-  console.log("how many walls");
-  console.log(num_walls);
-  console.log(center_px);
   if (neg) {
     return center_px - (n * square + num_walls * wall);
   } else {
     return center_px + (n * square + num_walls * wall);
   }
 };
+
+export const tileMapPositionToCanvasPosition = (
+  x: number,
+  y: number,
+  canvas_width: number,
+  canvas_height: number
+
+): CanvasPosition => {
+  var center_x = canvas_width / 2;
+  var center_y = canvas_height / 2;
+  var wall = INTERNAL_TILE_OFFSET;
+  var x_px = x + (2*wall * (4*x - y))/17;
+  console.log(x_px);
+  var y_px = y + (2*wall * (4*y - x))/17;
+  console.log(y_px);
+  return { x: center_x + x_px, y: center_y + y_px };
+
+}
 
 export const mapPositionToCanvasPosition = (
   map_position: MapPosition,
@@ -68,11 +82,15 @@ export const mapPositionToCanvasPosition = (
 ): CanvasPosition => {
   var map_x = map_position.getX();
   var map_y = map_position.getY();
+  if (tile == 1) {
+    return tileMapPositionToCanvasPosition(map_x, map_y, canvas_width, canvas_height);
+  }
   var canvas_x = mapPositionToCanvasPositionSingle(
     map_x,
     pixel_offset,
     canvas_width,
     tile_offset_x,
+    map_y,
     tile
   );
   var canvas_y = mapPositionToCanvasPositionSingle(
@@ -80,6 +98,7 @@ export const mapPositionToCanvasPosition = (
     pixel_offset,
     canvas_height,
     tile_offset_y,
+    map_x,
     tile
   );
   return { x: canvas_x, y: canvas_y };
