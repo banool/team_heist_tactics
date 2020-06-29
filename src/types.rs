@@ -481,6 +481,21 @@ impl Internal for Player {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct StartGame {}
+
+impl Internal for StartGame {
+    type P = proto_types::StartGame;
+
+    fn from_proto(_proto: proto_types::StartGame) -> Self {
+        StartGame {}
+    }
+
+    fn to_proto(&self) -> proto_types::StartGame {
+        proto_types::StartGame {}
+    }
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Move {
     pub heister_color: HeisterColor,
     pub position: MapPosition,

@@ -21,6 +21,7 @@ fn main() {
         .type_attribute(".types.TilePosition", "#[derive(Serialize, Deserialize)]")
         .type_attribute(".types.HeisterName", "#[derive(Serialize, Deserialize)]")
         .type_attribute(".types.HeisterColor", "#[derive(Serialize, Deserialize)]")
+        .type_attribute(".types.StartGame", "#[derive(Serialize, Deserialize)]")
         .compile_protos(&["src/types.proto"], &["src/"])
         .unwrap();
 }

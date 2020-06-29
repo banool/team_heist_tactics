@@ -70,7 +70,7 @@ impl Game {
         Ok(())
     }
 
-    pub fn start_game(&mut self) {
+    pub fn start_game(&mut self) -> MoveValidity {
         // When we start the game, we can figure out how to break up the abilities.
         let player_abilities: Vec<Vec<Ability>> =
             get_player_abilities(self.game_state.players.len());
@@ -85,6 +85,16 @@ impl Game {
 
         // Set the game status to ONGOING.
         self.game_state.game_status = GameStatus::Ongoing;
+
+        // TODO Add this later, it would be too annoying for now for testing.
+        /*
+        if self.game_state.players.len() < 2 {
+            MoveValidity::Invalid("There must be at least 2 players".to_string())
+        } else {
+            MoveValidity::Valid
+        }
+        */
+        MoveValidity::Valid
     }
 
     fn rotate_abilities(&mut self) {
@@ -651,6 +661,7 @@ impl Game {
         info!("Received message: {:?}", message);
         let body = message.body.unwrap();
         let validity = match body {
+            Body::StartGame(_) => self.start_game(),
             Body::Move(m) => self.process_move(Move::from_proto(m)),
             Body::PlaceTile(pt) => self.process_tile_placement(PlaceTile::from_proto(pt)),
             Body::GameState(_gs) => {

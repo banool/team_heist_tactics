@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../common/reducers";
 
-import { JoinGameThing, ConnectionStatus } from "./types";
+import { ConnectionStatus } from "./types";
 
 import { GameState, MainMessage } from "../generated/types_pb";
 
@@ -46,6 +46,7 @@ const WEBSOCKET_ERROR_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
 interface GameInfo {
   connection_status: ConnectionStatus;
   player_name: string | null;
+  game_handle: string | null;
   game_state: GameState | null;
   num_invalid_move_attempts: number;
   // HeisterColor for whichever is selected, or null if none are.
@@ -68,7 +69,10 @@ const pushInitialMessages = (queue: string[]) => {
     queue,
     "Joined game. Welcome to Team Heist Tactics!!!"
   );
-  pushToPlayerMessageQueue(queue, "Made by Fatema, Kelly, and Daniel :)");
+  pushToPlayerMessageQueue(
+    queue,
+    "Made with love by Fatema, Kelly, and Daniel"
+  );
   pushToPlayerMessageQueue(queue, "Good luck have fun!");
 };
 
@@ -79,11 +83,13 @@ interface SelectKeyboardHeisterAction {
 
 interface RegisterPlayerNameAction {
   player_name: string;
+  game_handle: string;
 }
 
 let initialState: GameInfo = {
   connection_status: ConnectionStatus.NotConnected,
   player_name: null,
+  game_handle: null,
   game_state: null,
   num_invalid_move_attempts: 0,
   heister_selected_keyboard: null,
@@ -94,12 +100,13 @@ const joinGameSlice = createSlice({
   name: "joinGame",
   initialState,
   reducers: {
-    registerPlayerName: (
+    registerPlayerNameGameHandle: (
       state,
       action: PayloadAction<RegisterPlayerNameAction>
     ) => {
-      const { player_name } = action.payload;
+      const { player_name, game_handle } = action.payload;
       state.player_name = player_name;
+      state.game_handle = game_handle;
     },
     selectKeyboardHeister: (
       state,
@@ -175,7 +182,7 @@ const joinGameSlice = createSlice({
 });
 
 export const {
-  registerPlayerName,
+  registerPlayerNameGameHandle,
   selectKeyboardHeister,
 } = joinGameSlice.actions;
 
@@ -194,5 +201,7 @@ export const timerRunsOutSelector = (state: RootState): number =>
   state.joinGame.game_state!.getTimerRunsOut();
 export const playerNameSelector = (state: RootState): string | null =>
   state.joinGame.player_name;
+export const gameHandleSelector = (state: RootState): string | null =>
+  state.joinGame.game_handle;
 
 export default joinGameSlice.reducer;

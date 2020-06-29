@@ -8,11 +8,12 @@ import {
   MapPosition,
   Heister,
   PlaceTile,
+  StartGame,
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
 
 import { MoveDirection } from "./types";
-import { registerPlayerName, selectKeyboardHeister } from "./slice";
+import { registerPlayerNameGameHandle, selectKeyboardHeister } from "./slice";
 
 export function joinGame(join_game_thing: StagingJoinGameThing) {
   return async (dispatch) => {
@@ -34,9 +35,25 @@ export function joinGame(join_game_thing: StagingJoinGameThing) {
     var serverUrl = new URL(urlString);
     serverUrl.searchParams.set("name", join_game_thing.name);
     serverUrl.searchParams.set("handle", join_game_thing.handle);
-    dispatch(registerPlayerName({ player_name: join_game_thing.name }));
+    dispatch(
+      registerPlayerNameGameHandle({
+        player_name: join_game_thing.name,
+        game_handle: join_game_thing.handle,
+      })
+    );
     dispatch(connect(serverUrl.toString()));
     console.log("Dispatched action to join game");
+  };
+}
+
+export function startGame(game_handle: string) {
+  return async (dispatch) => {
+    var start_game = new StartGame();
+    console.log("Dispatching action to start game");
+    var main_message = new MainMessage();
+    main_message.setStartGame(start_game);
+    dispatch(send(main_message));
+    console.log("Dispatched action to start game");
   };
 }
 

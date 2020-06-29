@@ -13,6 +13,8 @@ import { handleKeyInput } from "./api";
 import styles from "../components/styles";
 import InvalidMessagesComponent from "./InvalidMessagesComponent";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
+import { GameStatusMap, GameStatus } from "../generated/types_pb";
+import LobbyForm from "./LobbyForm";
 
 type MainGameProps = {};
 const MainGame = ({}: MainGameProps) => {
@@ -57,22 +59,37 @@ const MainGame = ({}: MainGameProps) => {
     document.addEventListener("keydown", handleKeyDown, { once: true });
   };
 
-  // <ConnectionStatusComponent />
+  var inner;
+  if (
+    connection_status == ConnectionStatus.Connected &&
+    game_state &&
+    game_state.getGameStatus() === GameStatus.ONGOING
+  ) {
+    inner = <GameWindowComponent />;
+  } else {
+    var inner_form;
+    if (connection_status != ConnectionStatus.Connected) {
+      inner_form = <JoinGameForm />;
+    } else if (
+      game_state &&
+      game_state.getGameStatus() === GameStatus.STAGING
+    ) {
+      inner_form = <LobbyForm />;
+    }
+    inner = (
+      <div style={styles.joinGameForm}>
+        <h1 style={{ fontSize: 52, fontFamily: "'Damion', cursive" }}>
+          Team Heist Tactics
+        </h1>
+        {inner_form}
+        <InvalidMessagesComponent />
+      </div>
+    );
+  }
 
   return (
     <div>
-      {connection_status != ConnectionStatus.Connected ? (
-        <div style={styles.joinGameForm}>
-          <h1 style={{ fontSize: 52, fontFamily: "'Damion', cursive" }}>
-            Team Heist Tactics
-          </h1>
-          <JoinGameForm />
-          <InvalidMessagesComponent />
-        </div>
-      ) : null}
-      {connection_status == ConnectionStatus.Connected && game_state ? (
-        <GameWindowComponent />
-      ) : null}
+      {inner}
       <div style={styles.connectionStatusOverlay}>
         <ConnectionStatusComponent />
       </div>

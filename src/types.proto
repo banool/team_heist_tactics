@@ -165,6 +165,9 @@ message GameState {
   repeated MapPosition possible_placements = 10;
 }
 
+message StartGame {
+}
+
 message Move {
   HeisterColor heister_color = 1;
   MapPosition position = 2;
@@ -180,12 +183,14 @@ message InvalidRequest {
   string reason = 1;
 }
 
+
 // This is the only message that should be sent back and forth across the wire.
 message MainMessage {
   oneof body {
     GameState game_state = 1;
     InvalidRequest invalid_request = 2;
-    Move move = 3;
-    PlaceTile place_tile = 4;
+    StartGame start_game = 3;
+    Move move = 4;
+    PlaceTile place_tile = 5;
   }
 }
