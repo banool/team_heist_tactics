@@ -37,3 +37,19 @@ From this point, you just send requests to influence the game state and receive 
 
 ## Thoughts on the frontend
 The frontend should validate whether a move is valid based on the user's abilities.
+
+## Problems with sending errors upon establishing the websocket
+
+When a client tries to join a game, we might want to fail it for certain reasons, like the game handle doesn't exist. When we do this, we want to convey to the client why joining the game failed.
+
+Actix makes it hard to send back a `CloseError` (in which we could then put a `reason`). The only way I have found to do it so far is to let the websocket come up, and then use `ctx.close()`, like tthis:
+
+```
+// NOTE: This works, the reason field is populated if you do this:
+ctx.close(Some(ws::CloseReason{code: ws::CloseCode::Normal, description: Some("sdfsdf".to_string())}));
+```
+This leads into the next problem, which is the redux-websocket client will try to reconnect on outage no matter what, regardless of the `CloseCode`.
+
+Furthermore, one thing to note is that the event from `onerror` of the websocket doesn't actually say what went wrong, you need to look at the event from `onclose` instead. Not a huge problem, but `redux-websocket` does not include any information about the event on either `error` or `close` in the action it submits.
+
+These are all solvable, but a lot of work.
