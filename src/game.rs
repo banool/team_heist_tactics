@@ -12,6 +12,8 @@ use crate::types::{
 
 use log::{info, trace};
 
+const MAX_PLAYERS: u32 = 8;
+
 #[derive(Debug)]
 pub struct Game {
     pub game_handle: GameHandle,
@@ -611,6 +613,81 @@ impl Game {
         };
         self.update_possible_placements();
         validity
+    }
+}
+
+// TODO When we make it that games can't start until 2 - 8 players have joined,
+// remove the matches on 0 and 1.
+fn get_player_abilities(num_players: u32) -> Vec<Vec<Ability>> {
+    match num_players {
+        0 | 1 => vec![vec![
+            Ability::MoveNorth,
+            Ability::MoveEast,
+            Ability::MoveSouth,
+            Ability::MoveWest,
+            Ability::Teleport,
+            Ability::RevealTiles,
+            Ability::UseEscalator,
+        ]],
+        2 => vec![
+            vec![Ability::MoveNorth, Ability::MoveEast, Ability::Teleport],
+            vec![
+                Ability::MoveSouth,
+                Ability::MoveWest,
+                Ability::RevealTiles,
+                Ability::UseEscalator,
+            ],
+        ],
+        3 => vec![
+            vec![Ability::MoveNorth, Ability::MoveEast],
+            vec![
+                Ability::MoveSouth,
+                Ability::RevealTiles,
+                Ability::UseEscalator,
+            ],
+            vec![Ability::MoveWest, Ability::Teleport],
+        ],
+        4 => vec![
+            vec![Ability::MoveNorth],
+            vec![Ability::MoveEast, Ability::UseEscalator],
+            vec![Ability::MoveSouth, Ability::RevealTiles],
+            vec![Ability::MoveWest, Ability::Teleport],
+        ],
+        5 => vec![
+            vec![Ability::MoveNorth],
+            vec![Ability::MoveEast, Ability::UseEscalator],
+            vec![Ability::MoveSouth, Ability::RevealTiles],
+            vec![Ability::MoveWest],
+            vec![Ability::MoveWest, Ability::Teleport],
+        ],
+        6 => vec![
+            vec![Ability::MoveNorth],
+            vec![Ability::MoveEast],
+            vec![Ability::MoveEast, Ability::UseEscalator],
+            vec![Ability::MoveSouth, Ability::RevealTiles],
+            vec![Ability::MoveWest],
+            vec![Ability::MoveWest, Ability::Teleport],
+        ],
+        7 => vec![
+            vec![Ability::MoveNorth],
+            vec![Ability::MoveEast],
+            vec![Ability::MoveEast, Ability::UseEscalator],
+            vec![Ability::MoveSouth],
+            vec![Ability::MoveSouth, Ability::RevealTiles],
+            vec![Ability::MoveWest],
+            vec![Ability::MoveWest, Ability::Teleport],
+        ],
+        8 => vec![
+            vec![Ability::MoveNorth],
+            vec![Ability::MoveNorth],
+            vec![Ability::MoveEast],
+            vec![Ability::MoveEast, Ability::UseEscalator],
+            vec![Ability::MoveSouth],
+            vec![Ability::MoveSouth, Ability::RevealTiles],
+            vec![Ability::MoveWest],
+            vec![Ability::MoveWest, Ability::Teleport],
+        ],
+        wildcard => panic!("Invalid number of players somehow: {}", wildcard),
     }
 }
 

@@ -1,4 +1,4 @@
-name: All actions
+name: All
 
 on:
   push:
