@@ -3,7 +3,7 @@ import { Stage, Layer, Circle, Text } from "react-konva";
 import { getColor } from "./api";
 import { heisterSelectedSelector } from "./slice";
 import { useSelector } from "react-redux";
-import { Ability } from "../generated/types_pb";
+import { Ability, AbilityMap } from "../generated/types_pb";
 
 // The offset makes the center of the image be the center of the canvas element.
 type ResetMapComponentProps = {
@@ -61,7 +61,7 @@ export const PlayerAbilities = ({
   proto_abilities,
 }: PlayerAbilitiesProps) => {
   const getAbilityEmoji = (proto_ability): string => {
-    switch (+proto_ability) {
+    switch (proto_ability) {
       case Ability.MOVE_NORTH:
         return "⬆️";
       case Ability.MOVE_EAST:
@@ -77,15 +77,17 @@ export const PlayerAbilities = ({
       case Ability.USE_ESCALATOR:
         return "🎢";
       default:
-        console.error("Unexpected Ability");
+        console.error("Unexpected Ability", proto_ability);
         return "?";
     }
   };
 
   var abilities_string: string = "";
-  for (var a in proto_abilities) {
-    console.log("SDFLKSDFJKLDSKFL", a);
-    abilities_string = abilities_string.concat(" ", getAbilityEmoji(a));
+  for (let i = 0; i < proto_abilities.length; i++) {
+    abilities_string = abilities_string.concat(
+      " ",
+      getAbilityEmoji(proto_abilities[i])
+    );
   }
 
   console.log("FINDFLSKDF", abilities_string);
