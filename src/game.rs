@@ -573,7 +573,12 @@ impl Game {
     /// 1. we need a reference to the tile in self.tiles that contains the heister_square
     /// 2. we need to be able to know which wall on which square  to update
     /// 3. we need to replace that square wth one who has a clear wall instead of a door
-    fn open_door(&mut self, door_pos: MapPosition, src_square: Square, dir: &MoveDirection) -> () {
+    fn open_door(
+        &mut self,
+        door_pos: MapPosition,
+        src_square: Square,
+        dir: &MoveDirection,
+    ) -> Result<()> {
         let current_tile_position = Self::current_tile_position(&door_pos, &dir);
         let mut tile = &mut Tile::default();
         for t in &mut self.game_state.tiles {
@@ -583,7 +588,7 @@ impl Game {
             }
         }
         if tile.squares.len() == 0 {
-            panic!("No tile found at pos {:?}", door_pos);
+            return Err(anyhow!("No tile found at pos {:?}", door_pos));
         }
 
         for mut square in &mut tile.squares {
@@ -603,10 +608,12 @@ impl Game {
                         square.west_wall = WallType::Clear;
                     }
                 }
-                return;
+                return Ok(());
             }
         }
-        panic!("When opening a door, we expect the square to have a door to open");
+        return Err(anyhow!(
+            "When opening a door, we expect the square to have a door to open"
+        ));
     }
 
     fn process_tile_placement(&mut self, pt: PlaceTile) -> MoveValidity {
@@ -630,8 +637,13 @@ impl Game {
         let dir = &Self::get_door_direction(heister_square)
             .expect("Heister must be on a square with a door");
 
-        self.open_door(heister_pos.clone(), *heister_square, dir);
-        self.place_tile(&pt.tile_entrance, dir)
+        match self.open_door(heister_pos.clone(), *heister_square, dir) {
+            Ok(_) => self.place_tile(&pt.tile_entrance, dir),
+            Err(e) => {
+                let msg = format!("Couldn't open door for newly placed tile: {}", e);
+                MoveValidity::Invalid(msg.to_string())
+            }
+        }
     }
 
     pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
