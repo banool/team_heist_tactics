@@ -60,7 +60,7 @@ export const PlayerAbilities = ({
   name_prefix,
   proto_abilities,
 }: PlayerAbilitiesProps) => {
-  const getAbilityEmoji = (proto_ability: number): string => {
+  const getAbilityEmoji = (proto_ability): string => {
     switch (+proto_ability) {
       case Ability.MOVE_NORTH:
         return "⬆️";
@@ -84,7 +84,6 @@ export const PlayerAbilities = ({
 
   var abilities_string: string = "";
   for (var a in proto_abilities) {
-    console.log("SDFLKSDFJKLDSKFL", a);
     abilities_string = abilities_string.concat(" ", getAbilityEmoji(a));
   }
 
