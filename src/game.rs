@@ -1,4 +1,6 @@
 use anyhow::{anyhow, Result};
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use std::collections::HashMap;
 use std::convert::TryInto;
 
@@ -61,6 +63,28 @@ impl Game {
             ],
         });
         Ok(())
+    }
+
+    pub fn start_game(&mut self) {
+        // When we start the game, we can figure out how to break up the abilities.
+        let player_abilities: Vec<Vec<Ability>> =
+            get_player_abilities(self.game_state.players.len());
+        for (i, player) in self.game_state.players.iter_mut().enumerate() {
+            player.abilities = player_abilities[i].clone();
+        }
+    }
+
+    fn rotate_abilities(&mut self) {
+        let mut player_abilities: Vec<Vec<Ability>> = self
+            .game_state
+            .players
+            .iter()
+            .map(|p| p.abilities.clone())
+            .collect();
+        player_abilities.rotate_right(1);
+        for (i, player) in self.game_state.players.iter_mut().enumerate() {
+            player.abilities = player_abilities[i].clone();
+        }
     }
 
     pub fn has_player(&self, name: &str) -> bool {
@@ -618,8 +642,8 @@ impl Game {
 
 // TODO When we make it that games can't start until 2 - 8 players have joined,
 // remove the matches on 0 and 1.
-fn get_player_abilities(num_players: u32) -> Vec<Vec<Ability>> {
-    match num_players {
+fn get_player_abilities(num_players: usize) -> Vec<Vec<Ability>> {
+    let mut player_abilities = match num_players {
         0 | 1 => vec![vec![
             Ability::MoveNorth,
             Ability::MoveEast,
@@ -688,7 +712,10 @@ fn get_player_abilities(num_players: u32) -> Vec<Vec<Ability>> {
             vec![Ability::MoveWest, Ability::Teleport],
         ],
         wildcard => panic!("Invalid number of players somehow: {}", wildcard),
-    }
+    };
+    let mut rng = thread_rng();
+    player_abilities.shuffle(&mut rng);
+    player_abilities
 }
 
 #[cfg(test)]

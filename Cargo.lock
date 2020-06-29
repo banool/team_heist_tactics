@@ -1569,6 +1569,7 @@ dependencies = [
  "prost 0.6.1 (git+https://github.com/fdeantoni/prost?branch=meta)",
  "prost-build",
  "prost-types 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand",
  "serde",
  "serde_derive",
  "serde_json",
