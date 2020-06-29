@@ -1,6 +1,7 @@
 import {
   canvasPositionToMapPosition,
   mapPositionToCanvasPosition,
+  mapPositionToTileCoords,
 } from "./helpers";
 import { MapPosition } from "../generated/types_pb";
 import {
@@ -254,4 +255,135 @@ test("doors align y-axis on western draw", () => {
   ); // west door on this tile
 
   expect(tile_east_door_yval).toBe(tile_center_east_door_yval);
+});
+
+test("tile position function is correct", () => {
+  return;
+  // Test the base tile.
+  var mp = new MapPosition();
+  mp.setX(0);
+  mp.setY(0);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(3);
+  mp.setY(0);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(0);
+  mp.setY(3);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(3);
+  mp.setY(3);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+
+  // Test the null zones around the base tile.
+  // These are map positions that are impossible for a tile to have squares on.
+  // These go from above 0,0 (top left) clockwise.
+  /*
+  var mp = new MapPosition();
+  mp.setX(0);
+  mp.setY(-1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
+
+  var mp = new MapPosition();
+  mp.setX(4);
+  mp.setY(0);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
+
+  var mp = new MapPosition();
+  mp.setX(3);
+  mp.setY(4);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
+
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(3);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
+  */
+
+  // Test positions of the tile right from the start tile.
+  // Top left corner and then clockwise.
+  var mp = new MapPosition();
+  var mp = new MapPosition();
+  mp.setX(4);
+  mp.setY(1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(7);
+  mp.setY(1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(7);
+  mp.setY(4);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(4);
+  mp.setY(4);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+
+  // Test positions of the tile left from the start tile.
+  // First the direction entrance, and then the top left corner and clockwise.
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(-4);
+  mp.setY(-1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(-1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(2);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+
+  var mp = new MapPosition();
+  mp.setX(-4);
+  mp.setY(2);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+
+  /*
+  var mp = new MapPosition();
+  mp.setX(-4);
+  mp.setY(-1);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: -1, y: 0});
+
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(4);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 0, y: 1});
+
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(7);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 0, y: 1});
+
+  var mp = new MapPosition();
+  mp.setX(3);
+  mp.setY(4);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 1, y: 1});
+
+  var mp = new MapPosition();
+  mp.setX(3);
+  mp.setY(7);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 1, y: 1});
+
+  var mp = new MapPosition();
+  mp.setX(-1);
+  mp.setY(2);
+  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: -1, y: 0});
+  */
 });

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { MapPosition } from "../generated/types_pb";
+import { MapPosition, TilePosition } from "../generated/types_pb";
 import {
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
   TILE_SIZE,
 } from "../constants/other";
-import { CanvasPosition } from "./types";
+import { CanvasPosition, TileCoords } from "./types";
 
 export const mapPositionToCanvasPositionSingle = (
   n: number,
@@ -47,6 +47,25 @@ export const mapPositionToCanvasPosition = (
     tile_offset_y
   );
   return { x: canvas_x, y: canvas_y };
+};
+
+export const mapPositionToTileCoords = (
+  map_position: MapPosition
+): TileCoords | null => {
+  // This function returns where the tile is on the angled x / y axes.
+  var map_x = map_position.getX();
+  var map_y = map_position.getY();
+  var tile_x = mapPositionToTileCoordSingle(map_x, map_y);
+  var tile_y = mapPositionToTileCoordSingle(map_y, map_x);
+  return { x: tile_x, y: tile_y };
+};
+
+const mapPositionToTileCoordSingle = (
+  main: number,
+  alternate: number
+): number => {
+  let offset = Math.floor(alternate / 4);
+  return Math.floor((main - offset) / 4);
 };
 
 const canvasCoordToMapCoord = (
