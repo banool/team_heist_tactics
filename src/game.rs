@@ -744,7 +744,7 @@ pub mod tests {
         let _ = env_logger::builder().is_test(true).try_init();
 
         // Confirm yellow heister is where we expect it to be to begin with.
-        let heister_color = super::HeisterColor::Yellow;
+        let heister_color = super::HeisterColor::Purple;
         let heister_pos = &game
             .get_heister_from_vec(heister_color)
             .unwrap()
