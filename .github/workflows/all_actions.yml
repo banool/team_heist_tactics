@@ -1,0 +1,73 @@
+name: All actions
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  backend_style:
+    name: Backend style check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: rustup toolchain install nightly-2020-06-26 --profile minimal --component rustfmt
+      - run: cargo +nightly-2020-06-26 fmt -- --check
+  frontend_style:
+    name: Frontend style check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.4.0'
+      - run: yarn install
+      - run: yarn run style-check
+  backend_tests:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2020-06-11
+          default: true
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+  frontend_tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.4.0'
+      - uses: arduino/setup-protoc@master
+        with:
+          version: '3.12.3'
+      - run: yarn install
+      - run: cp ../src/types.proto .
+      - run: ./generate_types.sh
+      - run: yarn run tsc
+      - run: yarn run test
+  build_image:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    needs: [backend_style, frontend_style, backend_tests, frontend_tests]
+    steps:
+    - uses: actions/checkout@master
+    - uses: whoan/docker-build-with-cache-action@v5
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        image_name: team_heist_tactics

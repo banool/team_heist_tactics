@@ -60,7 +60,7 @@ export const PlayerAbilities = ({
   name_prefix,
   proto_abilities,
 }: PlayerAbilitiesProps) => {
-  const getAbilityEmoji = (proto_ability: number): string => {
+  const getAbilityEmoji = (proto_ability): string => {
     switch (+proto_ability) {
       case Ability.MOVE_NORTH:
         return "⬆️";
