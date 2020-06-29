@@ -1,6 +1,5 @@
 use crate::load_map::tile_1a;
 use crate::manager::GameHandle;
-use crate::utils::get_current_time_secs;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -584,12 +583,10 @@ impl Internal for GameState {
     }
 }
 
-const TIMER_DURATION_SECS: u64 = 5 * 60;
-
 impl GameState {
     pub fn new(game_name: GameHandle) -> Self {
-        let game_started = get_current_time_secs();
-        let timer_runs_out = game_started + TIMER_DURATION_SECS;
+        let game_started = 0;
+        let timer_runs_out = 0;
         let starting_tile = tile_1a();
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
@@ -610,7 +607,6 @@ impl GameState {
             HeisterColor::Orange,
             &starting_tile_enum,
         ));
-        let possible_placements: Vec<MapPosition> = Vec::new();
         GameState {
             game_name,
             game_started,
@@ -621,7 +617,7 @@ impl GameState {
             remaining_tiles: 8,
             game_status: GameStatus::Staging,
             players: vec![],
-            possible_placements,
+            possible_placements: vec![],
         }
     }
 }

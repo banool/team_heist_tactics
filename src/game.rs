@@ -11,16 +11,19 @@ use crate::types::{
     Ability, GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition,
     Move, MoveDirection, PlaceTile, Player, Square, SquareType, Tile, WallType, DOOR_TYPES,
 };
+use crate::utils::get_current_time_secs;
 
 use log::{info, trace};
 
 const MAX_PLAYERS: u32 = 8;
+const TIMER_DURATION_SECS: u64 = 5 * 60;
 
 #[derive(Debug)]
 pub struct Game {
     pub game_handle: GameHandle,
     pub game_state: GameState,
     pub tile_deck: Vec<Tile>,
+    pub game_created: u64,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -33,10 +36,12 @@ impl Game {
     pub fn new(game_handle: GameHandle, _game_options: GameOptions) -> Game {
         let game_state = GameState::new(game_handle.clone());
         let tile_deck: Vec<Tile> = load_map::load_tiles_from_json();
+        let game_created = get_current_time_secs();
         Game {
             game_handle,
             game_state,
             tile_deck,
+            game_created,
         }
     }
 
@@ -72,6 +77,14 @@ impl Game {
         for (i, player) in self.game_state.players.iter_mut().enumerate() {
             player.abilities = player_abilities[i].clone();
         }
+
+        // Kick off the timer.
+        let now = get_current_time_secs();
+        self.game_state.game_started = now;
+        self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
+
+        // Set the game status to ONGOING.
+        self.game_state.game_status = GameStatus::Ongoing;
     }
 
     fn rotate_abilities(&mut self) {
