@@ -53,20 +53,142 @@ export const mapPositionToCanvasPositionSingle = (
   }
 };
 
+export const isMapPosSame = (a: MapPosition, b: MapPosition): boolean => {
+  if (a.getX() == b.getX() && a.getY() == b.getY()) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export const isInMapPosList = (a: (MapPosition | undefined)[], b: MapPosition): boolean => {
+  var i;
+  for (i = 0; i < a.length; i++) {
+    var c = a[i];
+    if (c != undefined) {
+      console.log(c.getX());
+      console.log(b.getX());
+      console.log(c.getY());
+      console.log(b.getY());
+      if (isMapPosSame(c, b)) {
+        console.log("they r the same");
+        return true;
+      }
+    }
+  };
+  return false;
+};
+
+
 export const tileMapPositionToCanvasPosition = (
   x: number,
   y: number,
-  canvas_width: number,
-  canvas_height: number
+  center_x: number,
+  center_y: number,
+  x0: number,
+  y0: number,
+  map_positions: (MapPosition | undefined)[],
+  back: MapPosition
 ): CanvasPosition => {
-  var center_x = canvas_width / 2;
-  var center_y = canvas_height / 2;
-  var wall = INTERNAL_TILE_OFFSET;
-  var x_px = x + (2 * wall * (4 * x - y)) / 17;
-  console.log(x_px);
-  var y_px = y + (2 * wall * (4 * y - x)) / 17;
-  console.log(y_px);
-  return { x: center_x + x_px, y: center_y + y_px };
+  console.log("recurse");
+  var n1 = new MapPosition();
+  n1.setX(x0 + 1);
+  n1.setY(y0 - 4);
+  var n2 = new MapPosition();
+  n2.setX(x0 - 4);
+  n2.setY(y0 - 1);
+  var n3 = new MapPosition();
+  n3.setX(x0 - 1);
+  n3.setY(y0 + 4);
+  var n4 = new MapPosition();
+  n4.setX(x0 + 4);
+  n4.setY(y0 + 1);
+  if (x == 0 && y == 0) {
+    return { x: center_x, y: center_y };
+  } else if (x == n1.getX() && y == n1.getY()) {
+    return { x: center_x + INTERNAL_SQUARE_SIZE, y: center_y - TILE_SIZE};
+  } else if (x == n2.getX() && y == n2.getY()) {
+    return { x: center_x - TILE_SIZE, y: center_y - INTERNAL_SQUARE_SIZE};
+  } else if (x == n3.getX() && y == n3.getY()) {
+    return { x: center_x - INTERNAL_SQUARE_SIZE, y: center_y + TILE_SIZE};
+  } else if (x == n4.getX() && y == n4.getY()) {
+    return { x: center_x + TILE_SIZE, y: center_y + INTERNAL_SQUARE_SIZE};
+  } else {
+    var imposs = { x: 1000, y: 1000};
+    var back1 = new MapPosition();
+    back1.setX(x0);
+    back1.setY(y0);
+    if (isInMapPosList(map_positions, n1) && !(isMapPosSame(n1, back))) {
+      var a = tileMapPositionToCanvasPosition(
+        x,
+        y,
+        center_x + INTERNAL_SQUARE_SIZE,
+        center_y - TILE_SIZE,
+        n1.getX(),
+        n1.getY(),
+        map_positions,
+        back1
+      )
+      if (a != imposs) {
+        return a;
+      }
+    }
+    //console.log(n2.getX())
+    //console.log(n2.getY())
+    //map_positions.forEach(element => {
+      //if (element != undefined) {
+        //console.log(element.getX());
+        //console.log(element.getY());
+      //}
+    //});
+    if (isInMapPosList(map_positions, n2) && !(isMapPosSame(n2, back))) {
+      console.log("hit n2");
+      var a = tileMapPositionToCanvasPosition(
+        x,
+        y,
+        center_x - TILE_SIZE,
+        center_y - INTERNAL_SQUARE_SIZE,
+        n2.getX(),
+        n2.getY(),
+        map_positions,
+        back1
+      )
+      if (a != imposs) {
+        return a;
+      }
+    }
+    if (isInMapPosList(map_positions, n3) && !(isMapPosSame(n3, back))) {
+      var a = tileMapPositionToCanvasPosition(
+        x,
+        y,
+        center_x - INTERNAL_SQUARE_SIZE,
+        center_y + TILE_SIZE,
+        n3.getX(),
+        n3.getY(),
+        map_positions,
+        back1
+      )
+      if (a != imposs) {
+        return a;
+      }
+    }
+    if (isInMapPosList(map_positions, n4) && !(isMapPosSame(n4, back))) {
+      var a = tileMapPositionToCanvasPosition(
+        x,
+        y,
+        center_x + TILE_SIZE,
+        center_y + INTERNAL_SQUARE_SIZE,
+        n4.getX(),
+        n4.getY(),
+        map_positions,
+        back1
+      )
+      if (a != imposs) {
+        return a;
+      }
+    }
+    return imposs;
+  }
 };
 
 export const mapPositionToCanvasPosition = (
@@ -81,15 +203,21 @@ export const mapPositionToCanvasPosition = (
 ): CanvasPosition => {
   // This is all the map positions.
   var map_positions = proto_tiles.map((pt) => pt.getPosition());
-
   var map_x = map_position.getX();
   var map_y = map_position.getY();
+  var back = new MapPosition();
+    back.setX(0);
+    back.setY(0);
   if (tile == 1) {
     return tileMapPositionToCanvasPosition(
       map_x,
       map_y,
-      canvas_width,
-      canvas_height
+      canvas_width / 2,
+      canvas_height / 2,
+      0,
+      0,
+      map_positions,
+      back
     );
   }
   var canvas_x = mapPositionToCanvasPositionSingle(
