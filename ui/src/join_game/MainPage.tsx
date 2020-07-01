@@ -73,7 +73,9 @@ const MainGame = ({}: MainGameProps) => {
     inner = <GameWindowComponent />;
   } else {
     var inner_form;
-    if (connection_status != ConnectionStatus.Connected) {
+    if (connection_status == ConnectionStatus.Connecting) {
+      <p>Joining game...</p>;
+    } else if (connection_status == ConnectionStatus.NotConnected) {
       inner_form = <JoinGameForm />;
     } else if (
       game_state &&

@@ -59,9 +59,6 @@ const get_tile_and_shadow_tile = ({
   var map_position = proto_tile.getPosition()!;
   var canvas_position = mapPositionToCanvasPosition(
     map_position,
-    pixel_offset,
-    1,
-    3,
     width,
     height
   );
@@ -159,7 +156,7 @@ type HeisterProps = {
 const Heister = ({ proto_heister }: HeisterProps) => {
   const dispatch = useDispatch();
 
-  const offset = HEISTER_SIZE;
+  const offset = HEISTER_SIZE * 1.5 + INTERNAL_SQUARE_SIZE;
   const pixel_offset = -INTERNAL_SQUARE_SIZE - HEISTER_SIZE * 2 + 3;
 
   // TODO Don't tell the client the walls unless we wanna do client side validation.
@@ -174,9 +171,6 @@ const Heister = ({ proto_heister }: HeisterProps) => {
   var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
-    pixel_offset,
-    tile_offset_x,
-    tile_offset_y,
     width,
     height
   );
@@ -237,15 +231,12 @@ type PossiblePlacementProps = {
 const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
   const dispatch = useDispatch();
 
-  const pixel_offset = -INTERNAL_SQUARE_SIZE * 2.2;
+  const pixel_offset = -INTERNAL_SQUARE_SIZE;
   console.log("pixel offset", pixel_offset);
 
   var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
-    pixel_offset,
-    0,
-    0,
     width,
     height
   );
@@ -278,8 +269,8 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
       height={INTERNAL_SQUARE_SIZE}
       stroke="black"
       strokeWidth={stroke_width}
-      offsetX={INTERNAL_SQUARE_SIZE / 4}
-      offsetY={INTERNAL_SQUARE_SIZE / 4}
+      offsetX={INTERNAL_SQUARE_SIZE * 2}
+      offsetY={INTERNAL_SQUARE_SIZE * 2}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}

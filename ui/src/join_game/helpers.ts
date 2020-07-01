@@ -7,65 +7,79 @@ import {
 } from "../constants/other";
 import { CanvasPosition, TileCoords } from "./types";
 
+const inclusive_range = (start: number, end: number): number[] => {
+  return [...Array(end + 1 - start).keys()].map((i) => i + start);
+};
+
+// This function precomputes a map of square coords (map positions) to tile coords.
+// Because you can't really use normal objects as keys, I use a string as a key instead.
+// -50 to 50 is total overkill, 25 would be enough, but better safe than sorry.
+const precomputeSquareCoordtoTileCoordMap = (): Map<string, TileCoords> => {
+  let map: Map<string, TileCoords> = new Map();
+  for (let tile_x = -50; tile_x <= 50; tile_x++) {
+    for (let tile_y = -50; tile_y <= 50; tile_y++) {
+      var min_x = tile_x * 4 - tile_y;
+      var max_x = tile_x * 4 - tile_y + 3;
+      var min_y = tile_y * 4 + tile_x;
+      var max_y = tile_y * 4 + tile_x + 3;
+      for (let x of inclusive_range(min_x, max_x)) {
+        for (let y of inclusive_range(min_y, max_y)) {
+          let key = `${x},${y}`;
+          map.set(key, { x: tile_x, y: tile_y });
+        }
+      }
+    }
+  }
+  return map;
+};
+
+// This is a constant, precomputed map of square coords to tile coords.
+export const squareCoordToTileCoordMap = precomputeSquareCoordtoTileCoordMap();
+
+// Given square coords, get the tile coords of the tile that square is on.
+export const squareCoordstoTileCoords = (x: number, y: number): TileCoords => {
+  let key = `${x},${y}`;
+  let tile_coords = squareCoordToTileCoordMap.get(key);
+  if (tile_coords === undefined) {
+    throw `Couldn't lookup tile coord from map coord ${x},${y}`;
+  }
+  return tile_coords;
+};
+
+// Given one of the values in a map position (x or y), get a canvas coord.
 export const mapPositionToCanvasPositionSingle = (
-  n: number,
-  pixel_offset: number,
-  canvas_dimension_size_px: number, // CANVAS_WIDTH or CANVAS_HEIGHT
-  _tile_offset: number
+  map_n: number,
+  tile_n: number,
+  canvas_dimension_size_px: number // CANVAS_WIDTH or CANVAS_HEIGHT
 ): number => {
-  var num_tiles_away_from_center = Math.floor(n / 4);
-  // Corner Canvas - this is the relative distance n from 0,0 in pixels
   var corner_canvas =
-    num_tiles_away_from_center * 2 * INTERNAL_TILE_OFFSET +
-    n * INTERNAL_SQUARE_SIZE;
-  // Adjusted Canvas - this translates 0,0 to match the center of the canvas, plus pixel offset
-  var adjusted_canvas =
-    corner_canvas + pixel_offset + canvas_dimension_size_px / 2;
+    tile_n * 2 * INTERNAL_TILE_OFFSET + map_n * INTERNAL_SQUARE_SIZE;
+  // Adjusted Canvas - this translates 0,0 to match the center of the canvas.
+  var adjusted_canvas = corner_canvas + canvas_dimension_size_px / 2;
   return adjusted_canvas;
 };
 
+// Given a map position, get the canvas coords (canvas pixels).
+// These are the final numbers we feed into the tile's x and y.
 export const mapPositionToCanvasPosition = (
   map_position: MapPosition,
-  pixel_offset: number,
-  tile_offset_x: number,
-  tile_offset_y: number,
   canvas_width: number,
   canvas_height: number
 ): CanvasPosition => {
   var map_x = map_position.getX();
   var map_y = map_position.getY();
+  var tile_coords = squareCoordstoTileCoords(map_x, map_y);
   var canvas_x = mapPositionToCanvasPositionSingle(
     map_x,
-    pixel_offset,
-    canvas_width,
-    tile_offset_x
+    tile_coords.x,
+    canvas_width
   );
   var canvas_y = mapPositionToCanvasPositionSingle(
     map_y,
-    pixel_offset,
-    canvas_height,
-    tile_offset_y
+    tile_coords.y,
+    canvas_height
   );
   return { x: canvas_x, y: canvas_y };
-};
-
-export const mapPositionToTileCoords = (
-  map_position: MapPosition
-): TileCoords | null => {
-  // This function returns where the tile is on the angled x / y axes.
-  var map_x = map_position.getX();
-  var map_y = map_position.getY();
-  var tile_x = mapPositionToTileCoordSingle(map_x, map_y);
-  var tile_y = mapPositionToTileCoordSingle(map_y, map_x);
-  return { x: tile_x, y: tile_y };
-};
-
-const mapPositionToTileCoordSingle = (
-  main: number,
-  alternate: number
-): number => {
-  let offset = Math.floor(alternate / 4);
-  return Math.floor((main - offset) / 4);
 };
 
 const canvasCoordToMapCoord = (
