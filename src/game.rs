@@ -608,7 +608,7 @@ impl Game {
             }
             _wildcard => {
                 let msg = format!(
-                    "Invalid move for heister {} at {:?} to position {:?}",
+                    "Invalid move for heister {:?} at {:?} to position {:?}",
                     heister_color, heister_pos, dest_pos
                 );
                 MoveValidity::Invalid(msg.to_string())
