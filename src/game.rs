@@ -606,8 +606,13 @@ impl Game {
                 }
                 validity
             }
-            // Not escalator, not teleporter -> try adjacent move check
-            _wildcard => MoveValidity::Invalid("Invalid move".to_string()),
+            _wildcard => {
+                let msg = format!(
+                    "Invalid move for heister {} at {:?} to position {:?}",
+                    heister_color, heister_pos, dest_pos
+                );
+                MoveValidity::Invalid(msg.to_string())
+            }
         }
     }
 
