@@ -53,3 +53,34 @@ This leads into the next problem, which is the redux-websocket client will try t
 Furthermore, one thing to note is that the event from `onerror` of the websocket doesn't actually say what went wrong, you need to look at the event from `onclose` instead. Not a huge problem, but `redux-websocket` does not include any information about the event on either `error` or `close` in the action it submits.
 
 These are all solvable, but a lot of work.
+
+## Original squareCoordToTileCoord
+
+```
+export const squareCoordtoTileCoord = (
+  // These are from a square, which comes straight from a server MapPosition.
+  square_x: number,
+  square_y: number
+): TileCoords => {
+  // TODO Search outwards from zero instead.
+  for (let tile_x = -20; tile_x <= 20; tile_x++) {
+    for (let tile_y = -20; tile_y <= 20; tile_y++) {
+      var min_x = tile_x * 4 - tile_y;
+      var max_x = tile_x * 4 - tile_y + 3;
+      var min_y = tile_y * 4 + tile_x;
+      var max_y = tile_y * 4 + tile_x + 3;
+      // console.log(`square ${square_x},${square_y} tile ${tile_x},${tile_y} = min: ${min_x},${min_y} max: ${max_x},${max_y}`)
+      if (
+        min_x <= square_x &&
+        square_x <= max_x &&
+        min_y <= square_y &&
+        square_y <= max_y
+      ) {
+        return { x: tile_x, y: tile_y };
+      }
+    }
+  }
+  throw "Couldn't go from square coords to tile coords";
+};
+```
+This 100% works.

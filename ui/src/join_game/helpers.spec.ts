@@ -1,7 +1,7 @@
 import {
   canvasPositionToMapPosition,
   mapPositionToCanvasPosition,
-  mapPositionToTileCoords,
+  squareCoordstoTileCoords,
 } from "./helpers";
 import { MapPosition } from "../generated/types_pb";
 import {
@@ -25,14 +25,7 @@ test("tile placement map_position reversible translations", () => {
   let center = new MapPosition();
   center.setX(0);
   center.setY(0);
-  let a = mapPositionToCanvasPosition(
-    center,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  let a = mapPositionToCanvasPosition(center, CANVAS_WIDTH, CANVAS_HEIGHT);
   expect(a.x).toBe(800);
   expect(a.y).toBe(500);
   let b = canvasPositionToMapPosition(
@@ -50,14 +43,7 @@ test("tile 1,-4 map_position reversible translation", () => {
   let tile_corner = new MapPosition();
   tile_corner.setX(1);
   tile_corner.setY(-4);
-  let a = mapPositionToCanvasPosition(
-    tile_corner,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  let a = mapPositionToCanvasPosition(tile_corner, CANVAS_WIDTH, CANVAS_HEIGHT);
   // For this simple case, I can guess what the resulting canvas value is. TODO - is this assumption correct?
   expect(a.x).toBe(CANVAS_WIDTH / 2 + INTERNAL_SQUARE_SIZE);
   expect(a.y).toBe(CANVAS_HEIGHT / 2 - TILE_SIZE);
@@ -72,18 +58,10 @@ test("tile 1,-4 map_position reversible translation", () => {
 });
 
 test("tile -1,4 map_position reversible translation", () => {
-  let pixel_offset = 0;
   let tile_corner = new MapPosition();
   tile_corner.setX(-1);
   tile_corner.setY(4);
-  let a = mapPositionToCanvasPosition(
-    tile_corner,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  let a = mapPositionToCanvasPosition(tile_corner, CANVAS_WIDTH, CANVAS_HEIGHT);
   // expect(a.x).toBe(CANVAS_WIDTH / 2 - INTERNAL_SQUARE_SIZE); // -- BROKEN
   expect(a.y).toBe(CANVAS_HEIGHT / 2 + TILE_SIZE);
   let b = canvasPositionToMapPosition(
@@ -97,18 +75,10 @@ test("tile -1,4 map_position reversible translation", () => {
 });
 
 test("tile -4,-1 map_position reversible translation", () => {
-  let pixel_offset = 0;
   let tile_corner = new MapPosition();
   tile_corner.setX(-4);
   tile_corner.setY(-1);
-  let a = mapPositionToCanvasPosition(
-    tile_corner,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  let a = mapPositionToCanvasPosition(tile_corner, CANVAS_WIDTH, CANVAS_HEIGHT);
   expect(a.x).toBe(
     CANVAS_WIDTH / 2 - (2 * INTERNAL_TILE_OFFSET + 4 * INTERNAL_SQUARE_SIZE)
   );
@@ -130,14 +100,7 @@ test("tile 4,1 map_position reversible translation", () => {
   let tile_corner = new MapPosition();
   tile_corner.setX(4);
   tile_corner.setY(1);
-  let a = mapPositionToCanvasPosition(
-    tile_corner,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  let a = mapPositionToCanvasPosition(tile_corner, CANVAS_WIDTH, CANVAS_HEIGHT);
   expect(a.x).toBe(
     CANVAS_WIDTH / 2 + (2 * INTERNAL_TILE_OFFSET + 4 * INTERNAL_SQUARE_SIZE)
   );
@@ -153,18 +116,10 @@ test("tile 4,1 map_position reversible translation", () => {
 });
 
 test("tile 4,-16 map_position reversible translation", () => {
-  let pixel_offset = 0;
   let tile_corner = new MapPosition();
   tile_corner.setX(4);
   tile_corner.setY(-16);
-  let a = mapPositionToCanvasPosition(
-    tile_corner,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  let a = mapPositionToCanvasPosition(tile_corner, CANVAS_WIDTH, CANVAS_HEIGHT);
   let b = canvasPositionToMapPosition(
     a,
     pixel_offset,
@@ -178,18 +133,10 @@ test("tile 4,-16 map_position reversible translation", () => {
 test("map position translation in both directions at non-center should work, too", () => {
   // NOTE: TODO: This fails at big numbers (251 and 252).
   // Unit test of sorts.
-  let pixel_offset = 20;
   var mp = new MapPosition();
   mp.setX(1);
   mp.setY(2);
-  var a = mapPositionToCanvasPosition(
-    mp,
-    pixel_offset,
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  var a = mapPositionToCanvasPosition(mp, CANVAS_WIDTH, CANVAS_HEIGHT);
   var b = canvasPositionToMapPosition(
     a,
     pixel_offset,
@@ -204,14 +151,7 @@ test("doors align y-axis on western draw", () => {
   var mp = new MapPosition();
   mp.setX(0);
   mp.setY(0);
-  var tile00_pos = mapPositionToCanvasPosition(
-    mp,
-    0, // pixel offset is 0
-    0,
-    0,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-  );
+  var tile00_pos = mapPositionToCanvasPosition(mp, CANVAS_WIDTH, CANVAS_HEIGHT);
   var tile_center_west_door_val = get_door_canvas_yval_from_tile_corner(
     tile00_pos,
     2
@@ -226,9 +166,6 @@ test("doors align y-axis on western draw", () => {
   west_door_first_tile.setY(-1);
   var tile_west = mapPositionToCanvasPosition(
     west_door_first_tile,
-    0,
-    0,
-    0,
     CANVAS_WIDTH,
     CANVAS_HEIGHT
   );
@@ -243,9 +180,6 @@ test("doors align y-axis on western draw", () => {
   east_door_first_tile.setY(1);
   var tile_east_pos = mapPositionToCanvasPosition(
     east_door_first_tile,
-    0,
-    0,
-    0,
     CANVAS_WIDTH,
     CANVAS_HEIGHT
   );
@@ -257,133 +191,57 @@ test("doors align y-axis on western draw", () => {
   expect(tile_east_door_yval).toBe(tile_center_east_door_yval);
 });
 
-test("tile position function is correct", () => {
-  return;
+test("test squareCoordstoTileCoords is correct", () => {
   // Test the base tile.
-  var mp = new MapPosition();
-  mp.setX(0);
-  mp.setY(0);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+  expect(squareCoordstoTileCoords(0, 0)).toStrictEqual({ x: 0, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(3);
-  mp.setY(0);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+  expect(squareCoordstoTileCoords(3, 0)).toStrictEqual({ x: 0, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(0);
-  mp.setY(3);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
+  expect(squareCoordstoTileCoords(0, 3)).toStrictEqual({ x: 0, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(3);
-  mp.setY(3);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 0, y: 0 });
-
-  // Test the null zones around the base tile.
-  // These are map positions that are impossible for a tile to have squares on.
-  // These go from above 0,0 (top left) clockwise.
-  /*
-  var mp = new MapPosition();
-  mp.setX(0);
-  mp.setY(-1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
-
-  var mp = new MapPosition();
-  mp.setX(4);
-  mp.setY(0);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
-
-  var mp = new MapPosition();
-  mp.setX(3);
-  mp.setY(4);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
-
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(3);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual(null);
-  */
+  expect(squareCoordstoTileCoords(3, 3)).toStrictEqual({ x: 0, y: 0 });
 
   // Test positions of the tile right from the start tile.
   // Top left corner and then clockwise.
-  var mp = new MapPosition();
-  var mp = new MapPosition();
-  mp.setX(4);
-  mp.setY(1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+  expect(squareCoordstoTileCoords(4, 1)).toStrictEqual({ x: 1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(7);
-  mp.setY(1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+  expect(squareCoordstoTileCoords(7, 1)).toStrictEqual({ x: 1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(7);
-  mp.setY(4);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+  expect(squareCoordstoTileCoords(7, 4)).toStrictEqual({ x: 1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(4);
-  mp.setY(4);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: 1, y: 0 });
+  expect(squareCoordstoTileCoords(4, 4)).toStrictEqual({ x: 1, y: 0 });
 
   // Test positions of the tile left from the start tile.
   // First the direction entrance, and then the top left corner and clockwise.
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+  expect(squareCoordstoTileCoords(-1, 1)).toStrictEqual({ x: -1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(-4);
-  mp.setY(-1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+  expect(squareCoordstoTileCoords(-4, -1)).toStrictEqual({ x: -1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(-1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+  expect(squareCoordstoTileCoords(-1, -1)).toStrictEqual({ x: -1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(2);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+  expect(squareCoordstoTileCoords(-1, 2)).toStrictEqual({ x: -1, y: 0 });
 
-  var mp = new MapPosition();
-  mp.setX(-4);
-  mp.setY(2);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({ x: -1, y: 0 });
+  expect(squareCoordstoTileCoords(-4, 2)).toStrictEqual({ x: -1, y: 0 });
 
-  /*
-  var mp = new MapPosition();
-  mp.setX(-4);
-  mp.setY(-1);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: -1, y: 0});
+  // Test positions of the tile down from the start tile.
+  // First the direction entrance, and then the top left corner and clockwise.
+  expect(squareCoordstoTileCoords(1, 4)).toStrictEqual({ x: 0, y: 1 });
 
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(4);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 0, y: 1});
+  expect(squareCoordstoTileCoords(-1, 4)).toStrictEqual({ x: 0, y: 1 });
 
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(7);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 0, y: 1});
+  expect(squareCoordstoTileCoords(2, 4)).toStrictEqual({ x: 0, y: 1 });
 
-  var mp = new MapPosition();
-  mp.setX(3);
-  mp.setY(4);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 1, y: 1});
+  expect(squareCoordstoTileCoords(2, 7)).toStrictEqual({ x: 0, y: 1 });
 
-  var mp = new MapPosition();
-  mp.setX(3);
-  mp.setY(7);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: 1, y: 1});
+  expect(squareCoordstoTileCoords(-1, 7)).toStrictEqual({ x: 0, y: 1 });
 
-  var mp = new MapPosition();
-  mp.setX(-1);
-  mp.setY(2);
-  expect(mapPositionToTileCoords(mp)).toStrictEqual({x: -1, y: 0});
-  */
+  // Test positions of the tile down TWICE from the start tile.
+  // Top left corner and then clockwise.
+  expect(squareCoordstoTileCoords(-2, 8)).toStrictEqual({ x: 0, y: 2 });
+
+  expect(squareCoordstoTileCoords(1, 8)).toStrictEqual({ x: 0, y: 2 });
+
+  expect(squareCoordstoTileCoords(1, 11)).toStrictEqual({ x: 0, y: 2 });
+
+  expect(squareCoordstoTileCoords(-2, 8)).toStrictEqual({ x: 0, y: 2 });
 });
