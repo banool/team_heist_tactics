@@ -201,11 +201,11 @@ impl Game {
 
     fn move_blocked_by_wall(
         &self,
+        grid: &HashMap<MapPosition, Square>,
         heister_pos: &MapPosition,
         dest_pos: &MapPosition,
     ) -> MoveValidity {
         // Assumes that heister_pos & dest_pos are adjacent
-        let grid = self.get_absolute_grid();
         let heister_square = match grid.get(&heister_pos) {
             Some(s) => s,
             None => {
@@ -215,8 +215,7 @@ impl Game {
                 ))
             }
         };
-        let move_dir = Self::adjacent_move_direction(heister_pos, dest_pos);
-        let blocking_wall = match move_dir {
+        let blocking_wall = match Self::adjacent_move_direction(heister_pos, dest_pos) {
             MoveDirection::North => heister_square.north_wall,
             MoveDirection::East => heister_square.east_wall,
             MoveDirection::South => heister_square.south_wall,
@@ -245,6 +244,29 @@ impl Game {
             }
         }
         return MoveValidity::Valid;
+    }
+
+    fn teleport_matches_color(teleport_type: SquareType, color: HeisterColor) -> bool {
+        match teleport_type {
+            SquareType::PurpleTeleportPad => color == HeisterColor::Purple,
+            SquareType::OrangeTeleportPad => color == HeisterColor::Orange,
+            SquareType::GreenTeleportPad => color == HeisterColor::Green,
+            SquareType::YellowTeleportPad => color == HeisterColor::Yellow,
+            _wildcard => false,
+        }
+    }
+
+    fn position_squaretype(
+        grid: &HashMap<MapPosition, Square>,
+        pos: &MapPosition,
+    ) -> Result<SquareType> {
+        let square = match grid.get(&pos) {
+            Some(s) => s,
+            None => {
+                return Err(anyhow!("No square at pos {:?}", pos));
+            }
+        };
+        Ok(square.square_type)
     }
 
     fn position_is_escalator(
@@ -316,6 +338,48 @@ impl Game {
             }
             _invalid => _invalid,
         }
+    }
+
+    /// To validate a teleporter move, we need to do a few checks:
+    /// 1. is the dest position on a teleporter square?
+    /// 2. is the source position on a teleporter square matching its color?
+    /// 3. is the heister color matching the teleporter color?
+    fn validate_teleport(
+        &self,
+        grid: &HashMap<MapPosition, Square>,
+        heister: &Heister,
+        dest_pos: &MapPosition,
+    ) -> MoveValidity {
+        let heister_color = heister.heister_color;
+        let heister_pos = &heister.map_position;
+        let heister_square_type = Self::position_squaretype(grid, &heister_pos).unwrap();
+        let dest_square_type = Self::position_squaretype(grid, &dest_pos).unwrap();
+
+        if !Self::teleport_matches_color(heister_square_type, heister_color) {
+            let msg = "Heister and teleporter color do not match";
+            return MoveValidity::Invalid(msg.to_string());
+        }
+        match heister_square_type == dest_square_type {
+            true => MoveValidity::Valid,
+            false => {
+                let msg = "Source and Dest teleporter colors do not match";
+                MoveValidity::Invalid(msg.to_string())
+            }
+        }
+    }
+
+    fn validate_adjacent_move(
+        &self,
+        grid: &HashMap<MapPosition, Square>,
+        heister_pos: &MapPosition,
+        dest_pos: &MapPosition,
+    ) -> MoveValidity {
+        let validity = self.move_blocked_by_wall(&grid, &heister_pos, &dest_pos);
+        match validity {
+            MoveValidity::Invalid(_) => return validity,
+            _ => (),
+        }
+        self.position_is_occupied(&dest_pos)
     }
 
     fn get_door_wall(square: &Square) -> Option<WallType> {
@@ -506,48 +570,44 @@ impl Game {
         let dest_pos = m.position;
 
         let grid = self.get_absolute_grid();
-        match grid.get(&dest_pos) {
-            None => {
-                return MoveValidity::Invalid(format!(
-                    "Destination square {:?} doesn't exist",
-                    dest_pos
-                ))
-            }
-            Some(_wildcard) => (),
-        };
         if Self::are_adjacent(heister_pos, &dest_pos) {
-            let validity = self.move_blocked_by_wall(&heister_pos, &dest_pos);
-            match validity {
-                MoveValidity::Invalid(_) => return validity,
-                _ => (),
-            }
-            let validity = self.position_is_occupied(&dest_pos);
-
+            let validity = self.validate_adjacent_move(&grid, heister_pos, &dest_pos);
             if validity == MoveValidity::Valid {
-                // If the move is valid, actually move it
                 let heister = self
                     .get_mut_heister_from_vec(heister_color.clone())
                     .unwrap();
                 heister.map_position = dest_pos;
             }
-            validity
-        } else if Self::position_is_escalator(&grid, &dest_pos) == MoveValidity::Valid {
-            let validity = self.validate_escalator_move(&grid, heister_pos, &dest_pos);
-            match validity.clone() {
-                MoveValidity::Valid => {
-                    // if valid, let's do the update
+            return validity;
+        }
+        match Self::position_squaretype(&grid, heister_pos) {
+            // Handle escalator move
+            Ok(SquareType::Escalator) => {
+                let validity = self.validate_escalator_move(&grid, heister_pos, &dest_pos);
+                if validity == MoveValidity::Valid {
                     let mut heister = self
                         .get_mut_heister_from_vec(heister_color.clone())
                         .unwrap();
                     heister.map_position = dest_pos;
                 }
-                _invalid => {}
+                validity
             }
-            validity
-        } else {
-            // If they're not adjacent, then we can check whether the destination is a
-            // matching teleport, and whether teleportation is allowed right now
-            MoveValidity::Invalid("Teleports not implemented yet".to_string())
+            // Handle teleport move
+            Ok(SquareType::OrangeTeleportPad)
+            | Ok(SquareType::YellowTeleportPad)
+            | Ok(SquareType::PurpleTeleportPad)
+            | Ok(SquareType::GreenTeleportPad) => {
+                let validity = self.validate_teleport(&grid, heister, &dest_pos);
+                if validity == MoveValidity::Valid {
+                    let heister = self
+                        .get_mut_heister_from_vec(heister_color.clone())
+                        .unwrap();
+                    heister.map_position = dest_pos;
+                }
+                validity
+            }
+            // Not escalator, not teleporter -> try adjacent move check
+            _wildcard => MoveValidity::Invalid("Invalid move".to_string()),
         }
     }
 
