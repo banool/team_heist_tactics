@@ -1,23 +1,26 @@
 import { useState, useEffect } from "react";
-import { MapPosition, TilePosition } from "../generated/types_pb";
+import { MapPosition } from "../generated/types_pb";
 import {
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
   TILE_SIZE,
 } from "../constants/other";
-import { CanvasPosition, TileCoords } from "./types";
+import { CanvasPosition, SquareCoords, TileCoords } from "./types";
 
 const inclusive_range = (start: number, end: number): number[] => {
   return [...Array(end + 1 - start).keys()].map((i) => i + start);
 };
+
+// The max number of tiles we would have in any direction from the middle.
+const TILES_LENGTH = 50;
 
 // This function precomputes a map of square coords (map positions) to tile coords.
 // Because you can't really use normal objects as keys, I use a string as a key instead.
 // -50 to 50 is total overkill, 25 would be enough, but better safe than sorry.
 const precomputeSquareCoordtoTileCoordMap = (): Map<string, TileCoords> => {
   let map: Map<string, TileCoords> = new Map();
-  for (let tile_x = -50; tile_x <= 50; tile_x++) {
-    for (let tile_y = -50; tile_y <= 50; tile_y++) {
+  for (let tile_x = -TILES_LENGTH; tile_x <= TILES_LENGTH; tile_x++) {
+    for (let tile_y = -TILES_LENGTH; tile_y <= TILES_LENGTH; tile_y++) {
       var min_x = tile_x * 4 - tile_y;
       var max_x = tile_x * 4 - tile_y + 3;
       var min_y = tile_y * 4 + tile_x;
