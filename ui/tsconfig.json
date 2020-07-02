@@ -16,10 +16,10 @@
     "esModuleInterop": true,
     "jsx": "react",
     // Allow implicit any for now as we migrate over.
-    "noImplicitAny": false
+    "noImplicitAny": false,
   },
   "include": [
     "src"
   ],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules"]
 }

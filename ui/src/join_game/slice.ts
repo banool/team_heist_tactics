@@ -1,9 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 import { RootState } from "../common/reducers";
-
 import { ConnectionStatus } from "./types";
-
 import { GameState, MainMessage } from "../generated/types_pb";
 
 import {
@@ -15,7 +12,6 @@ import {
   WEBSOCKET_BROKEN,
   WEBSOCKET_CLOSED,
   WEBSOCKET_CONNECT,
-  WEBSOCKET_DISCONNECT,
   WEBSOCKET_ERROR,
   WEBSOCKET_MESSAGE,
   WEBSOCKET_OPEN,
@@ -30,9 +26,6 @@ const WEBSOCKET_CLOSED_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
 );
 const WEBSOCKET_CONNECT_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
   WEBSOCKET_CONNECT
-);
-const WEBSOCKET_DISCONNECT_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
-  WEBSOCKET_DISCONNECT
 );
 const WEBSOCKET_MESSAGE_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
   WEBSOCKET_MESSAGE

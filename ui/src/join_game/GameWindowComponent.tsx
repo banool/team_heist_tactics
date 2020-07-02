@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector, Provider, connect } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector, Provider } from "react-redux";
 import {
   gameStateSelector,
   numInvalidMoveAttemptsSelector,
@@ -11,7 +11,6 @@ import {
   Heister as ProtoHeister,
   HeisterColor,
   MapPosition,
-  Player,
 } from "../generated/types_pb";
 import { moveHeisterReal, placeTile, getColor } from "./api";
 import { Stage, Layer, Circle, Text, Rect } from "react-konva";
@@ -36,7 +35,6 @@ import {
   PlayerAbilities,
 } from "./overlay_components";
 import styles from "../components/styles";
-import ConnectionStatusComponent from "./ConnectionStatusComponent";
 import { CanvasPosition } from "./types";
 import InvalidMessagesComponent from "./InvalidMessagesComponent";
 import TimerComponent from "./TimerComponent";

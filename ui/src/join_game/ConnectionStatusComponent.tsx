@@ -1,7 +1,5 @@
 import React from "react";
-
 import { useSelector } from "react-redux";
-
 import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
 

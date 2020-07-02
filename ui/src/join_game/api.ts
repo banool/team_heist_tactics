@@ -1,5 +1,4 @@
 import { StagingJoinGameThing, ConnectionStatus } from "./types";
-
 import {
   GameState,
   Move,
@@ -11,7 +10,6 @@ import {
   StartGame,
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
-
 import { MoveDirection } from "./types";
 import { registerPlayerNameGameHandle, selectKeyboardHeister } from "./slice";
 

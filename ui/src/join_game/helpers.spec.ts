@@ -8,19 +8,13 @@ import {
   INTERNAL_TILE_OFFSET,
   TILE_SIZE,
 } from "../constants/other";
-let CANVAS_HEIGHT = 1000;
-let CANVAS_WIDTH = 1600;
-let pixel_offset = 0;
+
+const CANVAS_HEIGHT = 1000;
+const CANVAS_WIDTH = 1600;
+const pixel_offset = 0;
 // For reference in these these tests: INTERNAL_TILE_OFFSET = ~28.sth, INTERNAL_SQUARE_SIZE = ~60.sth
 
-// Helper for checking door y-value alignment. (TODO - could be repurposed for x-value, as well)
-function get_door_canvas_yval_from_tile_corner(mp, dir_int) {
-  // 0 = N, 1 = W, 2 = E, 3 = S
-  return mp.y + INTERNAL_TILE_OFFSET + dir_int * INTERNAL_SQUARE_SIZE;
-}
-
 test("tile placement map_position reversible translations", () => {
-  let pixel_offset = 0;
   let center = new MapPosition();
   center.setX(0);
   center.setY(0);
@@ -43,7 +37,6 @@ test("tile placement map_position reversible translations", () => {
 });
 
 test("tile 1,-4 map_position reversible translation", () => {
-  let pixel_offset = 0;
   let tile_corner = new MapPosition();
   tile_corner.setX(1);
   tile_corner.setY(-4);
@@ -115,7 +108,6 @@ test("tile -4,-1 map_position reversible translation", () => {
 });
 
 test("tile 4,1 map_position reversible translation", () => {
-  let pixel_offset = 0;
   let tile_corner = new MapPosition();
   tile_corner.setX(4);
   tile_corner.setY(1);
