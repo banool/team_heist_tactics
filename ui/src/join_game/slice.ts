@@ -74,7 +74,7 @@ const pushInitialMessages = (queue: string[]) => {
     queue,
     "Made with love by Fatema, Kelly, and Daniel"
   );
-  pushToPlayerMessageQueue(queue, "Good luck have fun!");
+  pushToPlayerMessageQueue(queue, "Special thanks to Dmitry and Max!");
 };
 
 interface SelectKeyboardHeisterAction {
