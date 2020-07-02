@@ -103,6 +103,32 @@ impl Internal for MapPosition {
 }
 
 impl MapPosition {
+    pub fn is_adjacent(&self, pos: &MapPosition) -> bool {
+        if self.x == pos.x {
+            let abs_distance = (self.y - pos.y).abs();
+            return abs_distance == 1;
+        } else if self.y == pos.y {
+            let abs_distance = (self.x - pos.x).abs();
+            return abs_distance == 1;
+        } else {
+            return false;
+        }
+    }
+
+    pub fn adjacent_move_direction(&self, pos: &MapPosition) -> MoveDirection {
+        // NOTE: I assume that the two positions are adjacent. Might not be relevant
+        // Also suffers from NO VALIDATION AT ALL illness
+        if self.x > pos.x {
+            return MoveDirection::West;
+        } else if self.x < pos.x {
+            return MoveDirection::East;
+        } else if self.y > pos.y {
+            return MoveDirection::North;
+        } else {
+            return MoveDirection::South;
+        }
+    }
+
     /// With respect to a given (presumed) Tile MapPosition, return the respective
     /// MapPosition of a TileEntrance from one of this tile's doors (in a given direction)
     fn entrance_position(&self, dir: &MoveDirection) -> MapPosition {
