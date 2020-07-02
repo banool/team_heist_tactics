@@ -54,13 +54,15 @@ const get_tile_and_shadow_tile = ({
 }: GetTileShadowSquareProps) => {
   const size = TILE_SIZE;
   const offset = size / 2;
+  const pixel_offset = -INTERNAL_TILE_OFFSET;
 
   var map_position = proto_tile.getPosition()!;
   var canvas_position = mapPositionToCanvasPosition(
     map_position,
+    pixel_offset,
     width,
     height
-  );
+  )!;
   var num_rotations = proto_tile.getNumRotations();
   var tile_name = proto_tile.getName();
 
@@ -155,21 +157,22 @@ type HeisterProps = {
 const Heister = ({ proto_heister }: HeisterProps) => {
   const dispatch = useDispatch();
 
-  const heister_color = proto_heister.getHeisterColor();
-  const map_position = proto_heister.getMapPosition()!;
+  const offset = HEISTER_SIZE;
+  const pixel_offset = -INTERNAL_SQUARE_SIZE - HEISTER_SIZE * 2 + 3;
 
   // TODO Don't tell the client the walls unless we wanna do client side validation.
 
-  const pixel_offset = HEISTER_SIZE * 1.5 + INTERNAL_SQUARE_SIZE;
-
+  const heister_color = proto_heister.getHeisterColor();
+  const map_position = proto_heister.getMapPosition()!;
   var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
+    pixel_offset,
     width,
     height
-  );
+  )!;
 
-  console.debug(
+  console.log(
     `${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
   );
 
@@ -180,9 +183,8 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     // Pause rendering of this unit until we get information back
     // about whether the move attempt was valid. Otherwise it'll just snap back immediately.
     // Or perhaps until we get new game state back as a stop gap.
-    console.info("event okay", event);
-    var x = event.target.x();
-    var y = event.target.y();
+    var x = event.target.x() + INTERNAL_SQUARE_SIZE / 2;
+    var y = event.target.y() + INTERNAL_SQUARE_SIZE / 2;
     console.log("Attempted position ", x, y);
     var intended_canvas_position = { x: x, y: y };
     var intended_map_position = canvasPositionToMapPosition(
@@ -191,10 +193,12 @@ const Heister = ({ proto_heister }: HeisterProps) => {
       width,
       height
     );
-    console.log(
-      `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
-    );
-    dispatch(moveHeisterReal(proto_heister, intended_map_position));
+    if (intended_map_position !== null) {
+      console.log(
+        `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
+      );
+      dispatch(moveHeisterReal(proto_heister, intended_map_position));
+    }
   };
 
   // If x changes but y doesn't, y won't update, only x will.
@@ -205,12 +209,14 @@ const Heister = ({ proto_heister }: HeisterProps) => {
 
   return (
     <Circle
-      x={canvas_position.x - pixel_offset + random_x}
-      y={canvas_position.y - pixel_offset + random_y}
+      x={canvas_position.x + random_x}
+      y={canvas_position.y + random_y}
       stroke="black"
       fill={getColor(heister_color)}
       strokeWidth={4}
       radius={HEISTER_SIZE}
+      offsetX={offset}
+      offsetY={offset}
       draggable={true}
       onDragEnd={onDragEnd}
       perfectDrawEnabled={false}
@@ -224,15 +230,16 @@ type PossiblePlacementProps = {
 const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
   const dispatch = useDispatch();
 
-  const pixel_offset = INTERNAL_SQUARE_SIZE * 2;
+  const pixel_offset = -INTERNAL_SQUARE_SIZE * 2.2;
   console.log("pixel offset", pixel_offset);
 
   var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
+    pixel_offset,
     width,
     height
-  );
+  )!;
 
   console.log(
     `square at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
@@ -256,15 +263,18 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
 
   return (
     <Rect
-      x={canvas_position.x - pixel_offset}
-      y={canvas_position.y - pixel_offset}
+      x={canvas_position.x}
+      y={canvas_position.y}
       width={INTERNAL_SQUARE_SIZE}
       height={INTERNAL_SQUARE_SIZE}
       stroke="black"
       strokeWidth={stroke_width}
+      offsetX={INTERNAL_SQUARE_SIZE / 4}
+      offsetY={INTERNAL_SQUARE_SIZE / 4}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
+      // fill={colors.background}
       shadowBlur={5}
       shadowColor="black"
       shadowEnabled={shadowEnabled}
