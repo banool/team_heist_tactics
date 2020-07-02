@@ -47,6 +47,13 @@ pub const HEISTER_COLORS: [&'static HeisterColor; 4] = [
     &HeisterColor::Yellow,
 ];
 
+pub const DIRECTIONS: [&'static MoveDirection; 4] = [
+    &MoveDirection::North,
+    &MoveDirection::East,
+    &MoveDirection::South,
+    &MoveDirection::West,
+];
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
     x: u32,
@@ -95,12 +102,48 @@ impl Internal for MapPosition {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+impl MapPosition {
+    /// With respect to a given (presumed) Tile MapPosition, return the respective
+    /// MapPosition of a TileEntrance from one of this tile's doors (in a given direction)
+    fn entrance_position(&self, dir: &MoveDirection) -> MapPosition {
+        match dir {
+            MoveDirection::North => MapPosition {
+                x: self.x + 2,
+                y: self.y - 1,
+            },
+            MoveDirection::East => MapPosition {
+                x: self.x + 4,
+                y: self.y + 2,
+            },
+            MoveDirection::South => MapPosition {
+                x: self.x + 1,
+                y: self.y + 4,
+            },
+            MoveDirection::West => MapPosition {
+                x: self.x - 1,
+                y: self.y + 1,
+            },
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MoveDirection {
     North,
     East,
     South,
     West,
+}
+
+impl MoveDirection {
+    pub fn opposite(&self) -> MoveDirection {
+        match self {
+            MoveDirection::North => MoveDirection::South,
+            MoveDirection::East => MoveDirection::West,
+            MoveDirection::South => MoveDirection::North,
+            MoveDirection::West => MoveDirection::East,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
@@ -159,6 +202,19 @@ impl From<SerializableTile> for Tile {
 }
 
 impl Tile {
+    fn door_square_indices() -> HashMap<MoveDirection, usize> {
+        let dirs_to_square_indices: HashMap<MoveDirection, usize> = [
+            (MoveDirection::North, 2),
+            (MoveDirection::East, 11),
+            (MoveDirection::South, 13),
+            (MoveDirection::West, 4),
+        ]
+        .iter()
+        .cloned()
+        .collect();
+        dirs_to_square_indices
+    }
+
     pub fn pp(&self) -> String {
         let mut square_strs: Vec<String> = Vec::new();
         // should have 12 entries, for 3 rows of each square (4 squares in a tile)
@@ -234,6 +290,38 @@ impl Tile {
             }
         }
         rotated
+    }
+
+    /// In any tile, we can _KNOW_ the index of "door" squares.
+    /// 0    1   *2    3
+    /// 4*   5    6    7
+    /// 8    9   10  *11
+    /// 12  13*  14   15
+    pub fn get_door_squares(&self) -> HashMap<MoveDirection, Square> {
+        let mut map: HashMap<MoveDirection, Square> = HashMap::new();
+        let dirs_to_square_indices = Tile::door_square_indices();
+        for (dir, square_index) in dirs_to_square_indices {
+            let square = *self.squares.get(square_index).unwrap();
+            if square.has_door() {
+                map.insert(dir, square);
+            }
+        }
+        map
+    }
+
+    pub fn open_door_in_dir(&mut self, dir: MoveDirection) -> () {
+        let square_index = *Tile::door_square_indices().get(&dir).unwrap();
+        let square = self.squares.get_mut(square_index).unwrap();
+        square.open_door(dir)
+    }
+
+    pub fn adjacent_entrances(&self) -> HashMap<MoveDirection, MapPosition> {
+        let mut map: HashMap<MoveDirection, MapPosition> = HashMap::new();
+        for dir in self.get_door_squares().keys() {
+            let pos = self.position.entrance_position(dir);
+            map.insert(*dir, pos);
+        }
+        map
     }
 }
 
@@ -326,6 +414,38 @@ impl Square {
         walls.insert(MoveDirection::South, self.south_wall);
         walls.insert(MoveDirection::West, self.west_wall);
         walls
+    }
+
+    pub fn has_door(&self) -> bool {
+        DOOR_TYPES.contains(&&self.north_wall)
+            | DOOR_TYPES.contains(&&self.east_wall)
+            | DOOR_TYPES.contains(&&self.south_wall)
+            | DOOR_TYPES.contains(&&self.west_wall)
+    }
+
+    pub fn open_door(&mut self, dir: MoveDirection) -> () {
+        match dir {
+            MoveDirection::North => {
+                if DOOR_TYPES.contains(&&self.north_wall) {
+                    self.north_wall = WallType::Clear;
+                }
+            }
+            MoveDirection::East => {
+                if DOOR_TYPES.contains(&&self.east_wall) {
+                    self.east_wall = WallType::Clear;
+                }
+            }
+            MoveDirection::South => {
+                if DOOR_TYPES.contains(&&self.south_wall) {
+                    self.south_wall = WallType::Clear;
+                }
+            }
+            MoveDirection::West => {
+                if DOOR_TYPES.contains(&&self.west_wall) {
+                    self.west_wall = WallType::Clear;
+                }
+            }
+        };
     }
 
     fn pp_wall(w: WallType, vertical: bool) -> String {
