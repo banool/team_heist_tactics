@@ -171,6 +171,8 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     height
   )!;
 
+  const [rerenderer, set_rerenderer] = useState(0);
+
   console.log(
     `${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
   );
@@ -197,14 +199,17 @@ const Heister = ({ proto_heister }: HeisterProps) => {
         `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
       );
       dispatch(moveHeisterReal(proto_heister, intended_map_position));
+    } else {
+      // Cause the heister to re-render and snap back to where it should be.
+      set_rerenderer(Math.random() * 0.001 + 0.001);
     }
   };
 
   // If x changes but y doesn't, y won't update, only x will.
   // Introducing some jitter makes sure they always change.
   // TODO Do this only when a reset toggle flips.
-  var random_x = Math.random() * 0.001 + 0.001;
-  var random_y = Math.random() * 0.001 + 0.001;
+  var random_x = Math.random() * 0.001 + 0.001 + rerenderer;
+  var random_y = Math.random() * 0.001 + 0.001 + rerenderer;
 
   return (
     <Circle
