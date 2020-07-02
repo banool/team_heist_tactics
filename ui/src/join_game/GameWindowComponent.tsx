@@ -60,11 +60,9 @@ const get_tile_and_shadow_tile = ({
   var canvas_position = mapPositionToCanvasPosition(
     map_position,
     pixel_offset,
-    1,
-    3,
     width,
     height
-  );
+  )!;
   var num_rotations = proto_tile.getNumRotations();
   var tile_name = proto_tile.getName();
 
@@ -166,20 +164,13 @@ const Heister = ({ proto_heister }: HeisterProps) => {
 
   const heister_color = proto_heister.getHeisterColor();
   const map_position = proto_heister.getMapPosition()!;
-  // This sort of helped. I think I really just need the position of the tile I am on.
-  // const tile_offset_y = -Math.floor(map_position.getX() / 4);
-  // const tile_offset_x = -Math.floor(map_position.getY() / 4);
-  const tile_offset_x = 0;
-  const tile_offset_y = 0;
   var { width, height } = useWindowDimensions();
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
     pixel_offset,
-    tile_offset_x,
-    tile_offset_y,
     width,
     height
-  );
+  )!;
 
   console.log(
     `${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) heister at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`
@@ -192,8 +183,8 @@ const Heister = ({ proto_heister }: HeisterProps) => {
     // Pause rendering of this unit until we get information back
     // about whether the move attempt was valid. Otherwise it'll just snap back immediately.
     // Or perhaps until we get new game state back as a stop gap.
-    var x = event.target.x();
-    var y = event.target.y();
+    var x = event.target.x() + INTERNAL_SQUARE_SIZE/2;
+    var y = event.target.y() + INTERNAL_SQUARE_SIZE/2;
     console.log("Attempted position ", x, y);
     var intended_canvas_position = { x: x, y: y };
     var intended_map_position = canvasPositionToMapPosition(
@@ -202,10 +193,12 @@ const Heister = ({ proto_heister }: HeisterProps) => {
       width,
       height
     );
-    console.log(
-      `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
-    );
-    dispatch(moveHeisterReal(proto_heister, intended_map_position));
+    if (intended_map_position !== null) {
+      console.log(
+        `Heister ${heister_color} (0 yellow, 1 purple, 2 green, 3 orange) dropped at ${intended_map_position.getX()} ${intended_map_position.getY()}`
+      );
+      dispatch(moveHeisterReal(proto_heister, intended_map_position));
+    }
   };
 
   // If x changes but y doesn't, y won't update, only x will.
@@ -244,11 +237,9 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
   const canvas_position = mapPositionToCanvasPosition(
     map_position,
     pixel_offset,
-    0,
-    0,
     width,
     height
-  );
+  )!;
 
   console.log(
     `square at canvas.x/y ${canvas_position.x} ${canvas_position.y} map ${map_position}`

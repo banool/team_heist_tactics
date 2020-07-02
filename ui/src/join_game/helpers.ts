@@ -7,90 +7,138 @@ import {
 } from "../constants/other";
 import { CanvasPosition } from "./types";
 
-export const mapPositionToCanvasPositionSingle = (
-  n: number,
-  pixel_offset: number,
-  canvas_dimension_size_px: number, // CANVAS_WIDTH or CANVAS_HEIGHT
-  _tile_offset: number
-): number => {
-  var num_tiles_away_from_center = Math.floor(n / 4);
-  // Corner Canvas - this is the relative distance n from 0,0 in pixels
-  var corner_canvas =
-    num_tiles_away_from_center * 2 * INTERNAL_TILE_OFFSET +
-    n * INTERNAL_SQUARE_SIZE;
-  // Adjusted Canvas - this translates 0,0 to match the center of the canvas, plus pixel offset
-  var adjusted_canvas =
-    corner_canvas + pixel_offset + canvas_dimension_size_px / 2;
-  return adjusted_canvas;
-};
+/** 
+ * Converts a tile position (R moves right, D moves down) to a grid position.
+ * 
+ * Derivation: each move right gets us a tile that is one grid square lower,
+ * and four grid squares + two extra walls to the right.
+ * Similarly for moves downwards.
+ *
+ * @param m thickness of walls as a fraction of the size of one grid square
+ */
+function tileToGrid(R: number, D: number, m: number): {X: number, Y: number} {
+  const X = 2 * m * R + 4 * R - D;
+  const Y = 2 * m * D + 4 * D + R;
+  return {X, Y};
+}
 
+/** 
+ * Converts a grid position to a tile position (R moves right, D moves down).
+ * 
+ * Derivation: this function is the inverse of tileToGrid(). Solved with WolframAlpha:
+ * https://www.wolframalpha.com/input/?i=solve+for+D%2CR%3A+X+%3D+R*%282m+%2B+4%29+-+D%2C+Y+%3D+D*%282m+%2B+4%29+%2B+R
+ *
+ * If the input X, Y is the position of a tile, the resulting R, D will be integers
+ * (or almost integers, depending on floating point rounding).
+ *
+ * @param m thickness of walls as a fraction of the size of one grid square
+ */
+function gridToTile(X: number, Y: number, m: number): {R: number, D: number} {
+  // https://www.wolframalpha.com/input/?i=solve+for+D%2CR%3A+X+%3D+R*%282m+%2B+4%29+-+D%2C+Y+%3D+D*%282m+%2B+4%29+%2B+R
+  const K = 4 * m * m + 16 * m + 17;
+  const R = (2 * m * X + 4 * X + Y) / K;
+  const D = (2 * m * Y + 4 * Y - X) / K;
+  return {R, D};
+}
+
+/** 
+ * Gets the grid coordinates of the tile containing the (possibly not integer)
+ * grid position X,Y. May return null, since not all possible grid positions are
+ * contained within a tile (e.g. walls, the empty squares at the corners).
+ *
+ * @param m thickness of walls as a fraction of the size of one grid square
+ */
+function getTileGridCoords(X: number, Y: number, m: number): {X: number, Y:number} | null {
+  let {R, D} = gridToTile(X, Y, m);
+  // There might be a neater way to do this, but here is an algorithm that works:
+  // Get the closest integer tile (R,D), and then check it and its 8 neighbours
+  // to see if it is the tile that contains (X,Y).
+  R = Math.round(R);
+  D = Math.round(D);
+  for (const r of [-1, 0, 1]) {
+    for (const d of [-1, 0, 1]) {
+      const {X: x, Y: y} = tileToGrid(R + r, D + d, m);
+      if (x >= X - 3.99 && x <= X + 0.01 && y >= Y - 3.99 && y <= Y + 0.01) {
+        return {X: x, Y: y};
+      }
+    }
+  }
+  return null;
+}
+
+/** 
+ * Converts a grid position on the map (with no walls) to a position in pixels on the canvas (with walls).
+ */
 export const mapPositionToCanvasPosition = (
   map_position: MapPosition,
   pixel_offset: number,
-  tile_offset_x: number,
-  tile_offset_y: number,
   canvas_width: number,
   canvas_height: number
-): CanvasPosition => {
-  var map_x = map_position.getX();
-  var map_y = map_position.getY();
-  var canvas_x = mapPositionToCanvasPositionSingle(
-    map_x,
-    pixel_offset,
-    canvas_width,
-    tile_offset_x
-  );
-  var canvas_y = mapPositionToCanvasPositionSingle(
-    map_y,
-    pixel_offset,
-    canvas_height,
-    tile_offset_y
-  );
-  return { x: canvas_x, y: canvas_y };
+): CanvasPosition | null => {
+  const pos_no_walls_x = map_position.getX();
+  const pos_no_walls_y = map_position.getY();
+  
+  // 1. find the tile we are in.
+  const tile = getTileGridCoords(pos_no_walls_x, pos_no_walls_y, 0);
+  if (tile === null) {
+    return null;
+  }
+  const {X: tile_no_walls_x, Y: tile_no_walls_y} = tile;
+
+  // 2. find its tile coordinates - these are the same whether we have walls or not
+  const {R, D} = gridToTile(tile_no_walls_x, tile_no_walls_y, 0);
+
+  // 3. use the tile coordinates to get the grid coordinates with walls
+  const m = INTERNAL_TILE_OFFSET / INTERNAL_SQUARE_SIZE;
+  const {X: tile_with_walls_x, Y: tile_with_walls_y} = tileToGrid(R, D, m);
+  
+  // 4. shift back to get the grid coordinates of the point we want
+  const pos_with_walls_x = tile_with_walls_x + pos_no_walls_x - tile_no_walls_x;
+  const pos_with_walls_y = tile_with_walls_y + pos_no_walls_y - tile_no_walls_y;
+
+  // 5. convert grid-with-walls to pixels and apply shifts
+  const canvas_x = INTERNAL_SQUARE_SIZE * pos_with_walls_x + pixel_offset + canvas_width / 2;
+  const canvas_y = INTERNAL_SQUARE_SIZE * pos_with_walls_y + pixel_offset + canvas_height / 2;
+  return {x: canvas_x, y: canvas_y};
 };
 
-const canvasCoordToMapCoord = (
-  coord: number,
-  pixel_offset: number,
-  canvas_dimension_size_px: number // CANVAS_WIDTH or CANVAS_HEIGHT
-): number => {
-  // Translate the point so that its origin is at 0,0 - not at CANVAS_DIM / 2
-  var corner_canvas_val = coord - pixel_offset - canvas_dimension_size_px / 2;
-
-  // We know that corner_canvas_val is the _sum_ of tile_offset and square_offset.
-  // We need to get both of those values separately from this value, corner_canvas_val
-  var num_tiles_offset = Math.floor(corner_canvas_val / TILE_SIZE);
-  var canvas_square_offset = corner_canvas_val - TILE_SIZE * num_tiles_offset;
-
-  // We should repeat the process (square offset = floor of current val (canvas_square_offset) / square_size)
-  var num_squares_offset = Math.floor(
-    canvas_square_offset / INTERNAL_SQUARE_SIZE
-  );
-
-  // For each tile, we're moved 4 away. For each square, it's 1 worth
-  var num_squares_away_from_center = num_tiles_offset * 4 + num_squares_offset;
-  return num_squares_away_from_center;
-};
-
+/** 
+ * Converts a position in pixels on the canvas (with walls) to a grid position on the map (with no walls).
+ */
 export const canvasPositionToMapPosition = (
   canvas_position: CanvasPosition,
   pixel_offset: number,
   canvas_width: number,
   canvas_height: number
-): MapPosition => {
-  var map_x = canvasCoordToMapCoord(
-    canvas_position.x,
-    pixel_offset,
-    canvas_width
-  );
-  var map_y = canvasCoordToMapCoord(
-    canvas_position.y,
-    pixel_offset,
-    canvas_height
-  );
-  var out = new MapPosition();
-  out.setX(map_x);
-  out.setY(map_y);
+): MapPosition | null => {
+  const canvas_x = canvas_position.x;
+  const canvas_y = canvas_position.y;
+  
+  // 1. Convert pixels to grid-with-walls coordinate
+  const pos_with_walls_x = (canvas_x - pixel_offset - canvas_width / 2) / INTERNAL_SQUARE_SIZE;
+  const pos_with_walls_y = (canvas_y - pixel_offset - canvas_height / 2) / INTERNAL_SQUARE_SIZE;
+  
+  // 2. find the tile we are in.
+  const m = INTERNAL_TILE_OFFSET / INTERNAL_SQUARE_SIZE;
+  const tile = getTileGridCoords(pos_with_walls_x, pos_with_walls_y, m);
+  if (tile === null) {
+    return null;
+  }
+  const {X: tile_with_walls_x, Y: tile_with_walls_y} = tile;
+  
+  // 3. find its tile coordinates - these are the same whether we have walls or not
+  const {R, D} = gridToTile(tile_with_walls_x, tile_with_walls_y, m);
+  
+  // 4. use the tile coordinates to get the grid coordinates without walls
+  const {X: tile_no_walls_x, Y: tile_no_walls_y} = tileToGrid(R, D, 0);
+
+  // 5. shift back to get the grid coordinates of the point we want, and round down
+  const pos_no_walls_x = tile_no_walls_x + Math.floor(pos_with_walls_x - tile_with_walls_x);
+  const pos_no_walls_y = tile_no_walls_y + Math.floor(pos_with_walls_y - tile_with_walls_y);
+
+  const out = new MapPosition();
+  out.setX(pos_no_walls_x);
+  out.setY(pos_no_walls_y);
   return out;
 };
 
