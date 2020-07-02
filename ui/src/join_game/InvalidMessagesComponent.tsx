@@ -1,8 +1,8 @@
+import { MAX_PLAYER_MESSAGES } from "../constants/other";
 import React from "react";
-import { useSelector } from "react-redux";
 import { playerMessageQueueSelector } from "./slice";
 import styles from "../components/styles";
-import { MAX_PLAYER_MESSAGES } from "../constants/other";
+import { useSelector } from "react-redux";
 
 const InvalidMessagesComponent = () => {
   const player_message_queue = useSelector(playerMessageQueueSelector);

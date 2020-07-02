@@ -1,17 +1,18 @@
-import { StagingJoinGameThing, ConnectionStatus } from "./types";
+import { ConnectionStatus, StagingJoinGameThing } from "./types";
 import {
   GameState,
-  Move,
-  MainMessage,
-  HeisterColor,
-  MapPosition,
   Heister,
+  HeisterColor,
+  MainMessage,
+  MapPosition,
+  Move,
   PlaceTile,
   StartGame,
 } from "../generated/types_pb";
 import { connect, send } from "@giantmachines/redux-websocket";
-import { MoveDirection } from "./types";
 import { registerPlayerNameGameHandle, selectKeyboardHeister } from "./slice";
+
+import { MoveDirection } from "./types";
 
 export function joinGame(join_game_thing: StagingJoinGameThing) {
   return async (dispatch) => {

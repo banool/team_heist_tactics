@@ -1,13 +1,9 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../common/reducers";
-import { ConnectionStatus } from "./types";
 import { GameState, MainMessage } from "../generated/types_pb";
-
 import {
-  WEBSOCKET_ACTION_PREFIX_FULL,
   MAX_PLAYER_MESSAGES,
+  WEBSOCKET_ACTION_PREFIX_FULL,
 } from "../constants/other";
-
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
   WEBSOCKET_BROKEN,
   WEBSOCKET_CLOSED,
@@ -17,6 +13,9 @@ import {
   WEBSOCKET_OPEN,
   WEBSOCKET_SEND,
 } from "@giantmachines/redux-websocket";
+
+import { ConnectionStatus } from "./types";
+import { RootState } from "../common/reducers";
 
 const WEBSOCKET_BROKEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
   WEBSOCKET_BROKEN

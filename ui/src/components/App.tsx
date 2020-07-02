@@ -1,9 +1,9 @@
-import React from "react";
 import Footer from "./Footer";
 import MainPage from "../join_game/MainPage";
-import styles from "./styles";
 import { Provider } from "react-redux";
+import React from "react";
 import store from "../common/store";
+import styles from "./styles";
 
 // <Footer />
 

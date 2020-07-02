@@ -13,8 +13,8 @@
     "devbuild": "webpack --config webpack.dev.js",
     "prodbuild": "webpack --config webpack.prod.js",
     "start": "Please use run.sh in the root directory",
-    "style-check": "prettier --check 'src/**/*.{js,jsx,ts,tsx}'",
-    "style-fix": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
+    "style-check": "import-sort -l 'src/**/*.{js,jsx,ts,tsx}' && prettier --check 'src/**/*.{js,jsx,ts,tsx}'",
+    "style-fix": "import-sort --write 'src/**/*.{js,jsx,ts,tsx}' && prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
     "type-check": "tsc"
   },
   "dependencies": {
@@ -50,6 +50,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.3",
     "@types/node": "^14.0.14",
+    "import-sort-cli": "^6.0.0",
     "jest": "^26.1.0",
     "ts-jest": "^26.1.1",
     "typescript": "^3.9.5"

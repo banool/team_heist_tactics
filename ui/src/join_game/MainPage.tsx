@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-
-import JoinGameForm from "./JoinGameForm";
-import GameWindowComponent from "./GameWindowComponent";
-import { useDispatch } from "react-redux";
+import { GameStatus, GameStatusMap } from "../generated/types_pb";
+import React, { useEffect, useState } from "react";
 import {
   gameStateSelector,
   heisterSelectedSelector,
   playerIsSpectatorSelector,
 } from "./slice";
 
-import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
-
+import ConnectionStatusComponent from "./ConnectionStatusComponent";
+import GameWindowComponent from "./GameWindowComponent";
+import InvalidMessagesComponent from "./InvalidMessagesComponent";
+import JoinGameForm from "./JoinGameForm";
+import LobbyForm from "./LobbyForm";
+import { connectionStatusSelector } from "./slice";
 import { handleKeyInput } from "./api";
 import styles from "../components/styles";
-import InvalidMessagesComponent from "./InvalidMessagesComponent";
-import ConnectionStatusComponent from "./ConnectionStatusComponent";
-import { GameStatusMap, GameStatus } from "../generated/types_pb";
-import LobbyForm from "./LobbyForm";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 type MainGameProps = {};
 const MainGame = ({}: MainGameProps) => {

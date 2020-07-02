@@ -1,9 +1,10 @@
-import React from "react";
+import { connectionStatusSelector, gameStateSelector } from "./slice";
 import { useDispatch, useSelector } from "react-redux";
-import { moveHeister } from "./api";
-import { MoveDirection } from "./types";
-import { gameStateSelector, connectionStatusSelector } from "./slice";
+
 import { HeisterColor } from "../generated/types_pb";
+import { MoveDirection } from "./types";
+import React from "react";
+import { moveHeister } from "./api";
 
 const MoveHeisterComponent = () => {
   const dispatch = useDispatch();

@@ -1,9 +1,9 @@
-import React from "react";
+import { Ability } from "../generated/types_pb";
 import { Circle } from "react-konva";
+import React from "react";
 import { getColor } from "./api";
 import { heisterSelectedSelector } from "./slice";
 import { useSelector } from "react-redux";
-import { Ability } from "../generated/types_pb";
 
 // The offset makes the center of the image be the center of the canvas element.
 type ResetMapComponentProps = {

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+
 import { timerRunsOutSelector } from "./slice";
+import { useSelector } from "react-redux";
 
 const TimerComponent = () => {
   const timer_runs_out = useSelector(timerRunsOutSelector);

@@ -1,13 +1,14 @@
 import {
-  canvasPositionToMapPosition,
-  mapPositionToCanvasPosition,
-} from "./helpers";
-import { MapPosition } from "../generated/types_pb";
-import {
   INTERNAL_SQUARE_SIZE,
   INTERNAL_TILE_OFFSET,
   TILE_SIZE,
 } from "../constants/other";
+import {
+  canvasPositionToMapPosition,
+  mapPositionToCanvasPosition,
+} from "./helpers";
+
+import { MapPosition } from "../generated/types_pb";
 
 const CANVAS_HEIGHT = 1000;
 const CANVAS_WIDTH = 1600;

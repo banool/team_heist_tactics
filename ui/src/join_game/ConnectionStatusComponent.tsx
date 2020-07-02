@@ -1,7 +1,7 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { connectionStatusSelector } from "./slice";
 import { ConnectionStatus } from "./types";
+import React from "react";
+import { connectionStatusSelector } from "./slice";
+import { useSelector } from "react-redux";
 
 const ConnectionStatusComponent = () => {
   const connection_status = useSelector(connectionStatusSelector);

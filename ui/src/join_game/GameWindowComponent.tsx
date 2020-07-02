@@ -1,43 +1,44 @@
+import {
+  ActiveHeisterKeyboardComponent,
+  PlayerAbilities,
+  ResetMapComponent,
+} from "./overlay_components";
+import { Circle, Layer, Rect, Stage, Text } from "react-konva";
+import {
+  HEISTER_SIZE,
+  INTERNAL_SQUARE_SIZE,
+  INTERNAL_TILE_OFFSET,
+  TILE_SIZE,
+} from "../constants/other";
+import {
+  HeisterColor,
+  MapPosition,
+  Heister as ProtoHeister,
+  Tile as ProtoTile,
+} from "../generated/types_pb";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import React, { useState } from "react";
-import { useDispatch, useSelector, Provider } from "react-redux";
+import {
+  canvasPositionToMapPosition,
+  mapPositionToCanvasPosition,
+  useWindowDimensions,
+} from "./helpers";
 import {
   gameStateSelector,
   numInvalidMoveAttemptsSelector,
-  playerNameSelector,
   playerIsSpectatorSelector,
+  playerNameSelector,
 } from "./slice";
-import {
-  Tile as ProtoTile,
-  Heister as ProtoHeister,
-  HeisterColor,
-  MapPosition,
-} from "../generated/types_pb";
-import { moveHeisterReal, placeTile, getColor } from "./api";
-import { Stage, Layer, Circle, Text, Rect } from "react-konva";
-import Konva from "konva";
-import { Image } from "react-konva";
-import useImage from "use-image";
-import {
-  HEISTER_SIZE,
-  TILE_SIZE,
-  INTERNAL_SQUARE_SIZE,
-  INTERNAL_TILE_OFFSET,
-} from "../constants/other";
-import {
-  mapPositionToCanvasPosition,
-  canvasPositionToMapPosition,
-  useWindowDimensions,
-} from "./helpers";
-import store from "../common/store";
-import {
-  ResetMapComponent,
-  ActiveHeisterKeyboardComponent,
-  PlayerAbilities,
-} from "./overlay_components";
-import styles from "../components/styles";
+import { getColor, moveHeisterReal, placeTile } from "./api";
+
 import { CanvasPosition } from "./types";
+import { Image } from "react-konva";
 import InvalidMessagesComponent from "./InvalidMessagesComponent";
+import Konva from "konva";
 import TimerComponent from "./TimerComponent";
+import store from "../common/store";
+import styles from "../components/styles";
+import useImage from "use-image";
 
 type GetTileShadowSquareProps = {
   proto_tile: ProtoTile;

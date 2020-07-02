@@ -1,8 +1,9 @@
-import React from "react";
+import { gameHandleSelector, gameStateSelector } from "./slice";
 import { useDispatch, useSelector } from "react-redux";
-import { startGame } from "./api";
-import { gameStateSelector, gameHandleSelector } from "./slice";
+
 import { Player } from "../generated/types_pb";
+import React from "react";
+import { startGame } from "./api";
 
 const LobbyForm = () => {
   const dispatch = useDispatch();

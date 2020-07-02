@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { joinGame } from "./api";
 import { JoinGameThing, StagingJoinGameThing } from "./types";
+import React, { useState } from "react";
+
+import { joinGame } from "./api";
+import { useDispatch } from "react-redux";
 
 const defaults: StagingJoinGameThing = {
   name: "",

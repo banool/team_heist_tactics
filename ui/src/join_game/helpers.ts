@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { MapPosition } from "../generated/types_pb";
 import { INTERNAL_SQUARE_SIZE, INTERNAL_TILE_OFFSET } from "../constants/other";
+import { useEffect, useState } from "react";
+
 import { CanvasPosition } from "./types";
+import { MapPosition } from "../generated/types_pb";
 
 /**
  * Converts a tile position (R moves right, D moves down) to a grid position.

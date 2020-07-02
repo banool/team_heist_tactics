@@ -1,9 +1,10 @@
-import { getDefaultMiddleware, configureStore } from "@reduxjs/toolkit";
+import * as jspb from "google-protobuf";
+
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+
+import { WEBSOCKET_ACTION_PREFIX } from "../constants/other";
 import reduxWebsocket from "@giantmachines/redux-websocket";
 import rootReducer from "./reducers";
-import { WEBSOCKET_ACTION_PREFIX } from "../constants/other";
-
-import * as jspb from "google-protobuf";
 
 // This means we can only send jspb Messages.
 const customSerializer = (payload: jspb.Message) => payload.serializeBinary();
