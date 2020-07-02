@@ -18,6 +18,7 @@ actix-web-actors = "*"
 anyhow = "*"
 base64 = "*"
 env_logger = "*"
+lazy_static = "*"
 log = "*"
 prost = { git = "https://github.com/fdeantoni/prost", branch = "meta" }
 prost-types = "0.6"

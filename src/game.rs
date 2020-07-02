@@ -9,7 +9,8 @@ use crate::manager::{GameHandle, GameOptions};
 use crate::types::main_message::Body;
 use crate::types::{
     Ability, GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition,
-    Move, MoveDirection, PlaceTile, Player, Square, SquareType, Tile, WallType, DOOR_TYPES,
+    Move, MoveDirection, PlaceTile, Player, PlayerName, Square, SquareType, Tile, WallType,
+    DOOR_TYPES,
 };
 use crate::utils::get_current_time_secs;
 
@@ -537,7 +538,7 @@ impl Game {
         }
     }
 
-    fn process_move(&mut self, m: Move) -> MoveValidity {
+    fn process_move(&mut self, m: Move, player_name: &PlayerName) -> MoveValidity {
         let heister_color = m.heister_color;
         let heister = self.get_heister_from_vec(heister_color).unwrap();
         let heister_pos = &heister.map_position;
@@ -696,7 +697,7 @@ impl Game {
         }
     }
 
-    fn process_tile_placement(&mut self, pt: PlaceTile) -> MoveValidity {
+    fn process_tile_placement(&mut self, pt: PlaceTile, player_name: &PlayerName) -> MoveValidity {
         let grid = self.get_absolute_grid();
         let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
         let maybe_heister_pos_tuple = heister_to_tile_entrance_locs
@@ -726,14 +727,20 @@ impl Game {
         }
     }
 
-    pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
+    pub fn handle_message(
+        &mut self,
+        message: MainMessage,
+        player_name: &PlayerName,
+    ) -> MoveValidity {
         // If we receive GameState or InvalidRequest at this endpoint, panic, it should never happen.
         info!("Received message: {:?}", message);
         let body = message.body.unwrap();
         let validity = match body {
             Body::StartGame(_) => self.start_game(),
-            Body::Move(m) => self.process_move(Move::from_proto(m)),
-            Body::PlaceTile(pt) => self.process_tile_placement(PlaceTile::from_proto(pt)),
+            Body::Move(m) => self.process_move(Move::from_proto(m), &player_name),
+            Body::PlaceTile(pt) => {
+                self.process_tile_placement(PlaceTile::from_proto(pt), &player_name)
+            }
             Body::GameState(_gs) => {
                 MoveValidity::Invalid("GameState Message is invalid from players".to_string())
             }
@@ -831,10 +838,14 @@ pub mod tests {
     use crate::manager::{GameHandle, GameOptions};
     use crate::types::{
         Heister, HeisterColor, Internal, MainMessage, MapPosition, Move, MoveDirection, Player,
-        Square, WallType, HEISTER_COLORS,
+        PlayerName, Square, WallType, HEISTER_COLORS,
     };
     use log::{info, warn};
     use std::collections::HashMap;
+
+    lazy_static! {
+        static ref FAKE_PLAYER_NAME: PlayerName = PlayerName("fake name".to_string());
+    }
 
     fn setup_game(handle: String) -> Game {
         let _ = env_logger::builder().is_test(true).try_init();
@@ -857,7 +868,7 @@ pub mod tests {
         let message = MainMessage {
             body: Some(super::Body::Move(test_move.to_proto())),
         };
-        let validity = game.handle_message(message);
+        let validity = game.handle_message(message, &FAKE_PLAYER_NAME);
         assert_eq!(validity, MoveValidity::Valid);
         validity
     }
@@ -899,7 +910,7 @@ pub mod tests {
         let message = MainMessage {
             body: Some(super::Body::Move(test_move.to_proto())),
         };
-        let validity = game.handle_message(message);
+        let validity = game.handle_message(message, &FAKE_PLAYER_NAME);
         assert_eq!(validity, expected_validity);
         match validity.clone() {
             MoveValidity::Valid => {
@@ -926,7 +937,7 @@ pub mod tests {
         let message = MainMessage {
             body: Some(super::Body::PlaceTile(tile_placement.to_proto())),
         };
-        let validity = game.handle_message(message);
+        let validity = game.handle_message(message, &FAKE_PLAYER_NAME);
         assert_eq!(validity, super::MoveValidity::Valid);
 
         for tile in &game.game_state.tiles {
@@ -1123,7 +1134,7 @@ pub mod tests {
         let message = MainMessage {
             body: Some(super::Body::Move(test_move.to_proto())),
         };
-        game.handle_message(message); // don't care if this move is valid
+        game.handle_message(message, &FAKE_PLAYER_NAME); // don't care if this move is valid
 
         let pp = game.game_state.possible_placements;
         assert_eq!(pp.len(), 4);

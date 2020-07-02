@@ -2,6 +2,7 @@ use crate::errors::MyError;
 use crate::game::MoveValidity;
 use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
+use crate::types::PlayerName;
 
 use log::{debug, info, trace, warn};
 use std::fs::File;
@@ -96,6 +97,7 @@ pub async fn play_game(
 
     let my_ws = MyWs {
         game_wrapper: game_wrapper.clone(),
+        player_name: PlayerName(info.name.clone()),
     };
     debug!(
         "Created actor for player {} joining game {}",
@@ -128,6 +130,7 @@ pub async fn play_game(
 #[derive(Debug)]
 pub struct MyWs {
     game_wrapper: Arc<RwLock<GameWrapper>>,
+    player_name: PlayerName,
 }
 
 impl Actor for MyWs {
@@ -149,7 +152,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
                     self.game_wrapper
                         .write()
                         .unwrap()
-                        .handle_message(main_message)
+                        .handle_message(main_message, &self.player_name)
                 }
                 Err(e) => {
                     warn!("Failed to decode message: {:?}: {:?}", bin, e);

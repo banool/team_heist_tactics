@@ -3,7 +3,7 @@
 use crate::endpoints::MyWs;
 use crate::game::{Game, MoveValidity};
 use crate::serializer::InternalMessage;
-use crate::types::MainMessage;
+use crate::types::{MainMessage, PlayerName};
 
 use actix::Addr;
 use anyhow::{anyhow, Result};
@@ -71,8 +71,12 @@ impl GameWrapper {
         Ok(())
     }
 
-    pub fn handle_message(&mut self, message: MainMessage) -> MoveValidity {
-        self.game.handle_message(message)
+    pub fn handle_message(
+        &mut self,
+        message: MainMessage,
+        player_name: &PlayerName,
+    ) -> MoveValidity {
+        self.game.handle_message(message, &player_name)
     }
 }
 

@@ -1565,6 +1565,7 @@ dependencies = [
  "anyhow",
  "base64",
  "env_logger",
+ "lazy_static",
  "log",
  "prost 0.6.1 (git+https://github.com/fdeantoni/prost?branch=meta)",
  "prost-build",

@@ -870,6 +870,8 @@ impl From<Tile> for SerializableTile {
         }
     }
 }
+#[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+pub struct PlayerName(pub String);
 
 #[allow(dead_code, unused_imports)]
 mod tests {
