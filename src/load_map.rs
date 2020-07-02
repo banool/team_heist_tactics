@@ -509,7 +509,7 @@ pub fn tile_4() -> Tile {
     let sq20 = Square {
         north_wall: WallType::Impassable,
         east_wall: WallType::Clear,
-        south_wall: WallType::Impassable,
+        south_wall: WallType::Clear,
         west_wall: WallType::Impassable,
         square_type: SquareType::OrangeTeleportPad,
     };
@@ -542,14 +542,21 @@ pub fn tile_4() -> Tile {
     };
     my_squares.push(sq23);
 
-    // square 30 is blocked
-    my_squares.push(blocked_square);
+    // Square 30 is actually not blocked
+    let sq30 = Square {
+        north_wall: WallType::Clear,
+        east_wall: WallType::Clear,
+        south_wall: WallType::Impassable,
+        west_wall: WallType::Impassable,
+        square_type: SquareType::Normal,
+    };
+    my_squares.push(sq30);
 
     let sq31 = Square {
         north_wall: WallType::Clear,
         east_wall: WallType::Impassable,
         south_wall: WallType::Clear,
-        west_wall: WallType::Impassable,
+        west_wall: WallType::Clear,
         square_type: SquareType::Normal,
     };
     my_squares.push(sq31);
