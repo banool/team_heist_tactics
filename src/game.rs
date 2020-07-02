@@ -153,6 +153,7 @@ impl Game {
         grid
     }
 
+    // TODO: move this to be a public function on MapPosition struct
     fn are_adjacent(my_pos: &MapPosition, other_pos: &MapPosition) -> bool {
         if my_pos.x == other_pos.x {
             let abs_distance = (my_pos.y - other_pos.y).abs();
@@ -165,6 +166,7 @@ impl Game {
         }
     }
 
+    // TODO: move this to be a public function on MapPosition struct
     fn adjacent_move_direction(my_pos: &MapPosition, other_pos: &MapPosition) -> MoveDirection {
         // NOTE: I assume that the two positions are adjacent. Might not be relevant
         // Also suffers from NO VALIDATION AT ALL illness
@@ -288,8 +290,8 @@ impl Game {
         }
     }
 
-    fn get_tile_from_position(&self, position: &MapPosition) -> Option<Tile> {
-        for t in &self.game_state.tiles {
+    fn get_tile_with_index(&self, position: &MapPosition) -> Option<(usize, Tile)> {
+        for (i, t) in self.game_state.tiles.iter().enumerate() {
             let x_distance = position.x - t.position.x;
             let x_distance_within_tile = x_distance >= 0 && x_distance < 4;
             match x_distance_within_tile {
@@ -297,7 +299,7 @@ impl Game {
                     let y_distance = position.y - t.position.y;
                     let y_distance_within_tile = y_distance >= 0 && y_distance < 4;
                     match y_distance_within_tile {
-                        true => return Some(t.clone()),
+                        true => return Some((i, t.clone())),
                         false => continue,
                     }
                 }
@@ -322,8 +324,8 @@ impl Game {
                 match grid.get(&heister_pos).unwrap().square_type {
                     SquareType::Escalator => {
                         // last check: is the heister & dest on the same tile?
-                        let ht = self.get_tile_from_position(heister_pos);
-                        let dt = self.get_tile_from_position(dest_pos);
+                        let ht = self.get_tile_with_index(heister_pos).unwrap().1;
+                        let dt = self.get_tile_with_index(dest_pos).unwrap().1;
                         match ht == dt {
                             true => MoveValidity::Valid,
                             false => MoveValidity::Invalid(
@@ -633,11 +635,13 @@ impl Game {
                 for _ in 0..num_rotations {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
-                let rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
+                let mut rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
                 info!(
                     "Added Tile {} at {:?} to Game map",
                     rotated_tile.name, rotated_tile.position
                 );
+
+                self.open_new_tile_doors(&mut rotated_tile);
                 self.game_state.tiles.push(rotated_tile);
                 MoveValidity::Valid
             }
@@ -667,6 +671,8 @@ impl Game {
             return Err(anyhow!("No tile found at pos {:?}", door_pos));
         }
 
+        // TODO: the helper i am writing will change THIS iterator in open_door
+        // helper = something like "get tile door squares"
         for mut square in &mut tile.squares {
             if square == &src_square {
                 // Open The Door
@@ -690,6 +696,34 @@ impl Game {
         return Err(anyhow!(
             "When opening a door, we expect the square to have a door to open"
         ));
+    }
+
+    /// In addition to rotating a new tile, we also need to open any doors on it
+    /// that align with existing doors.
+    /// What do we need in order to make this happen?
+    /// 1. we need a way to find the doors on the new tile
+    /// 1.1: and open those doors
+    /// 2. we need a way to find the adjacent doors
+    /// 2.1: and to open _those_ doors too
+    fn open_new_tile_doors(&mut self, new_tile: &mut Tile) -> () {
+        for (dir, position) in new_tile.adjacent_entrances() {
+            let grid = self.get_absolute_grid();
+            let adjacent_entrance_exists = grid.get(&position);
+            match adjacent_entrance_exists {
+                Some(_neighbor_square) => {
+                    // If there is a door there, and it's on the map (aka on an
+                    // already-drawn tile)
+                    new_tile.open_door_in_dir(dir);
+                    // And then we need to get that neighbor tile, and open it in the
+                    // opposite dir
+                    let (idx, mut neighbor_tile) = self.get_tile_with_index(&position).unwrap();
+                    neighbor_tile.open_door_in_dir(dir.opposite());
+                    // We need to actually set it since neighbor_tile is a clone
+                    self.game_state.tiles[idx] = neighbor_tile;
+                }
+                None => {}
+            }
+        }
     }
 
     fn process_tile_placement(&mut self, pt: PlaceTile) -> MoveValidity {
