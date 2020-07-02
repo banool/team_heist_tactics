@@ -153,34 +153,6 @@ impl Game {
         grid
     }
 
-    // TODO: move this to be a public function on MapPosition struct
-    fn are_adjacent(my_pos: &MapPosition, other_pos: &MapPosition) -> bool {
-        if my_pos.x == other_pos.x {
-            let abs_distance = (my_pos.y - other_pos.y).abs();
-            return abs_distance == 1;
-        } else if my_pos.y == other_pos.y {
-            let abs_distance = (my_pos.x - other_pos.x).abs();
-            return abs_distance == 1;
-        } else {
-            return false;
-        }
-    }
-
-    // TODO: move this to be a public function on MapPosition struct
-    fn adjacent_move_direction(my_pos: &MapPosition, other_pos: &MapPosition) -> MoveDirection {
-        // NOTE: I assume that the two positions are adjacent. Might not be relevant
-        // Also suffers from NO VALIDATION AT ALL illness
-        if my_pos.x > other_pos.x {
-            return MoveDirection::West;
-        } else if my_pos.x < other_pos.x {
-            return MoveDirection::East;
-        } else if my_pos.y > other_pos.y {
-            return MoveDirection::North;
-        } else {
-            return MoveDirection::South;
-        }
-    }
-
     // NOTE: Would be nice if self.game_state.heisters was a map<color, heister>
     // or even <color, pos>
     fn get_mut_heister_from_vec(&mut self, hc: HeisterColor) -> Option<&mut Heister> {
@@ -217,7 +189,7 @@ impl Game {
                 ))
             }
         };
-        let blocking_wall = match Self::adjacent_move_direction(heister_pos, dest_pos) {
+        let blocking_wall = match heister_pos.adjacent_move_direction(dest_pos) {
             MoveDirection::North => heister_square.north_wall,
             MoveDirection::East => heister_square.east_wall,
             MoveDirection::South => heister_square.south_wall,
@@ -572,7 +544,7 @@ impl Game {
         let dest_pos = m.position;
 
         let grid = self.get_absolute_grid();
-        if Self::are_adjacent(heister_pos, &dest_pos) {
+        if heister_pos.is_adjacent(&dest_pos) {
             let validity = self.validate_adjacent_move(&grid, heister_pos, &dest_pos);
             if validity == MoveValidity::Valid {
                 let heister = self
@@ -621,8 +593,6 @@ impl Game {
     fn place_tile(&mut self, position: &MapPosition, direction: &MoveDirection) -> MoveValidity {
         let tile = self.draw_tile();
         match tile {
-            // TODO: figure out how to handle mismatched door case for {Color}Door
-            // into TileEntrance (mismatched/asymmetric walls on tile bounds)
             Some(t) => {
                 let new_pos = Self::new_tile_position(position, direction);
                 let num_rotations = match direction {
