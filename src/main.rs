@@ -14,7 +14,8 @@ use actix_web::{web, App, HttpServer};
 
 // My imports.
 use team_heist_tactics::endpoints;
-use team_heist_tactics::manager::{GameManager, GameManagerWrapper, GameOptions};
+use team_heist_tactics::game::GameOptions;
+use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
 
 const REQUIRED_ENV_VARS: &'static [&'static str] = &[
     "THT_IP_ADDRESS",

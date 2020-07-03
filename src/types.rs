@@ -1,5 +1,5 @@
+use crate::game::GameHandle;
 use crate::load_map::tile_1a;
-use crate::manager::GameHandle;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

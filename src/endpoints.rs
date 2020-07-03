@@ -1,6 +1,6 @@
 use crate::errors::MyError;
-use crate::game::MoveValidity;
-use crate::manager::{GameHandle, GameManagerWrapper, GameOptions, GameWrapper, JoinOptions};
+use crate::game::{GameHandle, GameOptions, MoveValidity};
+use crate::manager::{GameManagerWrapper, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
 use crate::types::PlayerName;
 

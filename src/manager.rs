@@ -1,7 +1,7 @@
 // Manages all the games.
 
 use crate::endpoints::MyWs;
-use crate::game::{Game, MoveValidity};
+use crate::game::{Game, GameHandle, GameOptions, MoveValidity};
 use crate::serializer::InternalMessage;
 use crate::types::main_message::Body;
 use crate::types::{MainMessage, PlayerName};
@@ -9,15 +9,8 @@ use crate::types::{MainMessage, PlayerName};
 use actix::Addr;
 use anyhow::{anyhow, Result};
 use log::{error, info, warn};
-use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
-
-#[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
-pub struct GameHandle(pub String);
-
-#[derive(Default)]
-pub struct GameOptions {}
 
 pub struct JoinOptions {
     pub name: String,

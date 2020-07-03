@@ -1,11 +1,11 @@
 use anyhow::{anyhow, Result};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::TryInto;
 
 use crate::load_map;
-use crate::manager::{GameHandle, GameOptions};
 use crate::types::main_message::Body;
 use crate::types::{
     Ability, GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition,
@@ -26,6 +26,10 @@ pub struct Game {
     pub tile_deck: Vec<Tile>,
     pub game_created: u64,
 }
+#[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+pub struct GameHandle(pub String);
+
+pub struct GameOptions {}
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum MoveValidity {
@@ -903,8 +907,7 @@ fn get_player_abilities(num_players: usize) -> Vec<Vec<Ability>> {
 #[cfg(test)]
 #[allow(dead_code, unused_imports)]
 pub mod tests {
-    use super::{Game, MoveValidity};
-    use crate::manager::{GameHandle, GameOptions};
+    use super::{Game, GameHandle, GameOptions, MoveValidity};
     use crate::types::{
         Heister, HeisterColor, Internal, MainMessage, MapPosition, Move, MoveDirection, Player,
         PlayerName, Square, WallType, HEISTER_COLORS,
@@ -919,7 +922,7 @@ pub mod tests {
     fn setup_game(handle: String) -> Game {
         let _ = env_logger::builder().is_test(true).try_init();
         let game_handle = GameHandle(handle);
-        let game_options = GameOptions::default();
+        let game_options = GameOptions {};
         let mut game = super::Game::new(game_handle, game_options);
         game.add_player(FAKE_PLAYER_NAME.0.clone()).unwrap();
         game.start_game();
