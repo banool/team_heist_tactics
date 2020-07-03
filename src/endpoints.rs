@@ -3,6 +3,7 @@ use crate::game::{GameHandle, GameOptions, MoveValidity};
 use crate::manager::{GameManagerWrapper, GameWrapper, JoinOptions};
 use crate::serializer::InternalMessage;
 use crate::types::PlayerName;
+use crate::utils::empty_string_as_none;
 
 use log::{debug, info, trace, warn};
 use std::fs::File;
@@ -44,6 +45,7 @@ pub async fn play() -> impl Responder {
 
 #[derive(Deserialize)]
 pub struct CreateGameFormData {
+    #[serde(deserialize_with = "empty_string_as_none")]
     game_handle: Option<String>,
 }
 
