@@ -11,14 +11,13 @@ const MessagesComponent = () => {
 
   return (
     <div style={styles.invalidMessages}>
-      {player_message_queue.map((msg, i) => (
+      {player_message_queue.slice(-MAX_PLAYER_MESSAGES).map((msg, i) => (
         <p
           style={{
             opacity:
               LOWEST_OPACITY +
               i * (i - LOWEST_OPACITY) * (1 / MAX_PLAYER_MESSAGES),
           }}
-          key={msg}
         >
           {msg}
         </p>

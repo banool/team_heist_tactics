@@ -52,7 +52,7 @@ const pushToPlayerMessageQueue = (queue: string[], msg: string) => {
   const date = new Date();
   let message = `[${date.toLocaleTimeString()}] ${msg}`;
   queue.push(message);
-  if (queue.length > MAX_PLAYER_MESSAGES) {
+  while (queue.length > MAX_PLAYER_MESSAGES) {
     queue.shift();
   }
 };
