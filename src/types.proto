@@ -192,5 +192,6 @@ message MainMessage {
     StartGame start_game = 3;
     Move move = 4;
     PlaceTile place_tile = 5;
+    string chat = 6;
   }
 }

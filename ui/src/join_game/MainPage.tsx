@@ -9,9 +9,9 @@ import {
 import { ConnectionStatus } from "./types";
 import ConnectionStatusComponent from "./ConnectionStatusComponent";
 import GameWindowComponent from "./GameWindowComponent";
-import InvalidMessagesComponent from "./InvalidMessagesComponent";
 import JoinGameForm from "./JoinGameForm";
 import LobbyForm from "./LobbyForm";
+import MessagesComponent from "./MessagesComponent";
 import { connectionStatusSelector } from "./slice";
 import { handleKeyInput } from "./api";
 import styles from "../components/styles";
@@ -87,7 +87,7 @@ const MainGame = ({}: MainGameProps) => {
           Team Heist Tactics
         </h1>
         {inner_form}
-        <InvalidMessagesComponent />
+        <MessagesComponent />
       </div>
     );
   }

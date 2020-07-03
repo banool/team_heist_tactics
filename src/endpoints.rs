@@ -147,13 +147,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWs {
         }
         let validity = match msg {
             Ok(ws::Message::Binary(bin)) => match InternalMessage::from_bytes(&bin.clone()) {
-                Ok(internal_message) => {
-                    let main_message = internal_message.main_message;
-                    self.game_wrapper
-                        .write()
-                        .unwrap()
-                        .handle_message(main_message, &self.player_name)
-                }
+                Ok(internal_message) => self
+                    .game_wrapper
+                    .write()
+                    .unwrap()
+                    .handle_message(internal_message.main_message, &self.player_name),
                 Err(e) => {
                     warn!("Failed to decode message: {:?}: {:?}", bin, e);
                     MoveValidity::Invalid(format!("Failed to decode message: {:?}", e))

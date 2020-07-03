@@ -163,11 +163,16 @@ const joinGameSlice = createSlice({
         state.num_invalid_move_attempts += 1;
         pushToPlayerMessageQueue(state.player_message_queue, msg);
       }
+      if (main_message.hasChat()) {
+        let msg = main_message.getChat()!;
+        pushToPlayerMessageQueue(state.player_message_queue, msg);
+      }
       state.game_state = game_state;
       if (state.game_state) {
         let players = state.game_state.getPlayersList().map((p) => p.getName());
         state.player_is_spectator = !players.includes(state.player_name!);
       }
+      console.log("HEY FRIEND", JSON.stringify(state.player_message_queue));
     },
     [WEBSOCKET_SEND_FULL]: (_state, _action) => {
       console.debug("Sending message over websocket");

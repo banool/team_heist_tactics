@@ -127,6 +127,14 @@ export function moveHeisterReal(heister: Heister, new_position: MapPosition) {
   };
 }
 
+export function sendChat(chat: string) {
+  return async (dispatch) => {
+    var main_message = new MainMessage();
+    main_message.setChat(chat);
+    dispatch(send(main_message));
+  };
+}
+
 // Take a key input, convert to an enum representing different things
 // the user wants to do, then match on that instead.
 export function handleKeyInput(

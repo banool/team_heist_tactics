@@ -32,9 +32,10 @@ import {
 import { getColor, moveHeisterReal, placeTile } from "./api";
 
 import { CanvasPosition } from "./types";
+import ChatBoxComponent from "./ChatBoxComponent";
 import { Image } from "react-konva";
-import InvalidMessagesComponent from "./InvalidMessagesComponent";
 import Konva from "konva";
+import MessagesComponent from "./MessagesComponent";
 import TimerComponent from "./TimerComponent";
 import store from "../common/store";
 import styles from "../components/styles";
@@ -295,7 +296,7 @@ const PossiblePlacement = ({ map_position }: PossiblePlacementProps) => {
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
-      // fill={colors.background}
+      // fill="#ffffff"
       shadowBlur={5}
       shadowColor="black"
       shadowEnabled={shadowEnabled}
@@ -560,7 +561,10 @@ const GameWindowComponent = () => {
         <ResetMapComponent reset_parent_func={resetMap} />
       </div>
       <div style={styles.invalidMessagesOverlay}>
-        <InvalidMessagesComponent />
+        <MessagesComponent />
+      </div>
+      <div style={styles.chatBoxOverlay}>
+        <ChatBoxComponent />
       </div>
       <div style={styles.timerOverlay}>
         <TimerComponent />

@@ -35,9 +35,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   connectionStatusOverlay: {
     zIndex: 5,
-    position: "absolute",
-    left: 30,
-    bottom: 10,
+    position: "relative",
+    fontSize: 16,
+    textAlign: "center",
   },
   // CSS for the second canvas we put on top of the first canvas.
   // This makes clicks "pass through" so we can just use it to display stuff.
@@ -60,8 +60,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 5,
     position: "absolute",
     left: 30,
-    bottom: 50,
+    bottom: 70,
     height: 120,
+  },
+  chatBox: {},
+  chatBoxOverlay: {
+    zIndex: 7,
+    position: "absolute",
+    left: 30,
+    bottom: 40,
   },
   timerOverlay: {
     zIndex: 5,

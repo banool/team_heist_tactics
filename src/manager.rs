@@ -3,6 +3,7 @@
 use crate::endpoints::MyWs;
 use crate::game::{Game, MoveValidity};
 use crate::serializer::InternalMessage;
+use crate::types::main_message::Body;
 use crate::types::{MainMessage, PlayerName};
 
 use actix::Addr;
@@ -71,11 +72,24 @@ impl GameWrapper {
         Ok(())
     }
 
+    pub fn push_chat(&self, chat: String) -> Result<()> {
+        let internal_message = InternalMessage::from_chat(chat);
+        for a in self.actors.iter() {
+            // TODO Consider using send instead.
+            a.do_send(internal_message.clone());
+        }
+        Ok(())
+    }
+
     pub fn handle_message(
         &mut self,
         message: MainMessage,
         player_name: &PlayerName,
     ) -> MoveValidity {
+        if let Body::Chat(c) = message.clone().body.unwrap() {
+            self.push_chat(c).unwrap();
+            return MoveValidity::Valid;
+        }
         self.game.handle_message(message, &player_name)
     }
 }

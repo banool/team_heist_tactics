@@ -40,6 +40,13 @@ impl InternalMessage {
         };
         InternalMessage { main_message }
     }
+
+    pub fn from_chat(chat: String) -> InternalMessage {
+        let main_message = MainMessage {
+            body: Some(Body::Chat(chat)),
+        };
+        InternalMessage { main_message }
+    }
 }
 
 impl ActixMessage for InternalMessage {

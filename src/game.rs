@@ -739,6 +739,7 @@ impl Game {
             Body::InvalidRequest(_ir) => {
                 MoveValidity::Invalid("InvalidRequest Message is invalid from players".to_string())
             }
+            Body::Chat(_c) => MoveValidity::Valid,
         };
         self.update_possible_placements();
         validity
