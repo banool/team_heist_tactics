@@ -94,7 +94,12 @@ async fn main() -> std::io::Result<()> {
         .game_manager
         .write()
         .unwrap()
-        .new_game(GameOptions {}, Some("test".to_string()))
+        .new_game(
+            GameOptions {
+                shuffle_tiles: false,
+            },
+            Some("test".to_string()),
+        )
         .unwrap();
 
     HttpServer::new(move || {

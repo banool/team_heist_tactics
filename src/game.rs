@@ -29,7 +29,17 @@ pub struct Game {
 #[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct GameHandle(pub String);
 
-pub struct GameOptions {}
+pub struct GameOptions {
+    pub shuffle_tiles: bool,
+}
+
+impl Default for GameOptions {
+    fn default() -> Self {
+        GameOptions {
+            shuffle_tiles: true,
+        }
+    }
+}
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum MoveValidity {
@@ -38,9 +48,13 @@ pub enum MoveValidity {
 }
 
 impl Game {
-    pub fn new(game_handle: GameHandle, _game_options: GameOptions) -> Game {
+    pub fn new(game_handle: GameHandle, game_options: GameOptions) -> Game {
         let game_state = GameState::new(game_handle.clone());
-        let tile_deck: Vec<Tile> = load_map::load_tiles_from_json();
+        let mut tile_deck: Vec<Tile> = load_map::load_tiles_from_json();
+        if game_options.shuffle_tiles {
+            let mut rng = thread_rng();
+            tile_deck.shuffle(&mut rng);
+        }
         let game_created = get_current_time_secs();
         Game {
             game_handle,
@@ -922,7 +936,7 @@ pub mod tests {
     fn setup_game(handle: String) -> Game {
         let _ = env_logger::builder().is_test(true).try_init();
         let game_handle = GameHandle(handle);
-        let game_options = GameOptions {};
+        let game_options = GameOptions::default();
         let mut game = super::Game::new(game_handle, game_options);
         game.add_player(FAKE_PLAYER_NAME.0.clone()).unwrap();
         game.start_game();
