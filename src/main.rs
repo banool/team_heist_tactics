@@ -114,25 +114,34 @@ async fn main() -> std::io::Result<()> {
     // Game Reaper thread
     thread::spawn(move || loop {
         thread::sleep(Duration::from_secs(REAP_INTERVAL));
+        let test_handle = GameHandle("test".to_string());
+        let num_games = reaper_manager_ref
+            .game_manager
+            .read()
+            .unwrap()
+            .games
+            .len()
+            .clone();
+
         let mut game_manager_mut = reaper_manager_ref.game_manager.write().unwrap();
         let games = game_manager_mut.games.clone();
         let mut unreaped_games: HashMap<GameHandle, std::sync::Arc<RwLock<GameWrapper>>> =
             HashMap::new();
         for (handle, game_wrapper) in games {
             let creation_time = game_wrapper.read().unwrap().game.game_created;
-            if creation_time + REAP_DURATION < get_current_time_secs() {
+            if handle == test_handle || (creation_time + REAP_DURATION) > get_current_time_secs() {
                 unreaped_games.insert(handle, game_wrapper);
             }
         }
-        let num_games = reaper_manager_ref.game_manager.read().unwrap().games.len();
         let num_reaped_games = num_games - unreaped_games.len();
-        println!(
-            "Reaper: time {}, num games: {:?}, num games reaped: {:?}",
-            get_current_time_secs(),
-            num_games,
-            num_reaped_games
+        info!(
+            "Reaper: num games: {}, num games reaped this cycle: {}",
+            num_games, num_reaped_games,
         );
-        game_manager_mut.games = unreaped_games;
+        // Only update if the number of games changed (ie. some were reaped)
+        if unreaped_games.len() != num_games {
+            game_manager_mut.games = unreaped_games;
+        }
     });
 
     HttpServer::new(move || {
