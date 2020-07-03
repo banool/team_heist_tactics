@@ -385,6 +385,29 @@ impl Game {
         None
     }
 
+    pub fn move_in_direction(position: &MapPosition, direction: &MoveDirection) -> MapPosition {
+        // Given a position and direction, return the position if you were to
+        // "Move" in that direction (one square)
+        match direction {
+            MoveDirection::North => MapPosition {
+                x: position.x,
+                y: position.y - 1,
+            },
+            MoveDirection::East => MapPosition {
+                x: position.x + 1,
+                y: position.y,
+            },
+            MoveDirection::South => MapPosition {
+                x: position.x,
+                y: position.y + 1,
+            },
+            MoveDirection::West => MapPosition {
+                x: position.x - 1,
+                y: position.y,
+            },
+        }
+    }
+
     fn heister_tile_placement_positions(
         &self,
         grid: &HashMap<MapPosition, Square>,
@@ -444,7 +467,10 @@ impl Game {
                 .expect("Heister must be on a valid square");
             let dir = &Self::get_door_direction(square)
                 .expect("Square must have a door on it to be entered through");
-            tile_entrance_positions.insert(heister_pos.clone(), heister_pos.move_in_direction(dir));
+            tile_entrance_positions.insert(
+                heister_pos.clone(),
+                Self::move_in_direction(&heister_pos, dir),
+            );
         }
         tile_entrance_positions
     }
@@ -657,7 +683,7 @@ impl Game {
             let adjacent_entrance_exists = grid.get(&position);
             match adjacent_entrance_exists {
                 Some(neighbor_square) => {
-                    let my_door_pos = position.move_in_direction(&dir.opposite());
+                    let my_door_pos = Self::move_in_direction(&position, &dir.opposite());
                     let my_square = grid.get(&my_door_pos).unwrap();
 
                     let mut_tile = &mut self.game_state.tiles[tile_idx];

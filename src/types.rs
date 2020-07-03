@@ -335,10 +335,22 @@ impl Tile {
         map
     }
 
+    pub fn has_door_in_dir(&self, dir: MoveDirection) -> bool {
+        let square_index = *Tile::door_square_indices().get(&dir).unwrap();
+        let square = self.squares.get(square_index).unwrap();
+        square.has_door()
+    }
+
     pub fn open_door_in_dir(&mut self, dir: MoveDirection) -> () {
         let square_index = *Tile::door_square_indices().get(&dir).unwrap();
         let square = self.squares.get_mut(square_index).unwrap();
         square.open_door(dir)
+    }
+
+    pub fn close_door_in_dir(&mut self, dir: MoveDirection) -> () {
+        let square_index = *Tile::door_square_indices().get(&dir).unwrap();
+        let square = self.squares.get_mut(square_index).unwrap();
+        square.close_door(dir)
     }
 
     pub fn adjacent_entrances(&self) -> HashMap<MoveDirection, MapPosition> {
@@ -470,6 +482,24 @@ impl Square {
                 if DOOR_TYPES.contains(&&self.west_wall) {
                     self.west_wall = WallType::Clear;
                 }
+            }
+        };
+    }
+
+    /// Once you close a door, it CANNOT be re-opened via open_door()
+    pub fn close_door(&mut self, dir: MoveDirection) -> () {
+        match dir {
+            MoveDirection::North => {
+                self.north_wall = WallType::Impassable;
+            }
+            MoveDirection::East => {
+                self.east_wall = WallType::Impassable;
+            }
+            MoveDirection::South => {
+                self.south_wall = WallType::Impassable;
+            }
+            MoveDirection::West => {
+                self.west_wall = WallType::Impassable;
             }
         };
     }
