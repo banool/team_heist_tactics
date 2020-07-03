@@ -9,6 +9,7 @@ pub mod errors;
 pub mod game;
 pub mod load_map;
 pub mod manager;
+pub mod periodic;
 pub mod serializer;
 pub mod types;
 pub mod utils;
