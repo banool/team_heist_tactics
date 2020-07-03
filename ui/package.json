@@ -22,7 +22,7 @@
     "@babel/core": "^7.10.4",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
-    "@babel/plugin-transform-react-jsx": "^7.10.3",
+    "@babel/plugin-transform-react-jsx": "^7.10.4",
     "@babel/preset-typescript": "^7.10.1",
     "@giantmachines/redux-websocket": "^1.2.1",
     "@reduxjs/toolkit": "^1.4.0",
