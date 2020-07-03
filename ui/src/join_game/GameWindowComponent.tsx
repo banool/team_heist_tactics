@@ -83,7 +83,9 @@ const get_tile_and_shadow_tile = ({
     />
   );
 
-  var st = <ShadowTile canvas_position={canvas_position} />;
+  var st = (
+    <ShadowTile key={`${tile_name}_shadow`} canvas_position={canvas_position} />
+  );
 
   return { tile: t, shadow_tile: st };
 };

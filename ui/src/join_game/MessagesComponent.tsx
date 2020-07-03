@@ -18,6 +18,7 @@ const MessagesComponent = () => {
               LOWEST_OPACITY +
               i * (i - LOWEST_OPACITY) * (1 / MAX_PLAYER_MESSAGES),
           }}
+          key={i}
         >
           {msg}
         </p>

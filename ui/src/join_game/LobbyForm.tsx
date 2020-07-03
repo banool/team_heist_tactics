@@ -17,7 +17,7 @@ const LobbyForm = () => {
 
   const players = game_state!
     .getPlayersList()
-    .map((p: Player) => <li>{p.getName()}</li>);
+    .map((p: Player) => <li key={p.getName()}>{p.getName()}</li>);
 
   return (
     <div>
