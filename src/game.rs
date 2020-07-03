@@ -320,16 +320,23 @@ impl Game {
         let heister_color = heister.heister_color;
         let heister_pos = &heister.map_position;
         let heister_square_type = Self::position_squaretype(grid, &heister_pos).unwrap();
-        let dest_square_type = Self::position_squaretype(grid, &dest_pos).unwrap();
-
-        if !Self::teleport_matches_color(heister_square_type, heister_color) {
-            let msg = "Heister and teleporter color do not match";
-            return MoveValidity::Invalid(msg.to_string());
-        }
-        match heister_square_type == dest_square_type {
-            true => MoveValidity::Valid,
-            false => {
-                let msg = "Source and Dest teleporter colors do not match";
+        let dest_square_type_maybe = Self::position_squaretype(grid, &dest_pos);
+        match dest_square_type_maybe {
+            Ok(dest_square_type) => {
+                if !Self::teleport_matches_color(heister_square_type, heister_color) {
+                    let msg = "Heister and teleporter color do not match";
+                    return MoveValidity::Invalid(msg.to_string());
+                }
+                match heister_square_type == dest_square_type {
+                    true => MoveValidity::Valid,
+                    false => {
+                        let msg = "Source and Dest teleporter colors do not match";
+                        MoveValidity::Invalid(msg.to_string())
+                    }
+                }
+            }
+            Err(e) => {
+                let msg = format!("Destination is not on the grid: {:?}", e);
                 MoveValidity::Invalid(msg.to_string())
             }
         }
