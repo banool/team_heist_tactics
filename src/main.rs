@@ -8,6 +8,10 @@ use std::io::BufReader;
 use std::str::FromStr;
 use std::sync::RwLock;
 
+use std::thread;
+use std::time::Duration;
+use team_heist_tactics::utils::get_current_time_secs;
+
 // Other crate imports.
 use actix_files as fs;
 use actix_web::{web, App, HttpServer};
@@ -16,6 +20,9 @@ use actix_web::{web, App, HttpServer};
 use team_heist_tactics::endpoints;
 use team_heist_tactics::game::GameOptions;
 use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
+
+const REAP_DURATION: u64 = 3600; // 1hr from creation, games are reaped
+const REAP_INTERVAL: u64 = 600; // 10m between reap calls
 
 const REQUIRED_ENV_VARS: &'static [&'static str] = &[
     "THT_IP_ADDRESS",
@@ -101,6 +108,32 @@ async fn main() -> std::io::Result<()> {
             Some("test".to_string()),
         )
         .unwrap();
+
+    let reaper_manager_ref = game_manager_wrapper.clone();
+
+    // Game Reaper thread
+    thread::spawn(move || loop {
+        thread::sleep(Duration::from_secs(REAP_INTERVAL));
+        let mut game_manager_mut = reaper_manager_ref.game_manager.write().unwrap();
+        let games = game_manager_mut.games.clone();
+        let mut unreaped_games: HashMap<GameHandle, std::sync::Arc<RwLock<GameWrapper>>> =
+            HashMap::new();
+        for (handle, game_wrapper) in games {
+            let creation_time = game_wrapper.read().unwrap().game.game_created;
+            if creation_time + REAP_DURATION < get_current_time_secs() {
+                unreaped_games.insert(handle, game_wrapper);
+            }
+        }
+        let num_games = reaper_manager_ref.game_manager.read().unwrap().games.len();
+        let num_reaped_games = num_games - unreaped_games.len();
+        println!(
+            "Reaper: time {}, num games: {:?}, num games reaped: {:?}",
+            get_current_time_secs(),
+            num_games,
+            num_reaped_games
+        );
+        game_manager_mut.games = unreaped_games;
+    });
 
     HttpServer::new(move || {
         let app = App::new()

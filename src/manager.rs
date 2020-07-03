@@ -19,7 +19,7 @@ pub struct JoinOptions {
 
 #[derive(Debug)]
 pub struct GameWrapper {
-    game: Game,
+    pub game: Game,
     actors: Vec<Addr<MyWs>>,
 }
 
