@@ -104,6 +104,16 @@ impl Game {
         }
     }
 
+    fn player_has_ability(&self, player_name: &PlayerName, ability: &Ability) -> bool {
+        let player = self
+            .game_state
+            .players
+            .iter()
+            .find(|p| p.name == player_name.0)
+            .expect("Tried to check for ability for player not in game");
+        player.abilities.contains(ability)
+    }
+
     pub fn has_player(&self, name: &str) -> bool {
         for p in self.game_state.players.iter() {
             if p.name == name {
@@ -537,6 +547,38 @@ impl Game {
         }
     }
 
+    fn validate_player_has_move_direction_ability(
+        &self,
+        current_pos: &MapPosition,
+        dest_pos: &MapPosition,
+        player_name: &PlayerName,
+    ) -> MoveValidity {
+        let direction = current_pos.adjacent_move_direction(&dest_pos);
+        match direction {
+            MoveDirection::North => {
+                if !self.player_has_ability(&player_name, &Ability::MoveNorth) {
+                    return MoveValidity::Invalid("You cannot move heisters North".to_string());
+                }
+            }
+            MoveDirection::East => {
+                if !self.player_has_ability(&player_name, &Ability::MoveEast) {
+                    return MoveValidity::Invalid("You cannot move heisters East".to_string());
+                }
+            }
+            MoveDirection::South => {
+                if !self.player_has_ability(&player_name, &Ability::MoveSouth) {
+                    return MoveValidity::Invalid("You cannot move heisters South".to_string());
+                }
+            }
+            MoveDirection::West => {
+                if !self.player_has_ability(&player_name, &Ability::MoveWest) {
+                    return MoveValidity::Invalid("You cannot move heisters West".to_string());
+                }
+            }
+        }
+        MoveValidity::Valid
+    }
+
     fn process_move(&mut self, m: Move, player_name: &PlayerName) -> MoveValidity {
         let heister_color = m.heister_color;
         let heister = self.get_heister_from_vec(heister_color).unwrap();
@@ -545,6 +587,14 @@ impl Game {
 
         let grid = self.get_absolute_grid();
         if heister_pos.is_adjacent(&dest_pos) {
+            let ability_validity = self.validate_player_has_move_direction_ability(
+                &heister_pos,
+                &dest_pos,
+                &player_name,
+            );
+            if let MoveValidity::Invalid(_) = ability_validity {
+                return ability_validity;
+            }
             let validity = self.validate_adjacent_move(&grid, heister_pos, &dest_pos);
             if validity == MoveValidity::Valid {
                 let heister = self
@@ -557,6 +607,9 @@ impl Game {
         match Self::position_squaretype(&grid, heister_pos) {
             // Handle escalator move
             Ok(SquareType::Escalator) => {
+                if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
+                    return MoveValidity::Invalid("You cannot use escalators".to_string());
+                }
                 let validity = self.validate_escalator_move(&grid, heister_pos, &dest_pos);
                 if validity == MoveValidity::Valid {
                     let mut heister = self
@@ -571,6 +624,9 @@ impl Game {
             | Ok(SquareType::YellowTeleportPad)
             | Ok(SquareType::PurpleTeleportPad)
             | Ok(SquareType::GreenTeleportPad) => {
+                if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
+                    return MoveValidity::Invalid("You cannot use teleporters".to_string());
+                }
                 let validity = self.validate_teleport(&grid, heister, &dest_pos);
                 if validity == MoveValidity::Valid {
                     let heister = self
@@ -697,6 +753,9 @@ impl Game {
     }
 
     fn process_tile_placement(&mut self, pt: PlaceTile, player_name: &PlayerName) -> MoveValidity {
+        if !self.player_has_ability(player_name, &Ability::RevealTiles) {
+            return MoveValidity::Invalid("You cannot reveal tiles".to_string());
+        }
         let grid = self.get_absolute_grid();
         let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
         let maybe_heister_pos_tuple = heister_to_tile_entrance_locs
@@ -851,7 +910,9 @@ pub mod tests {
         let _ = env_logger::builder().is_test(true).try_init();
         let game_handle = GameHandle(handle);
         let game_options = GameOptions::default();
-        let game = super::Game::new(game_handle, game_options);
+        let mut game = super::Game::new(game_handle, game_options);
+        game.add_player(FAKE_PLAYER_NAME.0.clone()).unwrap();
+        game.start_game();
         game
     }
 
@@ -931,6 +992,7 @@ pub mod tests {
         game: &mut Game,
         _heister_color: HeisterColor,
         tile_entrance: MapPosition,
+        expected_validity: MoveValidity,
     ) -> MoveValidity {
         // needs to assert that heister color is correct, etc. or not! i don't care
         let tile_placement = super::PlaceTile { tile_entrance };
@@ -938,7 +1000,7 @@ pub mod tests {
             body: Some(super::Body::PlaceTile(tile_placement.to_proto())),
         };
         let validity = game.handle_message(message, &FAKE_PLAYER_NAME);
-        assert_eq!(validity, super::MoveValidity::Valid);
+        assert_eq!(validity, expected_validity);
 
         for tile in &game.game_state.tiles {
             if tile.name == "1a".to_string() {
@@ -1094,7 +1156,12 @@ pub mod tests {
             MoveDirection::North,
             MoveValidity::Valid,
         );
-        place_first_tile_for_color(&mut game, HeisterColor::Orange, first_tile_entrance);
+        place_first_tile_for_color(
+            &mut game,
+            HeisterColor::Orange,
+            first_tile_entrance,
+            MoveValidity::Valid,
+        );
     }
 
     /// Ensure that we generate possible placements that are correct for the color
@@ -1158,7 +1225,12 @@ pub mod tests {
             MoveDirection::North,
             MoveValidity::Valid,
         );
-        place_first_tile_for_color(&mut game, HeisterColor::Orange, first_tile_entrance);
+        place_first_tile_for_color(
+            &mut game,
+            HeisterColor::Orange,
+            first_tile_entrance,
+            MoveValidity::Valid,
+        );
 
         // Next, we want to move orange UP, then down.
         move_heister_in_dir(
@@ -1172,6 +1244,40 @@ pub mod tests {
             HeisterColor::Orange,
             MoveDirection::South,
             MoveValidity::Valid,
+        );
+    }
+
+    // Ensure that a player with no abilities can't do anything.
+    #[test]
+    pub fn test_ability_check() -> () {
+        let handle = "new tile crossing".to_string();
+        let mut game = setup_game(handle);
+        game.game_state.players[0].abilities = vec![];
+        let first_tile_entrance = MapPosition { x: 2, y: -1 };
+
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::North,
+            MoveValidity::Invalid("You cannot move heisters North".to_string()),
+        );
+        place_first_tile_for_color(
+            &mut game,
+            HeisterColor::Orange,
+            first_tile_entrance,
+            MoveValidity::Invalid("You cannot reveal tiles".to_string()),
+        );
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::North,
+            MoveValidity::Invalid("You cannot move heisters North".to_string()),
+        );
+        move_heister_in_dir(
+            &mut game,
+            HeisterColor::Orange,
+            MoveDirection::South,
+            MoveValidity::Invalid("You cannot move heisters South".to_string()),
         );
     }
 }
