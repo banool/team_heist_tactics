@@ -1,5 +1,7 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
+#[cfg(test)]
+#[macro_use]
 extern crate lazy_static;
 
 pub mod endpoints;
