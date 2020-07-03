@@ -395,29 +395,6 @@ impl Game {
         None
     }
 
-    fn move_in_direction(position: MapPosition, direction: &MoveDirection) -> MapPosition {
-        // Given a position and direction, return the position if you were to
-        // "Move" in that direction (one square)
-        match direction {
-            MoveDirection::North => MapPosition {
-                x: position.x,
-                y: position.y - 1,
-            },
-            MoveDirection::East => MapPosition {
-                x: position.x + 1,
-                y: position.y,
-            },
-            MoveDirection::South => MapPosition {
-                x: position.x,
-                y: position.y + 1,
-            },
-            MoveDirection::West => MapPosition {
-                x: position.x - 1,
-                y: position.y,
-            },
-        }
-    }
-
     fn heister_tile_placement_positions(
         &self,
         grid: &HashMap<MapPosition, Square>,
@@ -477,10 +454,7 @@ impl Game {
                 .expect("Heister must be on a valid square");
             let dir = &Self::get_door_direction(square)
                 .expect("Square must have a door on it to be entered through");
-            tile_entrance_positions.insert(
-                heister_pos.clone(),
-                Self::move_in_direction(heister_pos, dir),
-            );
+            tile_entrance_positions.insert(heister_pos.clone(), heister_pos.move_in_direction(dir));
         }
         tile_entrance_positions
     }
@@ -661,14 +635,17 @@ impl Game {
                 for _ in 0..num_rotations {
                     m = Tile::rotate_matrix_clockwise(&m);
                 }
-                let mut rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
+                let rotated_tile = Tile::from_matrix(m, t.name.clone(), new_pos, num_rotations);
                 info!(
                     "Added Tile {} at {:?} to Game map",
                     rotated_tile.name, rotated_tile.position
                 );
 
-                self.open_new_tile_doors(&mut rotated_tile);
+                // Add the tile before opening doors on it, that way helpers that
+                // rely on the tile's presence in game.tiles work correctly
+                let new_tile_idx = self.game_state.tiles.len();
                 self.game_state.tiles.push(rotated_tile);
+                self.update_tile_doors(new_tile_idx);
                 MoveValidity::Valid
             }
             None => MoveValidity::Invalid("No tiles left in deck to draw".to_string()),
@@ -724,28 +701,35 @@ impl Game {
         ));
     }
 
-    /// In addition to rotating a new tile, we also need to open any doors on it
-    /// that align with existing doors.
-    /// What do we need in order to make this happen?
-    /// 1. we need a way to find the doors on the new tile
-    /// 1.1: and open those doors
-    /// 2. we need a way to find the adjacent doors
-    /// 2.1: and to open _those_ doors too
-    fn open_new_tile_doors(&mut self, new_tile: &mut Tile) -> () {
-        for (dir, position) in new_tile.adjacent_entrances() {
-            let grid = self.get_absolute_grid();
+    /// In addition to rotating a new tile, we also need to open/close any doors
+    /// it has that align with existing doors.
+    /// * This takes an index into self.tiles, because it can only operate on a
+    /// tile that has already been added to self.tiles
+    fn update_tile_doors(&mut self, tile_idx: usize) -> () {
+        let grid = self.get_absolute_grid();
+        let tile = &self.game_state.tiles[tile_idx];
+
+        for (dir, position) in tile.adjacent_entrances() {
             let adjacent_entrance_exists = grid.get(&position);
             match adjacent_entrance_exists {
-                Some(_neighbor_square) => {
-                    // If there is a door there, and it's on the map (aka on an
-                    // already-drawn tile)
-                    new_tile.open_door_in_dir(dir);
-                    // And then we need to get that neighbor tile, and open it in the
-                    // opposite dir
-                    let (idx, mut neighbor_tile) = self.get_tile_with_index(&position).unwrap();
-                    neighbor_tile.open_door_in_dir(dir.opposite());
-                    // We need to actually set it since neighbor_tile is a clone
-                    self.game_state.tiles[idx] = neighbor_tile;
+                Some(neighbor_square) => {
+                    let my_door_pos = position.move_in_direction(&dir.opposite());
+                    let my_square = grid.get(&my_door_pos).unwrap();
+
+                    let mut_tile = &mut self.game_state.tiles[tile_idx];
+                    if my_square.has_door() {
+                        if neighbor_square.has_door() {
+                            mut_tile.open_door_in_dir(dir);
+                            let (idx, mut neighbor_tile) =
+                                self.get_tile_with_index(&position).unwrap();
+                            neighbor_tile.open_door_in_dir(dir.opposite());
+                            self.game_state.tiles[idx] = neighbor_tile;
+                        } else {
+                            // If there isn't a door on the other side, close door
+                            // that way, we know it won't be a possible_placement
+                            mut_tile.close_door_in_dir(dir);
+                        }
+                    }
                 }
                 None => {}
             }
