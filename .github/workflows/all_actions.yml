@@ -3,8 +3,6 @@ name: All
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: ["**"]
 
 jobs:
   backend_style:

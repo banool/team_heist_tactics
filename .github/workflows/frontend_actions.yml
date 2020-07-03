@@ -1,10 +1,6 @@
 name: Frontend Lint & Test
 
 on:
-  push:
-    branches: [master]
-    paths:
-            - 'ui/**'
   pull_request:
     branches: ["**"]
     paths:
