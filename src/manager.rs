@@ -12,6 +12,8 @@ use log::{error, info, warn};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 
+pub const TEST_HANDLE: &str = "test";
+
 pub struct JoinOptions {
     pub name: String,
     pub handle: GameHandle,
@@ -19,7 +21,7 @@ pub struct JoinOptions {
 
 #[derive(Debug)]
 pub struct GameWrapper {
-    pub game: Game,
+    game: Game,
     actors: Vec<Addr<MyWs>>,
 }
 
@@ -32,6 +34,10 @@ impl GameWrapper {
             game,
             actors: vec![],
         }
+    }
+
+    pub fn get_creation_time(&self) -> u64 {
+        self.game.game_created
     }
 
     pub fn add_player(&mut self, name: String) -> Result<()> {

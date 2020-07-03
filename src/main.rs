@@ -9,8 +9,6 @@ use std::str::FromStr;
 use std::sync::RwLock;
 
 use std::thread;
-use std::time::Duration;
-use team_heist_tactics::utils::get_current_time_secs;
 
 // Other crate imports.
 use actix_files as fs;
@@ -19,7 +17,8 @@ use actix_web::{web, App, HttpServer};
 // My imports.
 use team_heist_tactics::endpoints;
 use team_heist_tactics::game::GameOptions;
-use team_heist_tactics::manager::{GameManager, GameManagerWrapper};
+use team_heist_tactics::manager::{GameManager, GameManagerWrapper, TEST_HANDLE};
+use team_heist_tactics::periodic::reaper;
 
 const REAP_DURATION: u64 = 3600; // 1hr from creation, games are reaped
 const REAP_INTERVAL: u64 = 600; // 10m between reap calls
@@ -88,7 +87,7 @@ async fn main() -> std::io::Result<()> {
     let game_manager = GameManager::new(games, possible_handles);
     let game_manager = RwLock::new(game_manager);
     let game_manager_wrapper = GameManagerWrapper { game_manager };
-    let game_manager_wrapper = web::Data::new(game_manager_wrapper);
+    let web_game_manager_wrapper = web::Data::new(game_manager_wrapper);
 
     let ip = env::var("THT_IP_ADDRESS").unwrap();
     let port = env::var("THT_PORT").unwrap();
@@ -97,7 +96,7 @@ async fn main() -> std::io::Result<()> {
         .expect("Invalid deployment mode");
 
     // For testing.
-    game_manager_wrapper
+    web_game_manager_wrapper
         .game_manager
         .write()
         .unwrap()
@@ -105,48 +104,20 @@ async fn main() -> std::io::Result<()> {
             GameOptions {
                 shuffle_tiles: false,
             },
-            Some("test".to_string()),
+            Some(TEST_HANDLE.to_string()),
         )
         .unwrap();
 
-    let reaper_manager_ref = game_manager_wrapper.clone();
-
+    let reaper_game_manager_wrapper = web_game_manager_wrapper.clone();
     // Game Reaper thread
     thread::spawn(move || loop {
-        thread::sleep(Duration::from_secs(REAP_INTERVAL));
-        let test_handle = GameHandle("test".to_string());
-        let num_games = reaper_manager_ref
-            .game_manager
-            .read()
-            .unwrap()
-            .games
-            .len()
-            .clone();
-
-        let mut game_manager_mut = reaper_manager_ref.game_manager.write().unwrap();
-        let games = game_manager_mut.games.clone();
-        let mut unreaped_games: HashMap<GameHandle, std::sync::Arc<RwLock<GameWrapper>>> =
-            HashMap::new();
-        for (handle, game_wrapper) in games {
-            let creation_time = game_wrapper.read().unwrap().game.game_created;
-            if handle == test_handle || (creation_time + REAP_DURATION) > get_current_time_secs() {
-                unreaped_games.insert(handle, game_wrapper);
-            }
-        }
-        let num_reaped_games = num_games - unreaped_games.len();
-        info!(
-            "Reaper: num games: {}, num games reaped this cycle: {}",
-            num_games, num_reaped_games,
-        );
-        // Only update if the number of games changed (ie. some were reaped)
-        if unreaped_games.len() != num_games {
-            game_manager_mut.games = unreaped_games;
-        }
+        let mut reaper_game_manager_ref = reaper_game_manager_wrapper.game_manager.write().unwrap();
+        reaper(&mut reaper_game_manager_ref);
     });
 
     HttpServer::new(move || {
         let app = App::new()
-            .app_data(game_manager_wrapper.clone())
+            .app_data(web_game_manager_wrapper.clone())
             .route("/", web::get().to(endpoints::index))
             .route("/play", web::get().to(endpoints::play))
             .route("/create_game", web::post().to(endpoints::create_game))
