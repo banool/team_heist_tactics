@@ -20,9 +20,6 @@ use team_heist_tactics::game::GameOptions;
 use team_heist_tactics::manager::{GameManager, GameManagerWrapper, TEST_HANDLE};
 use team_heist_tactics::periodic::reaper;
 
-const REAP_DURATION: u64 = 3600; // 1hr from creation, games are reaped
-const REAP_INTERVAL: u64 = 600; // 10m between reap calls
-
 const REQUIRED_ENV_VARS: &'static [&'static str] = &[
     "THT_IP_ADDRESS",
     "THT_PORT",
@@ -87,7 +84,7 @@ async fn main() -> std::io::Result<()> {
     let game_manager = GameManager::new(games, possible_handles);
     let game_manager = RwLock::new(game_manager);
     let game_manager_wrapper = GameManagerWrapper { game_manager };
-    let web_game_manager_wrapper = web::Data::new(game_manager_wrapper);
+    let game_manager_wrapper = web::Data::new(game_manager_wrapper);
 
     let ip = env::var("THT_IP_ADDRESS").unwrap();
     let port = env::var("THT_PORT").unwrap();
@@ -96,7 +93,7 @@ async fn main() -> std::io::Result<()> {
         .expect("Invalid deployment mode");
 
     // For testing.
-    web_game_manager_wrapper
+    game_manager_wrapper
         .game_manager
         .write()
         .unwrap()
@@ -108,16 +105,15 @@ async fn main() -> std::io::Result<()> {
         )
         .unwrap();
 
-    let reaper_game_manager_wrapper = web_game_manager_wrapper.clone();
+    let reaper_game_manager_wrapper = game_manager_wrapper.clone();
     // Game Reaper thread
     thread::spawn(move || loop {
-        let mut reaper_game_manager_ref = reaper_game_manager_wrapper.game_manager.write().unwrap();
-        reaper(&mut reaper_game_manager_ref);
+        reaper(&reaper_game_manager_wrapper);
     });
 
     HttpServer::new(move || {
         let app = App::new()
-            .app_data(web_game_manager_wrapper.clone())
+            .app_data(game_manager_wrapper.clone())
             .route("/", web::get().to(endpoints::index))
             .route("/play", web::get().to(endpoints::play))
             .route("/create_game", web::post().to(endpoints::create_game))
