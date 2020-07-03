@@ -42,15 +42,21 @@ pub async fn play() -> impl Responder {
     HttpResponse::Ok().body(contents)
 }
 
+#[derive(Deserialize)]
+pub struct CreateGameFormData {
+    game_handle: Option<String>,
+}
+
 pub async fn create_game(
     _req: HttpRequest,
+    form: web::Form<CreateGameFormData>,
     game_manager_wrapper: web::Data<GameManagerWrapper>,
 ) -> impl Responder {
     let mut game_manager = game_manager_wrapper.game_manager.write().unwrap();
 
     // Register a new game.
     let game_options = GameOptions {};
-    let game_handle = game_manager.new_game(game_options, None);
+    let game_handle = game_manager.new_game(game_options, form.game_handle.clone());
     let game_handle = match game_handle {
         Ok(game_handle) => game_handle,
         Err(e) => return HttpResponse::from_error(MyError::from(e).into()),

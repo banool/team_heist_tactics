@@ -114,10 +114,15 @@ impl GameManager {
         game_options: GameOptions,
         handle: Option<String>,
     ) -> Result<GameHandle> {
+        let in_use_handles: HashSet<String> = self.get_in_use_handles();
         let handle = match handle {
-            Some(handle) => handle,
+            Some(handle) => {
+                if in_use_handles.contains(&handle) {
+                    return Err(anyhow!("Game handle {} already in use", handle));
+                }
+                handle
+            }
             None => {
-                let in_use_handles: HashSet<String> = self.get_in_use_handles();
                 let mut available_handles = self.words.difference(&in_use_handles);
                 let handle = match available_handles.next() {
                     Some(handle) => handle,
