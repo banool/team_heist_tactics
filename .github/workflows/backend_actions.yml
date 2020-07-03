@@ -1,11 +1,6 @@
 name: Backend Lint & Test
 
 on:
-  push:
-    branches: [master]
-    paths:
-            - '**.rs'
-            - '**.proto'
   pull_request:
     branches: ["**"]
     paths:
