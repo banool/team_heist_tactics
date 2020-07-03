@@ -59,15 +59,7 @@ impl Game {
         }
         self.game_state.players.push(Player {
             name,
-            abilities: vec![
-                Ability::MoveNorth,
-                Ability::MoveEast,
-                Ability::MoveSouth,
-                Ability::MoveWest,
-                Ability::Teleport,
-                Ability::RevealTiles,
-                Ability::UseEscalator,
-            ],
+            abilities: vec![],
         });
         Ok(())
     }

@@ -82,24 +82,41 @@ const get_tile_and_shadow_tile = ({
     />
   );
 
-  var st = (
-    <Rect
-      key={`${tile_name}_square`}
-      x={canvas_position.x + 5}
-      y={canvas_position.y + 5}
-      width={TILE_SIZE - 10}
-      height={TILE_SIZE - 10}
-      shadowBlur={20}
-      shadowColor="black"
-      shadowEnabled={true}
-      stroke="black"
-      strokeWidth={10}
-      offsetX={TILE_SIZE / 2}
-      offsetY={TILE_SIZE / 2}
-    />
-  );
+  var st = <ShadowTile canvas_position={canvas_position} />;
 
   return { tile: t, shadow_tile: st };
+};
+
+type ShadowTileProps = {
+  canvas_position: CanvasPosition;
+};
+// The offset makes the center of the image be the center of the canvas element.
+const ShadowTile = ({ canvas_position }: ShadowTileProps) => {
+  const url = `static/images/tile_shadow.png`;
+  const [image, status] = useImage(url);
+  const extra = 70;
+
+  var st: JSX.Element;
+  if (status === "loaded") {
+    st = (
+      <Image
+        image={image}
+        x={canvas_position.x}
+        y={canvas_position.y}
+        width={TILE_SIZE + extra}
+        height={TILE_SIZE + extra}
+        offsetX={TILE_SIZE / 2 + extra / 2}
+        offsetY={TILE_SIZE / 2 + extra / 2}
+        perfectDrawEnabled={false}
+      />
+    );
+  } else if (status === "loading") {
+    st = <Text text={`Loading tile ${name}...`} />;
+  } else {
+    st = <Text text={`Failed to load tile ${name}!!!`} />;
+  }
+
+  return st;
 };
 
 type TileProps = {
