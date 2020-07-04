@@ -56,6 +56,50 @@ export function startGame(game_handle: string) {
   };
 }
 
+export function useEscalator(
+  game_state: GameState,
+  connection_status: ConnectionStatus,
+  heister_selected_keyboard: number // HeisterColor
+) {
+  return async (dispatch) => {
+    if (
+      game_state === null ||
+      connection_status !== ConnectionStatus.Connected
+    ) {
+      console.error("Tried to move heister with no game state / connection");
+      return;
+    }
+    var heisters = game_state.getHeistersList();
+    var heister = heisters.find(
+      (h) => h.getHeisterColor() == heister_selected_keyboard
+    );
+    if (heister === undefined) {
+      console.error("Could not find information for heister");
+      return;
+    }
+    var current_position = heister.getMapPosition();
+    if (current_position === undefined) {
+      console.error("Tried to move heister with no position");
+      return;
+    }
+    // prep checks done - now let's actually get the dest position, then do the move!
+    let map = game_state.getPossibleEscalatorsMap();
+    var blah = map.get(heister_selected_keyboard);
+    if (blah === undefined) {
+      console.error(
+        `No possible escalator dest for heister ${heister_selected_keyboard}: ${map}`
+      );
+      return;
+    }
+    let new_position = new MapPosition();
+    new_position.setX(blah.getX());
+    new_position.setY(blah.getY());
+    console.log(`Kelly is cool ${heister_selected_keyboard} ${blah}`);
+    console.log(`new_positon, esc: ${new_position}`);
+    dispatch(moveHeisterReal(heister, blah));
+  };
+}
+
 export function moveHeister(
   game_state: GameState,
   connection_status: ConnectionStatus,
@@ -187,6 +231,11 @@ export function handleKeyInput(
           )
         );
         return;
+      case KeyAction.Escalator:
+        dispatch(
+          useEscalator(game_state, connection_status, heister_selected_keyboard)
+        );
+        return;
       case KeyAction.MoveWest:
         dispatch(
           moveHeister(
@@ -237,6 +286,8 @@ export function getKeyAction(key: string) {
       return KeyAction.SelectGreenHeister;
     case "4":
       return KeyAction.SelectOrangeHeister;
+    case "e":
+      return KeyAction.Escalator;
     default:
       return null;
   }
@@ -251,6 +302,7 @@ export enum KeyAction {
   SelectPurpleHeister,
   SelectGreenHeister,
   SelectOrangeHeister,
+  Escalator,
 }
 
 export const getColor = (heister_color): string => {
