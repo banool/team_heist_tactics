@@ -477,6 +477,12 @@ impl Game {
         tile_entrance_positions
     }
 
+    fn update_auxiliary_state(&mut self) -> () {
+        self.update_possible_placements();
+        self.update_possible_escalators();
+    }
+
+    /// Possible placements for new tiles that Heisters can discover
     fn update_possible_placements(&mut self) -> () {
         let grid = self.get_absolute_grid();
         let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
@@ -486,6 +492,24 @@ impl Game {
             v.push(val.clone());
         }
         self.game_state.possible_placements = v;
+    }
+
+    /// Possible escalator destinations that a Heister can reach with an Escalator move
+    fn update_possible_escalators(&mut self) -> () {
+        let grid = self.get_absolute_grid();
+        let mut m: HashMap<HeisterColor, MapPosition> = HashMap::new();
+        for heister in &self.game_state.heisters {
+            let color = heister.heister_color;
+            let pos = &heister.map_position;
+
+            let square = grid.get(&pos).unwrap();
+            if square.square_type == SquareType::Escalator {
+                let (_idx, tile) = self.get_tile_with_index(&pos).unwrap();
+                let dest_pos = tile.get_escalator_dest(&pos).unwrap();
+                m.insert(color, dest_pos);
+            }
+        }
+        self.game_state.possible_escalators = m;
     }
 
     /// From a tile entrance and move direction of the tile's orientation,
@@ -809,7 +833,7 @@ impl Game {
             }
             Body::Chat(_c) => MoveValidity::Valid,
         };
-        self.update_possible_placements();
+        self.update_auxiliary_state();
         validity
     }
 }

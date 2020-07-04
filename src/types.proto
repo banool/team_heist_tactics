@@ -163,6 +163,10 @@ message GameState {
 
   // Possible tile entrances for placing new tiles
   repeated MapPosition possible_placements = 10;
+
+  // Possible escalator positions a heister can reach via escalator
+  map<int32, MapPosition> possible_escalators = 11;
+
 }
 
 message StartGame {
