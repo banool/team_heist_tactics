@@ -77,23 +77,23 @@ export function useEscalator(
       console.error("Could not find information for heister");
       return;
     }
-    var current_position = heister.getMapPosition();
+    var current_position = heister.getMapPosition()!;
     if (current_position === undefined) {
       console.error("Tried to move heister with no position");
       return;
     }
 
-    // prep checks done - now let's actually get the dest position, then do the move!
+    // prep checks done - now let's get the dest position, then send the move!
     let map = game_state.getPossibleEscalatorsMap();
     var esc_dest = map.get(heister_selected_keyboard);
     if (esc_dest === undefined) {
-      console.error(
+      console.log(
         `No possible escalator dest for heister ${heister_selected_keyboard}`
       );
       return;
     }
     console.log(
-      `Heister${heister_selected_keyboard} taking escalator to ${esc_dest}`
+      `Heister ${heister_selected_keyboard} taking escalator to ${esc_dest}`
     );
     dispatch(moveHeisterReal(heister, esc_dest));
   };
