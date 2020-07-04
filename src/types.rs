@@ -264,6 +264,17 @@ impl Tile {
         dirs_to_square_indices
     }
 
+    fn square_idx_to_map_pos(&self, i: usize) -> MapPosition {
+        let sq_x = (i % 4) as i32;
+        let sq_y = (i / 4) as i32;
+        let grid_x = self.position.x + sq_x;
+        let grid_y = self.position.y + sq_y;
+        MapPosition {
+            x: grid_x,
+            y: grid_y,
+        }
+    }
+
     pub fn pp(&self) -> String {
         let mut square_strs: Vec<String> = Vec::new();
         // should have 12 entries, for 3 rows of each square (4 squares in a tile)
@@ -383,6 +394,22 @@ impl Tile {
             map.insert(*dir, pos);
         }
         map
+    }
+
+    pub fn get_escalator_dest(&self, pos: &MapPosition) -> Option<MapPosition> {
+        let escalator_idx_and_squares: Vec<(usize, &Square)> = self
+            .squares
+            .iter()
+            .enumerate()
+            .filter(|(_, sq)| sq.square_type == SquareType::Escalator)
+            .collect();
+        for (i, _sq) in escalator_idx_and_squares {
+            let sq_pos = self.square_idx_to_map_pos(i);
+            if sq_pos != *pos {
+                return Some(sq_pos);
+            }
+        }
+        None
     }
 }
 
@@ -730,6 +757,7 @@ pub struct GameState {
     pub game_status: GameStatus,
     pub players: Vec<Player>,
     pub possible_placements: Vec<MapPosition>,
+    pub possible_escalators: HashMap<HeisterColor, MapPosition>,
 }
 
 impl Internal for GameState {
@@ -758,6 +786,16 @@ impl Internal for GameState {
             .iter()
             .map(|pp| MapPosition::from_proto(pp.clone()))
             .collect();
+        let possible_escalators = proto
+            .possible_escalators
+            .iter()
+            .map(|(c, pe)| {
+                (
+                    HeisterColor::from_i32(*c as i32).unwrap(),
+                    MapPosition::from_proto(pe.clone()),
+                )
+            })
+            .collect();
         GameState {
             game_name,
             game_started: proto.game_started,
@@ -769,6 +807,7 @@ impl Internal for GameState {
             game_status,
             players,
             possible_placements,
+            possible_escalators,
         }
     }
 
@@ -780,6 +819,11 @@ impl Internal for GameState {
             .possible_placements
             .iter()
             .map(|pp| pp.to_proto())
+            .collect();
+        let possible_escalators = self
+            .possible_escalators
+            .iter()
+            .map(|(c, pe)| (i32::from(*c), pe.to_proto()))
             .collect();
         let game_status = i32::from(self.game_status);
         proto_types::GameState {
@@ -793,6 +837,7 @@ impl Internal for GameState {
             game_status,
             players,
             possible_placements,
+            possible_escalators,
         }
     }
 }
@@ -804,6 +849,7 @@ impl GameState {
         let starting_tile = tile_1a();
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
+        let possible_escalators = HashMap::new();
         let mut heisters = Vec::new();
         heisters.push(Heister::get_initial(
             HeisterColor::Yellow,
@@ -832,6 +878,7 @@ impl GameState {
             game_status: GameStatus::Staging,
             players: vec![],
             possible_placements: vec![],
+            possible_escalators,
         }
     }
 }
