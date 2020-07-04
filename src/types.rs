@@ -129,6 +129,29 @@ impl MapPosition {
         }
     }
 
+    /// Given a position and direction, return the position if you were to
+    /// "Move" in that direction (one square)
+    pub fn move_in_direction(&self, direction: &MoveDirection) -> MapPosition {
+        match direction {
+            MoveDirection::North => MapPosition {
+                x: position.x,
+                y: position.y - 1,
+            },
+            MoveDirection::East => MapPosition {
+                x: position.x + 1,
+                y: position.y,
+            },
+            MoveDirection::South => MapPosition {
+                x: position.x,
+                y: position.y + 1,
+            },
+            MoveDirection::West => MapPosition {
+                x: position.x - 1,
+                y: position.y,
+            },
+        }
+    }
+
     /// With respect to a given (presumed) Tile MapPosition, return the respective
     /// MapPosition of a TileEntrance from one of this tile's doors (in a given direction)
     fn entrance_position(&self, dir: &MoveDirection) -> MapPosition {
