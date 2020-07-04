@@ -82,21 +82,20 @@ export function useEscalator(
       console.error("Tried to move heister with no position");
       return;
     }
+
     // prep checks done - now let's actually get the dest position, then do the move!
     let map = game_state.getPossibleEscalatorsMap();
-    var blah = map.get(heister_selected_keyboard);
-    if (blah === undefined) {
+    var esc_dest = map.get(heister_selected_keyboard);
+    if (esc_dest === undefined) {
       console.error(
-        `No possible escalator dest for heister ${heister_selected_keyboard}: ${map}`
+        `No possible escalator dest for heister ${heister_selected_keyboard}`
       );
       return;
     }
-    let new_position = new MapPosition();
-    new_position.setX(blah.getX());
-    new_position.setY(blah.getY());
-    console.log(`Kelly is cool ${heister_selected_keyboard} ${blah}`);
-    console.log(`new_positon, esc: ${new_position}`);
-    dispatch(moveHeisterReal(heister, blah));
+    console.log(
+      `Heister${heister_selected_keyboard} taking escalator to ${esc_dest}`
+    );
+    dispatch(moveHeisterReal(heister, esc_dest));
   };
 }
 
