@@ -134,20 +134,20 @@ impl MapPosition {
     pub fn move_in_direction(&self, direction: &MoveDirection) -> MapPosition {
         match direction {
             MoveDirection::North => MapPosition {
-                x: position.x,
-                y: position.y - 1,
+                x: self.x,
+                y: self.y - 1,
             },
             MoveDirection::East => MapPosition {
-                x: position.x + 1,
-                y: position.y,
+                x: self.x + 1,
+                y: self.y,
             },
             MoveDirection::South => MapPosition {
-                x: position.x,
-                y: position.y + 1,
+                x: self.x,
+                y: self.y + 1,
             },
             MoveDirection::West => MapPosition {
-                x: position.x - 1,
-                y: position.y,
+                x: self.x - 1,
+                y: self.y,
             },
         }
     }
