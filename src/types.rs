@@ -16,6 +16,7 @@ pub use proto_types::Ability;
 pub use proto_types::GameStatus;
 pub use proto_types::HeisterColor;
 pub use proto_types::HeisterSymbol;
+pub use proto_types::PossibleTeleportEntry;
 pub use proto_types::SquareType;
 pub use proto_types::WallType;
 
@@ -38,6 +39,13 @@ pub const DOOR_TYPES: [&'static WallType; 4] = [
     &WallType::OrangeDoor,
     &WallType::GreenDoor,
     &WallType::YellowDoor,
+];
+
+pub const TELEPORTER_TYPES: [&'static SquareType; 4] = [
+    &SquareType::PurpleTeleportPad,
+    &SquareType::OrangeTeleportPad,
+    &SquareType::GreenTeleportPad,
+    &SquareType::YellowTeleportPad,
 ];
 
 pub const HEISTER_COLORS: [&'static HeisterColor; 4] = [
@@ -411,6 +419,26 @@ impl Tile {
         }
         None
     }
+
+    /// Returns a Map from color to MapPositions for all teleporters within the tile
+    /// NOTE: Assumption: Each tile has no more than 1 teleporter per color
+    pub fn get_teleporters(&self) -> HashMap<HeisterColor, MapPosition> {
+        let mut map: HashMap<HeisterColor, MapPosition> = HashMap::new();
+        for (idx, square) in self.squares.iter().enumerate() {
+            if !TELEPORTER_TYPES.contains(&&square.square_type) {
+                continue;
+            }
+            // Match teleporter type to color,... helper???
+            match square.color() {
+                Some(color) => {
+                    map.insert(color, self.square_idx_to_map_pos(idx));
+                }
+                None => {}
+            }
+        }
+        // fn square_idx_to_map_pos(&self, i: usize) -> MapPosition {
+        map
+    }
 }
 
 pub enum StartingTile {
@@ -464,6 +492,16 @@ impl From<SerializableSquare> for Square {
 }
 
 impl Square {
+    pub fn color(&self) -> Option<HeisterColor> {
+        match self.square_type {
+            SquareType::PurpleTeleportPad => Some(HeisterColor::Purple),
+            SquareType::OrangeTeleportPad => Some(HeisterColor::Orange),
+            SquareType::GreenTeleportPad => Some(HeisterColor::Green),
+            SquareType::YellowTeleportPad => Some(HeisterColor::Yellow),
+            _wildcard => None,
+        }
+    }
+
     pub fn is_teleport(&self) -> bool {
         match self.square_type {
             SquareType::PurpleTeleportPad
@@ -758,6 +796,7 @@ pub struct GameState {
     pub players: Vec<Player>,
     pub possible_placements: Vec<MapPosition>,
     pub possible_escalators: HashMap<HeisterColor, MapPosition>,
+    pub possible_teleports: HashMap<HeisterColor, Vec<MapPosition>>,
 }
 
 impl Internal for GameState {
@@ -796,6 +835,22 @@ impl Internal for GameState {
                 )
             })
             .collect();
+
+        // Have to actually process this list into a proper map
+        let mut possible_teleports: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
+        for entry in proto.possible_teleports {
+            let color = HeisterColor::from_i32(entry.color).unwrap();
+            let pos = MapPosition::from_proto(entry.position.unwrap());
+            match possible_teleports.get_mut(&color) {
+                Some(list) => {
+                    list.push(pos);
+                }
+                None => {
+                    let list: Vec<MapPosition> = vec![pos];
+                    possible_teleports.insert(color, list);
+                }
+            }
+        }
         GameState {
             game_name,
             game_started: proto.game_started,
@@ -808,6 +863,7 @@ impl Internal for GameState {
             players,
             possible_placements,
             possible_escalators,
+            possible_teleports,
         }
     }
 
@@ -826,6 +882,17 @@ impl Internal for GameState {
             .map(|(c, pe)| (i32::from(*c), pe.to_proto()))
             .collect();
         let game_status = i32::from(self.game_status);
+
+        let mut possible_teleports: Vec<PossibleTeleportEntry> = Vec::new();
+        for (color, list) in self.possible_teleports.clone() {
+            for pos in list {
+                let entry = PossibleTeleportEntry {
+                    color: i32::from(color),
+                    position: Some(pos.to_proto()),
+                };
+                possible_teleports.push(entry);
+            }
+        }
         proto_types::GameState {
             game_name: self.game_name.0.to_string(),
             game_started: self.game_started,
@@ -838,6 +905,7 @@ impl Internal for GameState {
             players,
             possible_placements,
             possible_escalators,
+            possible_teleports,
         }
     }
 }
@@ -850,6 +918,7 @@ impl GameState {
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
         let tiles = vec![starting_tile.clone()];
         let possible_escalators = HashMap::new();
+        let possible_teleports = HashMap::new();
         let mut heisters = Vec::new();
         heisters.push(Heister::get_initial(
             HeisterColor::Yellow,
@@ -879,6 +948,7 @@ impl GameState {
             players: vec![],
             possible_placements: vec![],
             possible_escalators,
+            possible_teleports,
         }
     }
 }

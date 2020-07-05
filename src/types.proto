@@ -132,6 +132,13 @@ enum GameStatus {
   DEFEAT = 3;
 }
 
+// We can't have maps of lists in protobuf, so instead we'll have a list of these,
+// and construct a map from that.
+message PossibleTeleportEntry {
+    HeisterColor color = 1;
+    MapPosition position = 2;
+}
+
 // Captures all information related to the game.
 message GameState {
   // Word(s) that points to this game instance.
@@ -166,6 +173,9 @@ message GameState {
 
   // Possible escalator positions a heister can reach via escalator
   map<int32, MapPosition> possible_escalators = 11;
+
+  // Map of possible locations a heister can teleport to
+  repeated PossibleTeleportEntry possible_teleports = 12;
 
 }
 

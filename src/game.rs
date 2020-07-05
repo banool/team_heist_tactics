@@ -25,6 +25,7 @@ pub struct Game {
     pub game_state: GameState,
     pub tile_deck: Vec<Tile>,
     pub game_created: u64,
+    revealed_teleporters: HashMap<HeisterColor, Vec<MapPosition>>,
 }
 #[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct GameHandle(pub String);
@@ -56,11 +57,18 @@ impl Game {
             tile_deck.shuffle(&mut rng);
         }
         let game_created = get_current_time_secs();
+        // NOTE: Assumption: All games start with only one tile revealed
+        let mut revealed_teleporters: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
+        Self::update_revealed_teleporters(
+            &mut revealed_teleporters,
+            game_state.tiles.first().unwrap(),
+        );
         Game {
             game_handle,
             game_state,
             tile_deck,
             game_created,
+            revealed_teleporters,
         }
     }
 
@@ -478,13 +486,14 @@ impl Game {
     }
 
     fn update_auxiliary_state(&mut self) -> () {
-        self.update_possible_placements();
-        self.update_possible_escalators();
+        let grid = self.get_absolute_grid();
+        self.update_possible_placements(&grid);
+        self.update_possible_escalators(&grid);
+        self.update_possible_teleports(&grid);
     }
 
     /// Possible placements for new tiles that Heisters can discover
-    fn update_possible_placements(&mut self) -> () {
-        let grid = self.get_absolute_grid();
+    fn update_possible_placements(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
         let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
 
         let mut v = Vec::new();
@@ -495,8 +504,7 @@ impl Game {
     }
 
     /// Possible escalator destinations that a Heister can reach with an Escalator move
-    fn update_possible_escalators(&mut self) -> () {
-        let grid = self.get_absolute_grid();
+    fn update_possible_escalators(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
         let mut m: HashMap<HeisterColor, MapPosition> = HashMap::new();
         for heister in &self.game_state.heisters {
             let color = heister.heister_color;
@@ -510,6 +518,45 @@ impl Game {
             }
         }
         self.game_state.possible_escalators = m;
+    }
+
+    /// Possible teleport destinations that a Heister can reach with a Teleport move
+    fn update_possible_teleports(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
+        let mut m: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
+        for heister in &self.game_state.heisters {
+            let color = heister.heister_color;
+            let pos = &heister.map_position;
+            let square = grid.get(&pos).unwrap();
+            if square.is_teleport() {
+                match self.revealed_teleporters.get(&color) {
+                    Some(list) => {
+                        m.insert(color, list.to_vec());
+                    }
+                    None => {}
+                }
+            }
+        }
+        self.game_state.possible_teleports = m;
+    }
+
+    /// Return all revealed teleporters, called after adding new tiles
+    fn update_revealed_teleporters(
+        already_revealed: &mut HashMap<HeisterColor, Vec<MapPosition>>,
+        new_tile: &Tile,
+    ) -> () {
+        for (color, teleporter_pos) in new_tile.get_teleporters() {
+            match already_revealed.get_mut(&color) {
+                Some(already_revealed_list) => {
+                    // append the new list onto the end
+                    already_revealed_list.push(teleporter_pos);
+                }
+                None => {
+                    // set the new list from teleporter list
+                    let teleporter_list: Vec<MapPosition> = vec![teleporter_pos];
+                    already_revealed.insert(color, teleporter_list);
+                }
+            }
+        }
     }
 
     /// From a tile entrance and move direction of the tile's orientation,
@@ -686,8 +733,9 @@ impl Game {
                 // Add the tile before opening doors on it, that way helpers that
                 // rely on the tile's presence in game.tiles work correctly
                 let new_tile_idx = self.game_state.tiles.len();
+                Self::update_revealed_teleporters(&mut self.revealed_teleporters, &rotated_tile);
                 self.game_state.tiles.push(rotated_tile);
-                self.update_tile_doors(new_tile_idx);
+                self.update_tile_doors(new_tile_idx); // Must be called _after_ push
                 MoveValidity::Valid
             }
             None => MoveValidity::Invalid("No tiles left in deck to draw".to_string()),
