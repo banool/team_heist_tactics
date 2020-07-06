@@ -99,6 +99,54 @@ export function useEscalator(
   };
 }
 
+export function teleport(
+  game_state: GameState,
+  connection_status: ConnectionStatus,
+  heister_selected_keyboard: number // HeisterColor
+) {
+  return async (dispatch) => {
+    if (
+      game_state === null ||
+      connection_status !== ConnectionStatus.Connected
+    ) {
+      console.error("Tried to move heister with no game state / connection");
+      return;
+    }
+    var heisters = game_state.getHeistersList();
+    var heister = heisters.find(
+      (h) => h.getHeisterColor() == heister_selected_keyboard
+    );
+    if (heister === undefined) {
+      console.error("Could not find information for heister");
+      return;
+    }
+    var current_position = heister.getMapPosition()!;
+    if (current_position === undefined) {
+      console.error("Tried to move heister with no position");
+      return;
+    }
+
+    let possible_teleports: PossibleTeleports = getPossibleTeleportsMap(
+      game_state
+    );
+    // This does not need a guard because tile 1 will always populate possible teleports with at least
+    // one teleport per color.
+    let teleports: MapPosition[] =
+      possible_teleports[heister_selected_keyboard];
+    let current_idx: number = teleports.findIndex(
+      (pos) =>
+        pos.getX() == current_position.getX() &&
+        pos.getY() == current_position.getY()
+    );
+    let next_teleport_idx = (current_idx + 1) % teleports.length;
+    let next_teleport = teleports[next_teleport_idx];
+    console.log(
+      `Heister ${heister_selected_keyboard} teleporting to ${next_teleport}`
+    );
+    dispatch(moveHeisterReal(heister, next_teleport));
+  };
+}
+
 export function moveHeister(
   game_state: GameState,
   connection_status: ConnectionStatus,
@@ -235,6 +283,11 @@ export function handleKeyInput(
           useEscalator(game_state, connection_status, heister_selected_keyboard)
         );
         return;
+      case KeyAction.Teleport:
+        dispatch(
+          teleport(game_state, connection_status, heister_selected_keyboard)
+        );
+        return;
       case KeyAction.MoveWest:
         dispatch(
           moveHeister(
@@ -287,6 +340,8 @@ export function getKeyAction(key: string) {
       return KeyAction.SelectOrangeHeister;
     case "e":
       return KeyAction.Escalator;
+    case "t":
+      return KeyAction.Teleport;
     default:
       return null;
   }
@@ -302,6 +357,7 @@ export enum KeyAction {
   SelectGreenHeister,
   SelectOrangeHeister,
   Escalator,
+  Teleport,
 }
 
 export const getColor = (heister_color): string => {
@@ -318,6 +374,28 @@ export const getColor = (heister_color): string => {
       console.error("Unexpected heister color");
       return "#000000";
   }
+};
+
+export interface IPossibleTeleports {
+  [index: number]: MapPosition[]; // HeisterColor -> MapPosition[]
+}
+
+class PossibleTeleports {
+  constructor(game_state: GameState) {
+    for (const item of game_state.getPossibleTeleportsList()) {
+      if (this[item.getColor()] !== undefined) {
+        this[item.getColor()].push(item.getPosition());
+      } else {
+        this[item.getColor()] = [item.getPosition()];
+      }
+    }
+  }
+}
+
+export const getPossibleTeleportsMap = (
+  game_state: GameState
+): PossibleTeleports => {
+  return new PossibleTeleports(game_state);
 };
 
 export function placeTile(map_position: MapPosition) {
