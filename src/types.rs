@@ -365,14 +365,12 @@ impl Tile {
     /// 4*   5    6    7
     /// 8    9   10  *11
     /// 12  13*  14   15
-    pub fn get_door_squares(&self) -> HashMap<MoveDirection, Square> {
+    pub fn get_entrance_squares(&self) -> HashMap<MoveDirection, Square> {
         let mut map: HashMap<MoveDirection, Square> = HashMap::new();
         let dirs_to_square_indices = Tile::door_square_indices();
         for (dir, square_index) in dirs_to_square_indices {
             let square = *self.squares.get(square_index).unwrap();
-            if square.has_door() {
-                map.insert(dir, square);
-            }
+            map.insert(dir, square);
         }
         map
     }
@@ -395,9 +393,10 @@ impl Tile {
         square.close_door(dir)
     }
 
+    /// This returns possible entrance positions (not contained by this tile)
     pub fn adjacent_entrances(&self) -> HashMap<MoveDirection, MapPosition> {
         let mut map: HashMap<MoveDirection, MapPosition> = HashMap::new();
-        for dir in self.get_door_squares().keys() {
+        for dir in self.get_entrance_squares().keys() {
             let pos = self.position.entrance_position(dir);
             map.insert(*dir, pos);
         }
