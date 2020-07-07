@@ -800,8 +800,7 @@ impl Game {
         let tile = &self.game_state.tiles[tile_idx];
 
         for (dir, position) in tile.adjacent_entrances() {
-            let adjacent_entrance_exists = grid.get(&position);
-            match adjacent_entrance_exists {
+            match grid.get(&position) {
                 Some(neighbor_square) => {
                     let my_door_pos = position.move_in_direction(&dir.opposite());
                     let my_square = grid.get(&my_door_pos).unwrap();
@@ -818,6 +817,14 @@ impl Game {
                             // If there isn't a door on the other side, close door
                             // that way, we know it won't be a possible_placement
                             mut_tile.close_door_in_dir(dir);
+                        }
+                    } else {
+                        // If my square does NOT have a door, but neighbor does
+                        if neighbor_square.has_door() {
+                            let (idx, mut neighbor_tile) =
+                                self.get_tile_with_index(&position).unwrap();
+                            neighbor_tile.close_door_in_dir(dir.opposite());
+                            self.game_state.tiles[idx] = neighbor_tile;
                         }
                     }
                 }
