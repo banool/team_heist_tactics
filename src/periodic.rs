@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 use crate::game::GameHandle;
-use crate::manager::{GameManager, GameManagerWrapper, GameWrapper, TEST_HANDLE};
+use crate::manager::{GameManagerWrapper, GameWrapper, TEST_HANDLE};
 use crate::utils::get_current_time_secs;
 
 const REAP_DURATION: u64 = 3600; // 1hr from creation, games are reaped
