@@ -103,11 +103,6 @@ impl Game {
             player.abilities = player_abilities[i].clone();
         }
 
-        // Kick off the timer.
-        let now = get_current_time_secs();
-        self.game_state.game_started = now;
-        self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
-
         // Set the game status to ONGOING.
         self.game_state.game_status = GameStatus::Ongoing;
 
@@ -903,6 +898,15 @@ impl Game {
             Body::Chat(_c) => MoveValidity::Valid,
         };
         self.update_auxiliary_state();
+
+        // On first move, when timer_Started is set to sentinel values u64::MAX
+        // If the move is processed as valid, then let's set the game going.
+        if validity == MoveValidity::Valid && self.game_state.game_started == u64::MAX {
+            // Kick off the timer.
+            let now = get_current_time_secs();
+            self.game_state.game_started = now;
+            self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
+        }
         validity
     }
 }
