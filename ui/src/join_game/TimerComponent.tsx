@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 const TimerComponent = () => {
   const timer_runs_out = useSelector(timerRunsOutSelector);
 
+  const [seconds_left, set_seconds_left] = useState(300);
+
   useEffect(() => {
     // We set recalculateTimer to run every second, but it doesn't actually
     // count down a timer, it just recalculates how much time is left based
@@ -16,8 +18,6 @@ const TimerComponent = () => {
     };
   });
 
-  const [seconds_left, set_seconds_left] = useState(timer_runs_out);
-
   const recalculateTimer = () => {
     set_seconds_left(timer_runs_out - Math.floor(Date.now() / 1000));
   };
@@ -26,7 +26,7 @@ const TimerComponent = () => {
 
   return (
     <div>
-      <p>Seconds left: {seconds_left_string} </p>
+      <p>Seconds left: {seconds_left_string}</p>
     </div>
   );
 };
