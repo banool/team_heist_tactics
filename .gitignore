@@ -2,6 +2,7 @@
 templates/static/app.js
 templates/play.html
 /static/*.js
+/static/*.css
 
 # Rust
 /target/

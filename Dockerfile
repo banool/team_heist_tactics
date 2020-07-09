@@ -46,9 +46,6 @@ COPY src/ src/
 COPY build.rs .
 RUN set -x && cargo build --release
 
-# Copy in images
-COPY static/images /${app}/static/images
-
 # Final stage
 FROM gcr.io/distroless/cc:debug
 
@@ -60,6 +57,7 @@ COPY templates templates
 COPY data data
 COPY static/images static/images
 COPY prod_run.sh .
+COPY ui/src/components/main.css static/main.css
 
 # Copy the frontend in from the frontend build stage
 COPY --from=frontend_build /npm/dist/index.html /templates/play.html
