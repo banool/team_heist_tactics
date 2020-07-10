@@ -871,7 +871,18 @@ impl Game {
         let body = message.body.unwrap();
         let validity = match body {
             Body::StartGame(_) => self.start_game(),
-            Body::Move(m) => self.process_move(Move::from_proto(m), &player_name),
+            Body::Move(m) => {
+                let v = self.process_move(Move::from_proto(m), &player_name);
+                // On first move, when timer_Started is set to sentinel values u64::MAX
+                // If the move is processed as valid, then let's set the game going.
+                if v == MoveValidity::Valid && self.game_state.game_started == u64::MAX {
+                    // Kick off the timer.
+                    let now = get_current_time_secs();
+                    self.game_state.game_started = now;
+                    self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
+                }
+                v
+            }
             Body::PlaceTile(pt) => {
                 self.process_tile_placement(PlaceTile::from_proto(pt), &player_name)
             }
@@ -885,14 +896,6 @@ impl Game {
         };
         self.update_auxiliary_state();
 
-        // On first move, when timer_Started is set to sentinel values u64::MAX
-        // If the move is processed as valid, then let's set the game going.
-        if validity == MoveValidity::Valid && self.game_state.game_started == u64::MAX {
-            // Kick off the timer.
-            let now = get_current_time_secs();
-            self.game_state.game_started = now;
-            self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
-        }
         validity
     }
 }
