@@ -887,9 +887,9 @@ impl Game {
             Body::StartGame(_) => self.start_game(),
             Body::Move(m) => {
                 let v = self.process_move(Move::from_proto(m), &player_name);
-                // On first move, when timer_Started is set to sentinel values u64::MAX
+                // On first move, when timer_Started is set to sentinel value 0
                 // If the move is processed as valid, then let's set the game going.
-                if v == MoveValidity::Valid && self.game_state.game_started == u64::MAX {
+                if v == MoveValidity::Valid && self.game_state.game_started == 0 {
                     // Kick off the timer.
                     let now = get_current_time_secs();
                     self.game_state.game_started = now;

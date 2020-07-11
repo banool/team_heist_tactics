@@ -911,7 +911,7 @@ impl Internal for GameState {
 
 impl GameState {
     pub fn new(game_name: GameHandle) -> Self {
-        let game_started = u64::MAX;
+        let game_started = 0;
         let timer_runs_out = 0;
         let starting_tile = tile_1a();
         let starting_tile_enum = StartingTile::A(starting_tile.clone());
