@@ -1,12 +1,9 @@
-use crate::game::GameHandle;
-use crate::load_map::tile_1a;
-
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::From;
 
 // Import all the proto types in this private module.
-mod proto_types {
+pub mod proto_types {
     use serde::{Deserialize, Serialize};
     include!(concat!(env!("OUT_DIR"), "/types.rs"));
 }
@@ -179,6 +176,57 @@ impl MapPosition {
             MoveDirection::West => MapPosition {
                 x: self.x - 1,
                 y: self.y + 1,
+            },
+        }
+    }
+
+    /// From a tile exit square (one from which a player might initiate a PlaceTile move),
+    /// figure out the MapPosition of the tile that the heister is on.
+    /// (Useful for looking up which tile a heister might currently be on)
+    /// * You might notice - this is the same as new_tile_position, but with opposite
+    /// directions swapped. That's true! That's the magic of the game.
+    pub fn current_tile_position(&self, dir: &MoveDirection) -> MapPosition {
+        match dir {
+            MoveDirection::North => MapPosition {
+                x: self.x - 2,
+                y: self.y,
+            },
+            MoveDirection::West => MapPosition {
+                x: self.x,
+                y: self.y - 1,
+            },
+            MoveDirection::South => MapPosition {
+                x: self.x - 1,
+                y: self.y - 3,
+            },
+            MoveDirection::East => MapPosition {
+                x: self.x - 3,
+                y: self.y - 2,
+            },
+        }
+    }
+
+    /// From a tile entrance and move direction of the tile's orientation,
+    /// return the MapPosition for that new tile to place it in the absolute grid
+    /// This is doable since every tile has an entry square in some rotation of
+    /// (1, 3) - except for starting tiles
+    pub fn new_tile_position(&self, dir: &MoveDirection) -> MapPosition {
+        match dir {
+            MoveDirection::North => MapPosition {
+                x: self.x - 1,
+                y: self.y - 3,
+            },
+            MoveDirection::East => MapPosition {
+                x: self.x,
+                y: self.y - 1,
+            },
+            MoveDirection::South => MapPosition {
+                x: self.x - 2,
+                y: self.y,
+            },
+            MoveDirection::West => MapPosition {
+                x: self.x - 3,
+                y: self.y - 2,
             },
         }
     }
@@ -548,6 +596,47 @@ impl Square {
             | DOOR_TYPES.contains(&&self.west_wall)
     }
 
+    /// Return the square's (exit) door, if it has one
+    pub fn get_door_wall(&self) -> Option<WallType> {
+        let walls = self.get_walls();
+        let door = walls
+            .values()
+            .find(|&wt| DOOR_TYPES.iter().any(|&dt| wt == dt));
+        match door {
+            Some(d) => {
+                let ret = d.clone();
+                Some(ret.clone())
+            }
+            None => None,
+        }
+    }
+
+    /// Return the direction of the square's (exit) door, if it has one
+    pub fn get_door_direction(self) -> Option<MoveDirection> {
+        match self.get_door_wall() {
+            Some(_) => (),
+            None => return None,
+        };
+        for (dir, wall) in self.get_walls().iter() {
+            if DOOR_TYPES.contains(&wall) {
+                return Some(dir.clone());
+            }
+        }
+        None
+    }
+
+    /// Return whether or not my square_type matches the given color
+    /// (or false, if not a teleport)
+    pub fn teleport_matches_color(&self, color: HeisterColor) -> bool {
+        match self.square_type {
+            SquareType::PurpleTeleportPad => color == HeisterColor::Purple,
+            SquareType::OrangeTeleportPad => color == HeisterColor::Orange,
+            SquareType::GreenTeleportPad => color == HeisterColor::Green,
+            SquareType::YellowTeleportPad => color == HeisterColor::Yellow,
+            _wildcard => false,
+        }
+    }
+
     pub fn open_door(&mut self, dir: MoveDirection) -> () {
         match dir {
             MoveDirection::North => {
@@ -689,8 +778,8 @@ impl Heister {
     pub fn get_initial(heister_color: HeisterColor, starting_tile: &StartingTile) -> Self {
         let map_position = match starting_tile {
             // | | | | |
-            // | |y|o| |
-            // | |p|g| |
+            // | |p|o| |
+            // | |y|g| |
             // | | | | |
             StartingTile::A(_) => match heister_color {
                 HeisterColor::Yellow => MapPosition { x: 1, y: 2 },
@@ -778,176 +867,6 @@ impl Internal for Move {
         proto_types::Move {
             heister_color: i32::from(self.heister_color),
             position: Some(self.position.to_proto()),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct GameState {
-    pub game_name: GameHandle,
-    pub game_started: u64,
-    pub timer_runs_out: u64,
-    pub tiles: Vec<Tile>,
-    pub heisters: Vec<Heister>,
-    pub all_items_taken: bool,
-    pub remaining_tiles: u32,
-    pub game_status: GameStatus,
-    pub players: Vec<Player>,
-    pub possible_placements: Vec<MapPosition>,
-    pub possible_escalators: HashMap<HeisterColor, MapPosition>,
-    pub possible_teleports: HashMap<HeisterColor, Vec<MapPosition>>,
-}
-
-impl Internal for GameState {
-    type P = proto_types::GameState;
-
-    fn from_proto(proto: proto_types::GameState) -> Self {
-        let game_name = GameHandle(proto.game_name);
-        let tiles = proto
-            .tiles
-            .iter()
-            .map(|t| Tile::from_proto(t.clone()))
-            .collect();
-        let heisters = proto
-            .heisters
-            .iter()
-            .map(|h| Heister::from_proto(h.clone()))
-            .collect();
-        let players = proto
-            .players
-            .iter()
-            .map(|p| Player::from_proto(p.clone()))
-            .collect();
-        let game_status = GameStatus::from_i32(proto.game_status).unwrap(); // TODO Handle this gracefully?
-        let possible_placements = proto
-            .possible_placements
-            .iter()
-            .map(|pp| MapPosition::from_proto(pp.clone()))
-            .collect();
-        let possible_escalators = proto
-            .possible_escalators
-            .iter()
-            .map(|(c, pe)| {
-                (
-                    HeisterColor::from_i32(*c as i32).unwrap(),
-                    MapPosition::from_proto(pe.clone()),
-                )
-            })
-            .collect();
-
-        // Have to actually process this list into a proper map
-        let mut possible_teleports: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
-        for entry in proto.possible_teleports {
-            let color = HeisterColor::from_i32(entry.color).unwrap();
-            let pos = MapPosition::from_proto(entry.position.unwrap());
-            match possible_teleports.get_mut(&color) {
-                Some(list) => {
-                    list.push(pos);
-                }
-                None => {
-                    let list: Vec<MapPosition> = vec![pos];
-                    possible_teleports.insert(color, list);
-                }
-            }
-        }
-        GameState {
-            game_name,
-            game_started: proto.game_started,
-            timer_runs_out: proto.timer_runs_out,
-            tiles,
-            heisters,
-            all_items_taken: proto.all_items_taken,
-            remaining_tiles: proto.remaining_tiles,
-            game_status,
-            players,
-            possible_placements,
-            possible_escalators,
-            possible_teleports,
-        }
-    }
-
-    fn to_proto(&self) -> proto_types::GameState {
-        let tiles = self.tiles.iter().map(|t| t.to_proto()).collect();
-        let heisters = self.heisters.iter().map(|h| h.to_proto()).collect();
-        let players = self.players.iter().map(|p| p.to_proto()).collect();
-        let possible_placements = self
-            .possible_placements
-            .iter()
-            .map(|pp| pp.to_proto())
-            .collect();
-        let possible_escalators = self
-            .possible_escalators
-            .iter()
-            .map(|(c, pe)| (i32::from(*c), pe.to_proto()))
-            .collect();
-        let game_status = i32::from(self.game_status);
-
-        let mut possible_teleports: Vec<PossibleTeleportEntry> = Vec::new();
-        for (color, list) in self.possible_teleports.clone() {
-            for pos in list {
-                let entry = PossibleTeleportEntry {
-                    color: i32::from(color),
-                    position: Some(pos.to_proto()),
-                };
-                possible_teleports.push(entry);
-            }
-        }
-        proto_types::GameState {
-            game_name: self.game_name.0.to_string(),
-            game_started: self.game_started,
-            timer_runs_out: self.timer_runs_out,
-            tiles,
-            heisters,
-            all_items_taken: self.all_items_taken,
-            remaining_tiles: self.remaining_tiles,
-            game_status,
-            players,
-            possible_placements,
-            possible_escalators,
-            possible_teleports,
-        }
-    }
-}
-
-impl GameState {
-    pub fn new(game_name: GameHandle) -> Self {
-        let game_started = 0;
-        let timer_runs_out = 0;
-        let starting_tile = tile_1a();
-        let starting_tile_enum = StartingTile::A(starting_tile.clone());
-        let tiles = vec![starting_tile.clone()];
-        let possible_escalators = HashMap::new();
-        let possible_teleports = HashMap::new();
-        let mut heisters = Vec::new();
-        heisters.push(Heister::get_initial(
-            HeisterColor::Yellow,
-            &starting_tile_enum,
-        ));
-        heisters.push(Heister::get_initial(
-            HeisterColor::Purple,
-            &starting_tile_enum,
-        ));
-        heisters.push(Heister::get_initial(
-            HeisterColor::Green,
-            &starting_tile_enum,
-        ));
-        heisters.push(Heister::get_initial(
-            HeisterColor::Orange,
-            &starting_tile_enum,
-        ));
-        GameState {
-            game_name,
-            game_started,
-            timer_runs_out,
-            tiles,
-            heisters,
-            all_items_taken: false,
-            remaining_tiles: 8,
-            game_status: GameStatus::Staging,
-            players: vec![],
-            possible_placements: vec![],
-            possible_escalators,
-            possible_teleports,
         }
     }
 }

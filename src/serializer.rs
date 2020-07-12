@@ -1,8 +1,9 @@
 use anyhow::Result;
 use prost::Message as ProstMessage;
 
+use crate::game_state::GameState;
 use crate::types::main_message::Body;
-use crate::types::{GameState, Internal, InvalidRequest, MainMessage};
+use crate::types::{Internal, InvalidRequest, MainMessage};
 use actix::Message as ActixMessage;
 
 #[derive(Clone, Debug)]

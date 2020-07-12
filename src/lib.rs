@@ -7,6 +7,7 @@ extern crate lazy_static;
 pub mod endpoints;
 pub mod errors;
 pub mod game;
+pub mod game_state;
 pub mod load_map;
 pub mod manager;
 pub mod periodic;
