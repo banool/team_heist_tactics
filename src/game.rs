@@ -5,16 +5,16 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::TryInto;
 
+use crate::game_state::GameState;
 use crate::load_map;
 use crate::types::main_message::Body;
 use crate::types::{
-    Ability, GameState, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition,
-    Move, MoveDirection, PlaceTile, Player, PlayerName, Square, SquareType, Tile, WallType,
-    DOOR_TYPES,
+    Ability, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition, Move,
+    MoveDirection, PlaceTile, PlayerName, Square, SquareType, Tile,
 };
 use crate::utils::get_current_time_secs;
 
-use log::{info, trace};
+use log::info;
 
 const MAX_PLAYERS: u32 = 8;
 const TIMER_DURATION_SECS: u64 = 5 * 60;
@@ -84,15 +84,7 @@ impl Game {
     }
 
     pub fn add_player(&mut self, name: String) -> Result<()> {
-        if self.game_state.game_status != GameStatus::Staging {
-            // If the game is already in progress, don't actually register the player.
-            return Ok(());
-        }
-        self.game_state.players.push(Player {
-            name,
-            abilities: vec![],
-        });
-        Ok(())
+        self.game_state.add_player(name)
     }
 
     pub fn start_game(&mut self) -> MoveValidity {
@@ -141,122 +133,11 @@ impl Game {
     }
 
     pub fn has_player(&self, name: &str) -> bool {
-        for p in self.game_state.players.iter() {
-            if p.name == name {
-                return true;
-            }
-        }
-        false
+        self.game_state.has_player(name)
     }
 
     pub fn get_game_state(&self) -> GameState {
         self.game_state.clone()
-    }
-
-    pub fn get_absolute_grid(&self) -> HashMap<MapPosition, Square> {
-        let mut grid: HashMap<MapPosition, Square> = HashMap::new();
-        for tile in self.game_state.tiles.iter() {
-            // this is the top position for the tile - we can assign positions for this
-            let tile_pos = &tile.position;
-            for (i, square) in tile.squares.iter().enumerate() {
-                let sq_x = (i % 4) as i32;
-                let sq_y = (i / 4) as i32;
-                let grid_x = tile_pos.x + sq_x;
-                let grid_y = tile_pos.y + sq_y;
-                trace!(
-                    "{}: {:?} {:?} {:?} {:?}, {:?}",
-                    i,
-                    square.north_wall,
-                    square.west_wall,
-                    square.south_wall,
-                    square.east_wall,
-                    square.square_type
-                );
-                let mp = MapPosition {
-                    x: grid_x,
-                    y: grid_y,
-                };
-                grid.insert(mp, square.clone());
-            }
-        }
-        grid
-    }
-
-    // NOTE: Would be nice if self.game_state.heisters was a map<color, heister>
-    // or even <color, pos>
-    fn get_mut_heister_from_vec(&mut self, hc: HeisterColor) -> Option<&mut Heister> {
-        for h in self.game_state.heisters.iter_mut() {
-            if h.heister_color == hc {
-                return Some(h);
-            }
-        }
-        return None;
-    }
-
-    fn get_heister_from_vec(&self, hc: HeisterColor) -> Option<&Heister> {
-        for h in self.game_state.heisters.iter() {
-            if h.heister_color == hc {
-                return Some(h);
-            }
-        }
-        return None;
-    }
-
-    fn move_blocked_by_wall(
-        &self,
-        grid: &HashMap<MapPosition, Square>,
-        heister_pos: &MapPosition,
-        dest_pos: &MapPosition,
-    ) -> MoveValidity {
-        // Assumes that heister_pos & dest_pos are adjacent
-        let heister_square = match grid.get(&heister_pos) {
-            Some(s) => s,
-            None => {
-                return MoveValidity::Invalid(format!(
-                    "Heister square {:?} doesn't exist",
-                    heister_pos
-                ))
-            }
-        };
-        let blocking_wall = match heister_pos.adjacent_move_direction(dest_pos) {
-            MoveDirection::North => heister_square.north_wall,
-            MoveDirection::East => heister_square.east_wall,
-            MoveDirection::South => heister_square.south_wall,
-            MoveDirection::West => heister_square.west_wall,
-        };
-
-        let invalid_msg = format!("Wall {:?} cannot be passed through", blocking_wall);
-        match blocking_wall {
-            WallType::Clear => MoveValidity::Valid,
-            WallType::Impassable => {
-                MoveValidity::Invalid("Can't pass through impassable wall".to_string())
-            }
-            // Wildcard matches each tile-discovery type (one per color)
-            _wildcard => MoveValidity::Invalid(invalid_msg),
-        }
-    }
-
-    fn position_is_occupied(&self, position: &MapPosition) -> MoveValidity {
-        for h in &self.game_state.heisters {
-            match &h.map_position == position {
-                true => {
-                    let msg = format!("Heister {:?} is on {:?}", h.heister_color, position);
-                    return MoveValidity::Invalid(msg);
-                }
-                false => {}
-            }
-        }
-        return MoveValidity::Valid;
-    }
-
-    fn teleport_matches_color(teleport_type: SquareType, color: HeisterColor) -> bool {
-        match teleport_type {
-            SquareType::PurpleTeleportPad => color == HeisterColor::Purple,
-            SquareType::OrangeTeleportPad => color == HeisterColor::Orange,
-            SquareType::GreenTeleportPad => color == HeisterColor::Green,
-            SquareType::YellowTeleportPad => color == HeisterColor::Yellow,
-            _wildcard => false,
-        }
     }
 
     fn position_squaretype(
@@ -291,25 +172,6 @@ impl Game {
         }
     }
 
-    fn get_tile_with_index(&self, position: &MapPosition) -> Option<(usize, Tile)> {
-        for (i, t) in self.game_state.tiles.iter().enumerate() {
-            let x_distance = position.x - t.position.x;
-            let x_distance_within_tile = x_distance >= 0 && x_distance < 4;
-            match x_distance_within_tile {
-                true => {
-                    let y_distance = position.y - t.position.y;
-                    let y_distance_within_tile = y_distance >= 0 && y_distance < 4;
-                    match y_distance_within_tile {
-                        true => return Some((i, t.clone())),
-                        false => continue,
-                    }
-                }
-                false => continue,
-            }
-        }
-        None
-    }
-
     /// To validate an escalator move, we need to do a few checks:
     /// 1. is the dest position on an escalator square?
     /// 2. is the heister on an escalator square?
@@ -325,8 +187,8 @@ impl Game {
                 match grid.get(&heister_pos).unwrap().square_type {
                     SquareType::Escalator => {
                         // last check: is the heister & dest on the same tile?
-                        let ht = self.get_tile_with_index(heister_pos).unwrap().1;
-                        let dt = self.get_tile_with_index(dest_pos).unwrap().1;
+                        let ht = self.game_state.get_index_and_tile(heister_pos).unwrap().1;
+                        let dt = self.game_state.get_index_and_tile(dest_pos).unwrap().1;
                         match ht == dt {
                             true => MoveValidity::Valid,
                             false => MoveValidity::Invalid(
@@ -357,17 +219,16 @@ impl Game {
         let heister_color = heister.heister_color;
         let heister_pos = &heister.map_position;
         let heister_square_type = Self::position_squaretype(grid, &heister_pos).unwrap();
-        let dest_square_type_maybe = Self::position_squaretype(grid, &dest_pos);
-        match dest_square_type_maybe {
-            Ok(dest_square_type) => {
-                if !Self::teleport_matches_color(dest_square_type, heister_color) {
+        match grid.get(&dest_pos) {
+            Some(dest_square) => {
+                if !dest_square.teleport_matches_color(heister_color) {
                     let msg = "Heister and teleporter color do not match";
                     return MoveValidity::Invalid(msg.to_string());
                 }
                 if !teleport_only_from_portal_option {
                     return MoveValidity::Valid;
                 }
-                match heister_square_type == dest_square_type {
+                match heister_square_type == dest_square.square_type {
                     true => MoveValidity::Valid,
                     false => {
                         let msg = "Source and Dest teleporter colors do not match";
@@ -375,153 +236,18 @@ impl Game {
                     }
                 }
             }
-            Err(e) => {
-                let msg = format!("Destination is not on the grid: {:?}", e);
+            None => {
+                let msg = format!("Destination is not on the grid: {:?}", dest_pos);
                 MoveValidity::Invalid(msg.to_string())
             }
         }
     }
 
-    fn validate_adjacent_move(
-        &self,
-        grid: &HashMap<MapPosition, Square>,
-        heister_pos: &MapPosition,
-        dest_pos: &MapPosition,
-    ) -> MoveValidity {
-        let validity = self.move_blocked_by_wall(&grid, &heister_pos, &dest_pos);
-        match validity {
-            MoveValidity::Invalid(_) => return validity,
-            _ => (),
-        }
-        self.position_is_occupied(&dest_pos)
-    }
-
-    fn get_door_wall(square: &Square) -> Option<WallType> {
-        // Return the square's (exit) door, if it has one
-        let walls = square.get_walls();
-        let door = walls
-            .values()
-            .find(|&wt| DOOR_TYPES.iter().any(|&dt| wt == dt));
-        match door {
-            Some(d) => {
-                let ret = d.clone();
-                Some(ret.clone())
-            }
-            None => None,
-        }
-    }
-
-    fn get_door_direction(square: &Square) -> Option<MoveDirection> {
-        // Return the direction of the square's (exit) door, if it has one
-        match Self::get_door_wall(square) {
-            Some(_) => (),
-            None => return None,
-        };
-        for (dir, wall) in square.get_walls().iter() {
-            if DOOR_TYPES.contains(&wall) {
-                return Some(dir.clone());
-            }
-        }
-        None
-    }
-
-    fn heister_tile_placement_positions(
-        &self,
-        grid: &HashMap<MapPosition, Square>,
-    ) -> Vec<MapPosition> {
-        // Return the places from which you could draw a tile
-        // AKA - squares where a matching heister is on a square with a HeisterColor door
-        let mut placement_locations: Vec<MapPosition> = Vec::new();
-        for heister in &self.game_state.heisters {
-            let color = heister.heister_color;
-            let square = grid
-                .get(&heister.map_position)
-                .expect("Heister on invalid square");
-            let maybe_door = Self::get_door_wall(square);
-            let door = match maybe_door {
-                Some(d) => d,
-                None => continue,
-            };
-            // TODO: put this in a helper?
-            match door {
-                WallType::PurpleDoor => {
-                    if color == HeisterColor::Purple {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                WallType::OrangeDoor => {
-                    if color == HeisterColor::Orange {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                WallType::GreenDoor => {
-                    if color == HeisterColor::Green {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                WallType::YellowDoor => {
-                    if color == HeisterColor::Yellow {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                _wildcard => (),
-            }
-        }
-        placement_locations
-    }
-
-    fn heister_to_tile_entrance_positions(
-        &self,
-        grid: &HashMap<MapPosition, Square>,
-    ) -> HashMap<MapPosition, MapPosition> {
-        // Returns a map from current heister positions to their prospective tile_entrance
-        // positions, one tile away (if there are any such locations)
-        let heister_door_positions = self.heister_tile_placement_positions(&grid);
-        let mut tile_entrance_positions: HashMap<MapPosition, MapPosition> = HashMap::new();
-        for heister_pos in heister_door_positions {
-            let square = grid
-                .get(&heister_pos)
-                .expect("Heister must be on a valid square");
-            let dir = &Self::get_door_direction(square)
-                .expect("Square must have a door on it to be entered through");
-            tile_entrance_positions.insert(heister_pos.clone(), heister_pos.move_in_direction(dir));
-        }
-        tile_entrance_positions
-    }
-
     fn update_auxiliary_state(&mut self) -> () {
-        let grid = self.get_absolute_grid();
-        self.update_possible_placements(&grid);
-        self.update_possible_escalators(&grid);
+        let grid = self.game_state.get_absolute_grid();
+        self.game_state.update_possible_placements(&grid);
+        self.game_state.update_possible_escalators(&grid);
         self.update_possible_teleports(&grid);
-    }
-
-    /// Possible placements for new tiles that Heisters can discover
-    fn update_possible_placements(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
-        let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
-
-        let mut v = Vec::new();
-        for val in heister_to_tile_entrance_locs.values() {
-            v.push(val.clone());
-        }
-        self.game_state.possible_placements = v;
-    }
-
-    /// Possible escalator destinations that a Heister can reach with an Escalator move
-    fn update_possible_escalators(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
-        let mut m: HashMap<HeisterColor, MapPosition> = HashMap::new();
-        for heister in &self.game_state.heisters {
-            let color = heister.heister_color;
-            let pos = &heister.map_position;
-
-            let square = grid.get(&pos).unwrap();
-            if square.square_type == SquareType::Escalator {
-                let (_idx, tile) = self.get_tile_with_index(&pos).unwrap();
-                let dest_pos = tile.get_escalator_dest(&pos).unwrap();
-                m.insert(color, dest_pos);
-            }
-        }
-        self.game_state.possible_escalators = m;
     }
 
     /// Possible teleport destinations that a Heister can reach with a Teleport move
@@ -563,57 +289,6 @@ impl Game {
         }
     }
 
-    /// From a tile entrance and move direction of the tile's orientation,
-    /// return the MapPosition for that new tile to place it in the absolute grid
-    /// This is doable since every tile has an entry square in some rotation of
-    /// (1, 3) - except for starting tiles
-    fn new_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
-        match dir {
-            MoveDirection::North => MapPosition {
-                x: position.x - 1,
-                y: position.y - 3,
-            },
-            MoveDirection::East => MapPosition {
-                x: position.x,
-                y: position.y - 1,
-            },
-            MoveDirection::South => MapPosition {
-                x: position.x - 2,
-                y: position.y,
-            },
-            MoveDirection::West => MapPosition {
-                x: position.x - 3,
-                y: position.y - 2,
-            },
-        }
-    }
-
-    /// From a tile exit square (one from which a player might initiate a PlaceTile move),
-    /// figure out the MapPosition of the tile that the heister is on.
-    /// (Useful for looking up which tile a heister might currently be on)
-    /// * You might notice - this is the same as new_tile_position, but with opposite
-    /// directions swapped. That's true! That's the magic of the game.
-    fn current_tile_position(position: &MapPosition, dir: &MoveDirection) -> MapPosition {
-        match dir {
-            MoveDirection::North => MapPosition {
-                x: position.x - 2,
-                y: position.y,
-            },
-            MoveDirection::West => MapPosition {
-                x: position.x,
-                y: position.y - 1,
-            },
-            MoveDirection::South => MapPosition {
-                x: position.x - 1,
-                y: position.y - 3,
-            },
-            MoveDirection::East => MapPosition {
-                x: position.x - 3,
-                y: position.y - 2,
-            },
-        }
-    }
-
     fn validate_player_has_move_direction_ability(
         &self,
         current_pos: &MapPosition,
@@ -648,11 +323,11 @@ impl Game {
 
     fn process_move(&mut self, m: Move, player_name: &PlayerName) -> MoveValidity {
         let heister_color = m.heister_color;
-        let heister = self.get_heister_from_vec(heister_color).unwrap();
+        let heister = self.game_state.get_heister_from_vec(heister_color).unwrap();
         let heister_pos = &heister.map_position;
         let dest_pos = m.position;
 
-        let grid = self.get_absolute_grid();
+        let grid = self.game_state.get_absolute_grid();
         if heister_pos.is_adjacent(&dest_pos) {
             let ability_validity = self.validate_player_has_move_direction_ability(
                 &heister_pos,
@@ -662,9 +337,12 @@ impl Game {
             if let MoveValidity::Invalid(_) = ability_validity {
                 return ability_validity;
             }
-            let validity = self.validate_adjacent_move(&grid, heister_pos, &dest_pos);
+            let validity = self
+                .game_state
+                .validate_adjacent_move(&grid, heister_pos, &dest_pos);
             if validity == MoveValidity::Valid {
                 let heister = self
+                    .game_state
                     .get_mut_heister_from_vec(heister_color.clone())
                     .unwrap();
                 heister.map_position = dest_pos;
@@ -680,6 +358,7 @@ impl Game {
                 let validity = self.validate_escalator_move(&grid, heister_pos, &dest_pos);
                 if validity == MoveValidity::Valid {
                     let mut heister = self
+                        .game_state
                         .get_mut_heister_from_vec(heister_color.clone())
                         .unwrap();
                     heister.map_position = dest_pos;
@@ -702,6 +381,7 @@ impl Game {
                 );
                 if validity == MoveValidity::Valid {
                     let heister = self
+                        .game_state
                         .get_mut_heister_from_vec(heister_color.clone())
                         .unwrap();
                     heister.map_position = dest_pos;
@@ -722,7 +402,7 @@ impl Game {
         let tile = self.draw_tile();
         match tile {
             Some(t) => {
-                let new_pos = Self::new_tile_position(position, direction);
+                let new_pos = position.new_tile_position(direction);
                 let num_rotations = match direction {
                     MoveDirection::North => 0,
                     MoveDirection::East => 1,
@@ -744,101 +424,10 @@ impl Game {
                 let new_tile_idx = self.game_state.tiles.len();
                 Self::update_revealed_teleporters(&mut self.revealed_teleporters, &rotated_tile);
                 self.game_state.tiles.push(rotated_tile);
-                self.update_tile_doors(new_tile_idx); // Must be called _after_ push
+                self.game_state.update_tile_doors(new_tile_idx); // Must be called _after_ push
                 MoveValidity::Valid
             }
             None => MoveValidity::Invalid("No tiles left in deck to draw".to_string()),
-        }
-    }
-
-    /// in order to update the door to be a clear wall, we need a few things:
-    /// 1. we need a reference to the tile in self.tiles that contains the heister_square
-    /// 2. we need to be able to know which wall on which square  to update
-    /// 3. we need to replace that square wth one who has a clear wall instead of a door
-    fn open_door(
-        &mut self,
-        door_pos: MapPosition,
-        src_square: Square,
-        dir: &MoveDirection,
-    ) -> Result<()> {
-        let current_tile_position = Self::current_tile_position(&door_pos, &dir);
-        let mut tile = &mut Tile::default();
-        for t in &mut self.game_state.tiles {
-            if t.position == current_tile_position {
-                tile = t;
-                break;
-            }
-        }
-        if tile.squares.len() == 0 {
-            return Err(anyhow!("No tile found at pos {:?}", door_pos));
-        }
-
-        // TODO: the helper i am writing will change THIS iterator in open_door
-        // helper = something like "get tile door squares"
-        for mut square in &mut tile.squares {
-            if square == &src_square {
-                // Open The Door
-                match dir {
-                    MoveDirection::North => {
-                        square.north_wall = WallType::Clear;
-                    }
-                    MoveDirection::East => {
-                        square.east_wall = WallType::Clear;
-                    }
-                    MoveDirection::South => {
-                        square.south_wall = WallType::Clear;
-                    }
-                    MoveDirection::West => {
-                        square.west_wall = WallType::Clear;
-                    }
-                }
-                return Ok(());
-            }
-        }
-        return Err(anyhow!(
-            "When opening a door, we expect the square to have a door to open"
-        ));
-    }
-
-    /// In addition to rotating a new tile, we also need to open/close any doors
-    /// it has that align with existing doors.
-    /// * This takes an index into self.tiles, because it can only operate on a
-    /// tile that has already been added to self.tiles
-    fn update_tile_doors(&mut self, tile_idx: usize) -> () {
-        let grid = self.get_absolute_grid();
-        let tile = &self.game_state.tiles[tile_idx];
-
-        for (dir, position) in tile.adjacent_entrances() {
-            match grid.get(&position) {
-                Some(neighbor_square) => {
-                    let my_door_pos = position.move_in_direction(&dir.opposite());
-                    let my_square = grid.get(&my_door_pos).unwrap();
-
-                    let mut_tile = &mut self.game_state.tiles[tile_idx];
-                    if my_square.has_door() {
-                        if neighbor_square.has_door() {
-                            mut_tile.open_door_in_dir(dir);
-                            let (idx, mut neighbor_tile) =
-                                self.get_tile_with_index(&position).unwrap();
-                            neighbor_tile.open_door_in_dir(dir.opposite());
-                            self.game_state.tiles[idx] = neighbor_tile;
-                        } else {
-                            // If there isn't a door on the other side, close door
-                            // that way, we know it won't be a possible_placement
-                            mut_tile.close_door_in_dir(dir);
-                        }
-                    } else {
-                        // If my square does NOT have a door, but neighbor does
-                        if neighbor_square.has_door() {
-                            let (idx, mut neighbor_tile) =
-                                self.get_tile_with_index(&position).unwrap();
-                            neighbor_tile.close_door_in_dir(dir.opposite());
-                            self.game_state.tiles[idx] = neighbor_tile;
-                        }
-                    }
-                }
-                None => {}
-            }
         }
     }
 
@@ -846,8 +435,9 @@ impl Game {
         if !self.player_has_ability(player_name, &Ability::RevealTiles) {
             return MoveValidity::Invalid("You cannot reveal tiles".to_string());
         }
-        let grid = self.get_absolute_grid();
-        let heister_to_tile_entrance_locs = self.heister_to_tile_entrance_positions(&grid);
+        let grid = self.game_state.get_absolute_grid();
+        let heister_to_tile_entrance_locs =
+            self.game_state.heister_to_tile_entrance_positions(&grid);
         let maybe_heister_pos_tuple = heister_to_tile_entrance_locs
             .iter()
             .find(|&(_, te)| te == &pt.tile_entrance);
@@ -863,11 +453,15 @@ impl Game {
         let heister_square = grid
             .get(heister_pos)
             .expect("Heister must be on valid square");
-        let dir = &Self::get_door_direction(heister_square)
+        let dir = heister_square
+            .get_door_direction()
             .expect("Heister must be on a square with a door");
 
-        match self.open_door(heister_pos.clone(), *heister_square, dir) {
-            Ok(_) => self.place_tile(&pt.tile_entrance, dir),
+        match self
+            .game_state
+            .open_door(heister_pos.clone(), *heister_square, &dir)
+        {
+            Ok(_) => self.place_tile(&pt.tile_entrance, &dir),
             Err(e) => {
                 let msg = format!("Couldn't open door for newly placed tile: {}", e);
                 MoveValidity::Invalid(msg.to_string())
@@ -1020,6 +614,7 @@ pub mod tests {
     /// In-place movement for heisters, to cause game state to update
     fn move_heister_in_place(game: &mut Game, heister_color: HeisterColor) -> MoveValidity {
         let heister_pos = &game
+            .game_state
             .get_heister_from_vec(heister_color)
             .unwrap()
             .map_position;
@@ -1044,6 +639,7 @@ pub mod tests {
         expected_validity: MoveValidity,
     ) -> MoveValidity {
         let heister_pos = &game
+            .game_state
             .get_heister_from_vec(heister_color)
             .unwrap()
             .map_position;
@@ -1077,6 +673,7 @@ pub mod tests {
         match validity.clone() {
             MoveValidity::Valid => {
                 let curr_heister_pos = &game
+                    .game_state
                     .get_heister_from_vec(heister_color)
                     .unwrap()
                     .map_position;
@@ -1130,6 +727,7 @@ pub mod tests {
         // Confirm yellow heister is where we expect it to be to begin with.
         let heister_color = super::HeisterColor::Purple;
         let heister_pos = &game
+            .game_state
             .get_heister_from_vec(heister_color)
             .unwrap()
             .map_position;
@@ -1167,6 +765,7 @@ pub mod tests {
         let src_position = super::MapPosition { x: 2, y: 2 };
         let heister_color = super::HeisterColor::Green;
         let heister_pos = &game
+            .game_state
             .get_heister_from_vec(heister_color)
             .unwrap()
             .map_position;
@@ -1187,6 +786,7 @@ pub mod tests {
             expected_validity,
         );
         let curr_green_pos = game
+            .game_state
             .get_heister_from_vec(super::HeisterColor::Green)
             .unwrap();
         assert_eq!(&curr_green_pos.map_position, &src_position);
@@ -1196,7 +796,7 @@ pub mod tests {
     pub fn grid_walls_align() -> () {
         let handle = "grid walls align".to_string();
         let game = setup_game(handle);
-        let grid: HashMap<MapPosition, Square> = game.get_absolute_grid();
+        let grid: HashMap<MapPosition, Square> = game.game_state.get_absolute_grid();
 
         for (mp, square) in grid.iter() {
             // Check left wall lines up.
