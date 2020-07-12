@@ -65,12 +65,10 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
   };
 
   return (
-    <div>
+    <div className="joinForm">
       <form>
-        <br />
+        <h3>Join Game</h3>
         <label>
-          <h3>Join Game</h3>
-          Name:
           <input
             autoFocus
             type="text"
@@ -88,7 +86,6 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
         </label>
         <br />
         <label>
-          Handle:
           <input
             type="text"
             placeholder="Game handle"

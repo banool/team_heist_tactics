@@ -8,9 +8,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   joinGameForm: {
     position: "absolute",
     //width: 800,
-    backgroundColor: colors.formBackground,
-    padding: 30,
-    boxShadow: `10px 10px ${colors.formShadow}`,
     top: "30%",
     left: "50%",
     transform: "translate(-50%, -50%)",

@@ -30,5 +30,4 @@ cp ui/dist/index.html templates/play.html
 cp ui/src/components/main.css static/main.css
 cp -R ui/dist/static/* static/
 cargo run
-rm static/main.css
 rm templates/play.html
