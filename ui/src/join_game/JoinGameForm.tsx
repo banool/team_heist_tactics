@@ -72,6 +72,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
           <h3>Join Game</h3>
           Name:
           <input
+            autoFocus
             type="text"
             placeholder="Your name"
             value={name}
@@ -102,7 +103,9 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
           />
         </label>
         <br />
-        <input type="button" value="Submit" onClick={onSubmit} />
+        <button type="submit" onClick={onSubmit}>
+          Submit
+        </button>
       </form>
     </div>
   );
