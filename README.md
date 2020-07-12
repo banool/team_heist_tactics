@@ -1,4 +1,5 @@
 # Team Heist Tactics
+[![Actions Status](https://github.com/banool/team_heist_tactics/workflows/All/badge.svg)](https://github.com/banool/team_heist_tactics/actions)
 
 Yayyy!!!!!!!!
 
