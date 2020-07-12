@@ -6,9 +6,10 @@ extern crate lazy_static;
 use log::info;
 use std::collections::HashMap;
 use team_heist_tactics::game::{Game, GameHandle, GameOptions, MoveValidity};
+use team_heist_tactics::load_map::{tile_1a, tile_2, tile_5, tile_8};
 use team_heist_tactics::types::{
     main_message::Body, Heister, HeisterColor, Internal, MainMessage, MapPosition, Move,
-    MoveDirection, PlaceTile, PlayerName, Square, HEISTER_COLORS,
+    MoveDirection, PlaceTile, PlayerName, Square, Tile, HEISTER_COLORS,
 };
 
 lazy_static! {
@@ -305,6 +306,116 @@ pub fn possible_placements_no_mismatched_results() -> () {
     // because PP is the tile entrance, not the heister pos.
     // could short circuit it by directly calling the functioning returning the
     // dict?
+}
+
+#[test]
+pub fn can_use_escalators() -> () {
+    let handle = "any heister can walk into an escalator square".to_string();
+    let mut game = setup_game(handle);
+
+    // We only need Green (since green on 1a can immediately move to escalator)
+    move_heister_in_dir(
+        &mut game,
+        HeisterColor::Green,
+        MoveDirection::South,
+        MoveValidity::Valid,
+    );
+
+    let green_door_pos = MapPosition { x: 3, y: 2 };
+    let esc_move = Move {
+        heister_color: HeisterColor::Green,
+        position: green_door_pos,
+    };
+    let message = MainMessage {
+        body: Some(Body::Move(esc_move.to_proto())),
+    };
+    let validity = game.handle_message(message, &FAKE_PLAYER_NAME);
+    assert_eq!(validity, MoveValidity::Valid);
+}
+
+#[test]
+pub fn can_enter_mismatched_teleport() -> () {
+    let handle = "any heister can walk into a mismatched teleport square".to_string();
+    let mut game = setup_game(handle);
+
+    // We only need Orange (since orange on 1a can immediately move to yellow telly)
+    move_heister_in_dir(
+        &mut game,
+        HeisterColor::Orange,
+        MoveDirection::East,
+        MoveValidity::Valid,
+    );
+}
+
+/// Helper for rotating tiles.
+/// TODO: cleanup - make this a function on the tile!
+fn rotate_tile(tile: Tile) -> Tile {
+    let mut m = tile.to_matrix();
+    for _ in 0..tile.num_rotations {
+        m = Tile::rotate_matrix_clockwise(&m);
+    }
+    Tile::from_matrix(
+        m,
+        tile.name.clone(),
+        tile.position.clone(),
+        tile.num_rotations,
+    )
+}
+
+/// One test case I discovered was that adjacent teleports failed, because
+/// they were processed as walking moves that tried to bypass walls.
+#[test]
+pub fn can_teleport_between_adjacent_teleporters() -> () {
+    let handle = "can teleport between adjacent teleporters".to_string();
+    // How the heck do we construct adjacent teleporters from the base deck?
+    let mut game = setup_game(handle);
+    let tile_1 = tile_1a();
+    let mut tile_8 = tile_8();
+    tile_8.position = MapPosition { x: 5, y: 1 };
+    tile_8.num_rotations = 1;
+    tile_8 = rotate_tile(tile_8);
+    // need to also actually ROTATE tile 8
+
+    let mut tile_2 = tile_2();
+    tile_2.position = MapPosition { x: 6, y: -3 };
+    tile_2.num_rotations = 0;
+    let mut tile_5 = tile_5();
+    tile_5.position = MapPosition { x: 1, y: -4 };
+    tile_5.num_rotations = 3;
+    tile_5 = rotate_tile(tile_5);
+    let tiles: Vec<Tile> = vec![tile_1, tile_8, tile_2, tile_5];
+    game.game_state.tiles = tiles;
+
+    // Let's have purple try to teleport once to enter the first teleporter
+    // that one is at 3, 0
+    // Then, we'll have it try to teleport to its next teleporter, at 3, -1
+
+    move_heister_in_dir(
+        &mut game,
+        HeisterColor::Purple,
+        MoveDirection::North,
+        MoveValidity::Valid,
+    );
+    move_heister_in_dir(
+        &mut game,
+        HeisterColor::Purple,
+        MoveDirection::East,
+        MoveValidity::Valid,
+    );
+    move_heister_in_dir(
+        &mut game,
+        HeisterColor::Purple,
+        MoveDirection::East,
+        MoveValidity::Valid,
+    );
+    // THIS move is the attempted teleport. I expect it to succeed, in spite
+    // of the wall between these two adjacent squares.
+    move_heister_in_dir(
+        &mut game,
+        HeisterColor::Purple,
+        MoveDirection::North,
+        MoveValidity::Valid,
+    );
 }
 
 /// We test with initial game state (1a), move Orange one square north,

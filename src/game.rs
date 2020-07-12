@@ -52,6 +52,19 @@ pub enum MoveValidity {
     Invalid(String),
 }
 
+impl MoveValidity {
+    pub fn is_invalid(&self) -> bool {
+        match self {
+            MoveValidity::Invalid(_) => true,
+            MoveValidity::Valid => false,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        !self.is_invalid()
+    }
+}
+
 impl Game {
     pub fn new(game_handle: GameHandle, game_options: GameOptions) -> Game {
         let game_state = GameState::new(game_handle.clone());
@@ -321,81 +334,90 @@ impl Game {
         MoveValidity::Valid
     }
 
+    /// This function handles checking validity of Moves and executing them.
+    /// It also updates auxiliary game state like the timer depending on if the
+    /// move activated a timer.
+    /// 1. Rather than return early, it should set the return value, and continue
+    ///  that way, if we fall through to other cases (ie. adjacent teleport)
+    ///  the move may still work.
+    /// 2. If we defer the return until the end, then we can have logic
+    ///  that handles differently based on whether the final result is valid
+    ///  (or invalid) - AKA timer, "items taken", "you may speak" logic
     fn process_move(&mut self, m: Move, player_name: &PlayerName) -> MoveValidity {
         let heister_color = m.heister_color;
         let heister = self.game_state.get_heister_from_vec(heister_color).unwrap();
         let heister_pos = &heister.map_position;
         let dest_pos = m.position;
+        let mut validity = MoveValidity::Valid;
 
         let grid = self.game_state.get_absolute_grid();
-        if heister_pos.is_adjacent(&dest_pos) {
-            let ability_validity = self.validate_player_has_move_direction_ability(
-                &heister_pos,
-                &dest_pos,
-                &player_name,
-            );
-            if let MoveValidity::Invalid(_) = ability_validity {
-                return ability_validity;
-            }
-            let validity = self
-                .game_state
-                .validate_adjacent_move(&grid, heister_pos, &dest_pos);
-            if validity == MoveValidity::Valid {
-                let heister = self
-                    .game_state
-                    .get_mut_heister_from_vec(heister_color.clone())
-                    .unwrap();
-                heister.map_position = dest_pos;
-            }
-            return validity;
-        }
         match Self::position_squaretype(&grid, &dest_pos) {
             // Handle escalator move
             Ok(SquareType::Escalator) => {
                 if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
-                    return MoveValidity::Invalid("You cannot use escalators".to_string());
+                    validity = MoveValidity::Invalid("You cannot use escalators".to_string());
                 }
-                let validity = self.validate_escalator_move(&grid, heister_pos, &dest_pos);
-                if validity == MoveValidity::Valid {
-                    let mut heister = self
-                        .game_state
-                        .get_mut_heister_from_vec(heister_color.clone())
-                        .unwrap();
-                    heister.map_position = dest_pos;
-                }
-                validity
+                validity = if validity.is_invalid() {
+                    validity
+                } else {
+                    self.validate_escalator_move(&grid, heister_pos, &dest_pos)
+                };
             }
             // Handle teleport move
             Ok(SquareType::OrangeTeleportPad)
             | Ok(SquareType::YellowTeleportPad)
             | Ok(SquareType::PurpleTeleportPad)
             | Ok(SquareType::GreenTeleportPad) => {
-                if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
-                    return MoveValidity::Invalid("You cannot use teleporters".to_string());
+                if !self.player_has_ability(&player_name, &Ability::Teleport) {
+                    validity = MoveValidity::Invalid("You cannot use teleporters".to_string());
                 }
-                let validity = self.validate_teleport(
-                    &grid,
-                    heister,
-                    &dest_pos,
-                    self.game_options.teleport_only_from_portal,
-                );
-                if validity == MoveValidity::Valid {
-                    let heister = self
-                        .game_state
-                        .get_mut_heister_from_vec(heister_color.clone())
-                        .unwrap();
-                    heister.map_position = dest_pos;
+                validity = if validity.is_invalid() {
+                    validity
+                } else {
+                    self.validate_teleport(
+                        &grid,
+                        heister,
+                        &dest_pos,
+                        self.game_options.teleport_only_from_portal,
+                    )
                 }
-                validity
             }
             _wildcard => {
-                let msg = format!(
-                    "Invalid move for heister {:?} at {:?} to position {:?}",
-                    heister_color, heister_pos, dest_pos
-                );
-                MoveValidity::Invalid(msg.to_string())
+                validity = MoveValidity::Invalid("move wasn't teleport nor escalator".to_string());
             }
         }
+
+        if heister_pos.is_adjacent(&dest_pos) && validity.is_invalid() {
+            validity = self.validate_player_has_move_direction_ability(
+                &heister_pos,
+                &dest_pos,
+                &player_name,
+            );
+            validity = if validity.is_invalid() {
+                validity
+            } else {
+                self.game_state
+                    .validate_adjacent_move(&grid, heister_pos, &dest_pos)
+            };
+        }
+
+        // Regardless of the move type, if the move is valid, we execute it
+        if validity == MoveValidity::Valid {
+            let heister = self
+                .game_state
+                .get_mut_heister_from_vec(heister_color.clone())
+                .unwrap();
+            heister.map_position = dest_pos;
+
+            // If this is the first move, then let's start the game timer
+            if self.game_state.game_started == 0 {
+                // Kick off the timer.
+                let now = get_current_time_secs();
+                self.game_state.game_started = now;
+                self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
+            }
+        }
+        validity
     }
 
     fn place_tile(&mut self, position: &MapPosition, direction: &MoveDirection) -> MoveValidity {
