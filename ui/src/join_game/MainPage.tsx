@@ -83,9 +83,7 @@ const MainGame = ({}: MainGameProps) => {
     }
     inner = (
       <div style={styles.joinGameForm}>
-        <h1 style={{ fontSize: 52, fontFamily: "'Damion', cursive" }}>
-          Team Heist Tactics
-        </h1>
+        <h1 className="thtTitle">Team Heist Tactics</h1>
         {inner_form}
         <MessagesComponent />
       </div>
