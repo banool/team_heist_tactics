@@ -1,0 +1,30 @@
+name: Backend Lint & Test
+
+on:
+  pull_request:
+    branches: ["**"]
+    paths:
+            - '**.rs'
+            - '**.proto'
+
+jobs:
+  backend_style:
+    name: Backend style check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: rustup toolchain install nightly-2020-06-26 --profile minimal --component rustfmt
+      - run: cargo +nightly-2020-06-26 fmt -- --check
+  backend_tests:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2020-06-11
+          default: true
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test

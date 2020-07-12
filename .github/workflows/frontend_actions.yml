@@ -1,0 +1,41 @@
+name: Frontend Lint & Test
+
+on:
+  pull_request:
+    branches: ["**"]
+    paths:
+            - 'ui/**'
+
+jobs:
+  frontend_style:
+    name: Frontend style check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.4.0'
+      - run: yarn install
+      - run: yarn run style-check
+  frontend_tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.4.0'
+      - uses: arduino/setup-protoc@master
+        with:
+          version: '3.12.3'
+      - run: yarn install
+      - run: cp ../src/types.proto .
+      - run: ./generate_types.sh
+      - run: yarn run tsc
+      - run: yarn run test
