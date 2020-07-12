@@ -22,6 +22,7 @@ const TIMER_DURATION_SECS: u64 = 5 * 60;
 #[derive(Debug)]
 pub struct Game {
     pub game_handle: GameHandle,
+    pub game_options: GameOptions,
     pub game_state: GameState,
     pub tile_deck: Vec<Tile>,
     pub game_created: u64,
@@ -30,14 +31,17 @@ pub struct Game {
 #[derive(Clone, Default, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct GameHandle(pub String);
 
+#[derive(Debug)]
 pub struct GameOptions {
     pub shuffle_tiles: bool,
+    pub teleport_only_from_portal: bool,
 }
 
 impl Default for GameOptions {
     fn default() -> Self {
         GameOptions {
             shuffle_tiles: true,
+            teleport_only_from_portal: false,
         }
     }
 }
@@ -65,6 +69,7 @@ impl Game {
         );
         Game {
             game_handle,
+            game_options,
             game_state,
             tile_deck,
             game_created,
@@ -345,13 +350,14 @@ impl Game {
 
     /// To validate a teleporter move, we need to do a few checks:
     /// 1. is the dest position on a teleporter square?
-    /// 2. is the source position on a teleporter square matching its color?
-    /// 3. is the heister color matching the teleporter color?
+    /// 2. is the heister color matching the teleporter color?
+    /// 3.optional: is the source position on a teleporter square matching its color?
     fn validate_teleport(
         &self,
         grid: &HashMap<MapPosition, Square>,
         heister: &Heister,
         dest_pos: &MapPosition,
+        teleport_only_from_portal_option: bool,
     ) -> MoveValidity {
         let heister_color = heister.heister_color;
         let heister_pos = &heister.map_position;
@@ -359,9 +365,12 @@ impl Game {
         let dest_square_type_maybe = Self::position_squaretype(grid, &dest_pos);
         match dest_square_type_maybe {
             Ok(dest_square_type) => {
-                if !Self::teleport_matches_color(heister_square_type, heister_color) {
+                if !Self::teleport_matches_color(dest_square_type, heister_color) {
                     let msg = "Heister and teleporter color do not match";
                     return MoveValidity::Invalid(msg.to_string());
+                }
+                if !teleport_only_from_portal_option {
+                    return MoveValidity::Valid;
                 }
                 match heister_square_type == dest_square_type {
                     true => MoveValidity::Valid,
@@ -527,7 +536,7 @@ impl Game {
             let color = heister.heister_color;
             let pos = &heister.map_position;
             let square = grid.get(&pos).unwrap();
-            if square.is_teleport() {
+            if !self.game_options.teleport_only_from_portal || square.is_teleport() {
                 match self.revealed_teleporters.get(&color) {
                     Some(list) => {
                         m.insert(color, list.to_vec());
@@ -667,7 +676,7 @@ impl Game {
             }
             return validity;
         }
-        match Self::position_squaretype(&grid, heister_pos) {
+        match Self::position_squaretype(&grid, &dest_pos) {
             // Handle escalator move
             Ok(SquareType::Escalator) => {
                 if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
@@ -690,7 +699,12 @@ impl Game {
                 if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
                     return MoveValidity::Invalid("You cannot use teleporters".to_string());
                 }
-                let validity = self.validate_teleport(&grid, heister, &dest_pos);
+                let validity = self.validate_teleport(
+                    &grid,
+                    heister,
+                    &dest_pos,
+                    self.game_options.teleport_only_from_portal,
+                );
                 if validity == MoveValidity::Valid {
                     let heister = self
                         .get_mut_heister_from_vec(heister_color.clone())

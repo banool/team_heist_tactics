@@ -100,6 +100,7 @@ async fn main() -> std::io::Result<()> {
         .new_game(
             GameOptions {
                 shuffle_tiles: false,
+                teleport_only_from_portal: false,
             },
             Some(TEST_HANDLE.to_string()),
         )
