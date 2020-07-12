@@ -258,6 +258,7 @@ impl Game {
 
     fn update_auxiliary_state(&mut self) -> () {
         let grid = self.game_state.get_absolute_grid();
+        self.game_state.update_game_status();
         self.game_state.update_possible_placements(&grid);
         self.game_state.update_possible_escalators(&grid);
         self.update_possible_teleports(&grid);
@@ -349,9 +350,11 @@ impl Game {
         let heister_pos = &heister.map_position;
         let dest_pos = m.position;
         let mut validity = MoveValidity::Valid;
+        let mut dest_is_timer = false;
 
         let grid = self.game_state.get_absolute_grid();
-        match Self::position_squaretype(&grid, &dest_pos) {
+        let dest_squaretype = Self::position_squaretype(&grid, &dest_pos);
+        match dest_squaretype {
             // Handle escalator move
             Ok(SquareType::Escalator) => {
                 if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
@@ -381,6 +384,9 @@ impl Game {
                         self.game_options.teleport_only_from_portal,
                     )
                 }
+            }
+            Ok(SquareType::TimerFlip) => {
+                dest_is_timer = true;
             }
             _wildcard => {
                 validity = MoveValidity::Invalid("move wasn't teleport nor escalator".to_string());
@@ -415,6 +421,27 @@ impl Game {
                 let now = get_current_time_secs();
                 self.game_state.game_started = now;
                 self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
+            }
+            // If this square was a timer, we need to mark it used, and update
+            // timer_runs_out to the new time limit
+            if dest_is_timer {
+                // step 1: mark used
+                let (idx, tile) = self.game_state.get_index_and_tile(&dest_pos).unwrap();
+                let mut flipped_tile = tile.clone();
+                flipped_tile.flip_timer();
+                self.game_state.tiles[idx] = flipped_tile;
+
+                // step 2: update timer_runs_out
+                let now = get_current_time_secs();
+                if now > self.game_state.timer_runs_out {
+                    self.game_state.timer_runs_out = now;
+                } else {
+                    let time_left: i64 = (self.game_state.timer_runs_out - get_current_time_secs())
+                        .try_into()
+                        .unwrap();
+                    let new_time_left: u64 = (300 - time_left).try_into().unwrap();
+                    self.game_state.timer_runs_out = get_current_time_secs() + new_time_left;
+                }
             }
         }
         validity

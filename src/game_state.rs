@@ -1,7 +1,9 @@
 use crate::game::{GameHandle, MoveValidity};
 use crate::load_map::tile_1a;
+use crate::utils::get_current_time_secs;
 
 use anyhow::{anyhow, Result};
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::From;
@@ -413,6 +415,16 @@ impl GameState {
             }
         }
         self.possible_escalators = m;
+    }
+
+    /// This will check for victory/defeat conditions as part of update_auxiliary_state.
+    /// (intended to capure state changes due to timer)
+    pub fn update_game_status(&mut self) -> () {
+        let now = get_current_time_secs();
+        if self.game_started != 0 && now > self.timer_runs_out {
+            info!("Time ran out for game {:?}, you lost!", self.game_name);
+            self.game_status = GameStatus::Defeat;
+        }
     }
 
     /// in order to update the door to be a clear wall, we need a few things:

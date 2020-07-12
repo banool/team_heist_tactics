@@ -83,7 +83,7 @@ impl Internal for TilePosition {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct MapPosition {
     pub x: i32,
     pub y: i32,
@@ -485,6 +485,17 @@ impl Tile {
         }
         // fn square_idx_to_map_pos(&self, i: usize) -> MapPosition {
         map
+    }
+
+    pub fn flip_timer(&mut self) -> () {
+        for (idx, square) in self.squares.iter().enumerate() {
+            if square.square_type == SquareType::TimerFlip {
+                let mut flipped_square = square.clone();
+                flipped_square.square_type = SquareType::TimerFlipUsed;
+                self.squares[idx] = flipped_square;
+                return; // return early, save the cycles.
+            }
+        }
     }
 }
 
