@@ -14,13 +14,13 @@
 <link rel="stylesheet" type="text/css" href="static/main.css" />
 </head>
 <body>
-<h1 class="thtTitle">Team Heist Tactics</h1>
+<div class="triangle"><h1 class="thtTitle">Team Heist Tactics</h1>
 
-<center><h2>Create game</h2>
-<p>You may specify your own game handle if you want, but you don't have to.</p></center>
+  <h3 class="thtSubtitle">Committing crimes, together.</h3>
 <form action="/create_game" method="post">
-  <label><input autofocus type="text" id="game_handle" name="game_handle" placeholder="Game handle"></label><br>
+  <label><input autofocus type="text" id="game_handle" name="game_handle" placeholder="Game handle (optional)"></label><br>
   <button type="submit">Create Game</button>
 </form>
+</div>
 </body>
 </html>

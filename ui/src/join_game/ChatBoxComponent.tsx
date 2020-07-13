@@ -39,7 +39,9 @@ const ChatBoxComponent = () => {
           onKeyDown={onKeyDown}
           size={40}
         />
-        <input type="button" value="Send" onClick={onSubmit} />
+        <button style={{ marginLeft: 5 }} type="submit" onClick={onSubmit}>
+          Send
+        </button>
       </form>
     </div>
   );

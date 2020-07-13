@@ -5,13 +5,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   mainPage: {
     fontFamily: "'Crimson Text', serif",
   },
-  joinGameForm: {
-    position: "absolute",
-    //width: 800,
-    top: "30%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-  },
   gameWindowComponent: {
     width: "100%",
     height: "100%",

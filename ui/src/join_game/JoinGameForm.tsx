@@ -67,7 +67,6 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
   return (
     <div className="joinForm">
       <form>
-        <h3>Join Game</h3>
         <label>
           <input
             autoFocus
@@ -101,7 +100,7 @@ const JoinGameForm = ({ existing }: JoinGameFormProps) => {
         </label>
         <br />
         <button type="submit" onClick={onSubmit}>
-          Submit
+          Join Game
         </button>
       </form>
     </div>
