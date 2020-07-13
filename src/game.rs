@@ -518,6 +518,19 @@ impl Game {
         }
     }
 
+    fn game_is_ongoing(&self) -> MoveValidity {
+        match &self.game_state.game_status {
+            GameStatus::Ongoing => MoveValidity::Valid,
+            _wildcard => {
+                let msg = format!(
+                    "Game {:?} is in state {:?} and is not accepting moves",
+                    self.game_handle, self.game_state.game_status
+                );
+                MoveValidity::Invalid(msg)
+            }
+        }
+    }
+
     pub fn handle_message(
         &mut self,
         message: MainMessage,
@@ -529,6 +542,11 @@ impl Game {
         let validity = match body {
             Body::StartGame(_) => self.start_game(),
             Body::Move(m) => {
+                let valid_game_state = self.game_is_ongoing();
+                match valid_game_state {
+                    MoveValidity::Invalid(_) => return valid_game_state,
+                    MoveValidity::Valid => {}
+                }
                 let v = self.process_move(Move::from_proto(m), &player_name);
                 // On first move, when timer_Started is set to sentinel value 0
                 // If the move is processed as valid, then let's set the game going.
@@ -541,6 +559,11 @@ impl Game {
                 v
             }
             Body::PlaceTile(pt) => {
+                let valid_game_state = self.game_is_ongoing();
+                match valid_game_state {
+                    MoveValidity::Invalid(_) => return valid_game_state,
+                    MoveValidity::Valid => {}
+                }
                 self.process_tile_placement(PlaceTile::from_proto(pt), &player_name)
             }
             Body::GameState(_gs) => {
