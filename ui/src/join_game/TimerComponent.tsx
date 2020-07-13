@@ -22,7 +22,21 @@ const TimerComponent = () => {
     set_seconds_left(timer_runs_out - Math.floor(Date.now() / 1000));
   };
 
-  const seconds_left_string = seconds_left ? seconds_left : "Not started yet!";
+  const getSecondsLeftString = (runs_out: Number, seconds_left: Number) => {
+    if (runs_out === 0) {
+      return "Not started yet!";
+    } else {
+      if (seconds_left <= 0) {
+        return "Ran out of time!";
+      } else {
+        return seconds_left;
+      }
+    }
+  };
+  const seconds_left_string = getSecondsLeftString(
+    timer_runs_out,
+    seconds_left
+  );
 
   return (
     <div>
