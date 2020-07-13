@@ -23,9 +23,11 @@ const LobbyForm = () => {
     <div>
       <h3>Players in lobby:</h3>
       <ul>{players}</ul>
-      <button autoFocus type="submit" onClick={onSubmit}>
-        Start Game
-      </button>
+      <div style={{ textAlign: "center", marginBottom: 10, marginTop: 15 }}>
+        <button autoFocus type="submit" onClick={onSubmit}>
+          Start Game
+        </button>
+      </div>
     </div>
   );
 };

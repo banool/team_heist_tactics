@@ -75,19 +75,27 @@ const MainGame = ({}: MainGameProps) => {
       <p>Joining game...</p>;
     } else if (connection_status == ConnectionStatus.NotConnected) {
       inner_form = <JoinGameForm />;
+      inner = (
+        <div className="triangle">
+          <h1 className="thtTitle">Team Heist Tactics</h1>
+          <h3 className="thtSubtitle">Committing crime, together.</h3>
+          {inner_form}
+          <MessagesComponent />
+        </div>
+      );
     } else if (
       game_state &&
       game_state.getGameStatus() === GameStatus.STAGING
     ) {
       inner_form = <LobbyForm />;
+      inner = (
+        <div className="rect">
+          {inner_form}
+          <hr></hr>
+          <MessagesComponent />
+        </div>
+      );
     }
-    inner = (
-      <div style={styles.joinGameForm}>
-        <h1 className="thtTitle">Team Heist Tactics</h1>
-        {inner_form}
-        <MessagesComponent />
-      </div>
-    );
   }
 
   return (

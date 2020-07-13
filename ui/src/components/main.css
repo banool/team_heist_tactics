@@ -10,23 +10,81 @@ body {
 }
 
 .thtTitle {
-  font-size: 70px;
+  font-size: 90px;
   font-family: Damion, cursive;
   color: #f357f6;
   text-shadow: 3px 3px 5px #4dd7fa;
   text-align: center;
+  margin-bottom: 0px;
 }
 
-label, input {
+.thtSubtitle {
+  font-size: 25px;
+  font-family: "Crimson Text", serif;
+  font-style: italic;
+  font-weight: bold;
+  color: #7a7a7a;
+  text-align: center;
+  text-shadow: 0.5px 0.5px 1px #000000;
+  margin-bottom: 30px;
+  margin-top: 10px;
+}
+
+.triangle {
+  width: 800px;
+  height: 434px;
+  background-image: url("images/triangle.png");
+  background-position: top;
+  background-repeat: no-repeat;
+  background-size: 75%, auto;
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.rect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #dacafb;
+  padding: 30px;
+}
+
+.horiz {
+  border-top: 2px dotted black;
+}
+
+input {
   display: inline-block;
+  padding: 6px;
+  border-color: #f357f6;
+  font-family: "Crimson Text", serif;
+  font-size: 16px;
 }
 
 label {
+  display: inline-block;
   margin-bottom: 7px;
 }
 
 form {
   text-align: center;
+}
+
+button {
+  border-radius: 12px;
+  border-color: #f357f6;
+  background-color: #fff;
+  color: #00a4d3;
+  font-size: 18px;
+  font-family: "Crimson Text", serif;
+  font-style: italic;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .hidden {
