@@ -32,7 +32,7 @@ ENV app=tht
 WORKDIR /${app}
 
 # Use nightly
-RUN rustup default nightly-2020-06-11 
+RUN rustup default nightly-2020-07-12 
 
 # Files listing dependencies
 COPY Cargo.toml Cargo.lock ./
