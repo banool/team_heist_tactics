@@ -66,9 +66,7 @@ const MainGame = ({}: MainGameProps) => {
   if (
     connection_status == ConnectionStatus.Connected &&
     game_state &&
-    [GameStatus.ONGOING, GameStatus.DEFEAT, GameStatus.VICTORY].includes(
-      game_state.getGameStatus()
-    )
+    game_state.getGameStatus() !== GameStatus.STAGING
   ) {
     inner = <GameWindowComponent />;
   } else {
