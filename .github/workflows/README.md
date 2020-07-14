@@ -7,3 +7,18 @@ Only one job is set to run on push, the `build_image` job. This job builds the d
 
 ## Run on push and pull request
 All other jobs fall into this category. These run on push and pull requests, and the PR author should make sure they all pass before merging (rebasing) their PR.
+
+## Debugging
+If you're struggling with getting the `if` conditions right, try including something like this to make sure the values are what you expect:
+
+```
+  debug_needs:
+    name: Print needs for debugging
+    needs: [changes, backend_style, frontend_style, backend_tests, frontend_tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "These are the needs for the next step $NEEDS"
+      env:
+        NEEDS: ${{ toJson(needs) }}
+```

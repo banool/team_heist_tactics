@@ -10,23 +10,30 @@ jobs:
   # Check which files / paths have changed.
   # We use this to inform whether we should run later jobs.
   changes:
-    runs-on: ubuntu-latest
+    name: Determine changes
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       build: ${{ steps.filter.outputs.build }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2.2.0
       id: filter
       with:
         filters: '.github/filters.yml'
+    - name: Print changes
+      run: printf "Backend changed $BACK\nFrontend changed $FRONT\nBuild changed $BUILD\n"
+      env:
+        BACK: ${{ steps.filter.outputs.backend }}
+        FRONT: ${{ steps.filter.outputs.frontend }}
+        BUILD: ${{ steps.filter.outputs.build }}
 
   # Ensure that the backend is styled.
   backend_style:
     name: Backend style check
     needs: [changes]
-    if: ${{ needs.changes.outputs.backend == 'true' }}
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,11 +44,11 @@ jobs:
   frontend_style:
     name: Frontend style check
     needs: [changes]
-    if: ${{ needs.changes.outputs.frontend == 'true' }}
-    runs-on: ubuntu-latest
+    if: needs.changes.outputs.frontend == 'true'
     defaults:
       run:
         working-directory: ui
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2.1.0
@@ -54,7 +61,7 @@ jobs:
   backend_tests:
     name: Backend tests
     needs: [changes]
-    if: ${{ needs.changes.outputs.backend == 'true' }}
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -71,11 +78,11 @@ jobs:
   frontend_tests:
     name: Frontend tests
     needs: [changes]
-    if: ${{ needs.changes.outputs.frontend == 'true' }}
-    runs-on: ubuntu-latest
+    if: needs.changes.outputs.frontend == 'true'
     defaults:
       run:
         working-directory: ui
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2.1.0
@@ -90,11 +97,35 @@ jobs:
       - run: yarn run tsc
       - run: yarn run test
 
-  # If all the previous steps pass, build and publish the image.
+  # If all the previous steps pass or are skipped due to there being no changes to
+  # warrant style checks / tests, build and publish the image.
   build_image:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && needs.changes.outputs.build == 'true' }}
+    # The if condition here is pretty complicated. The conditions are:
+    # - This is a push.
+    # - Something changed in the `build` filter list.
+    # - If the backend changed, the backend style and tests must have passed.
+    # - If the frontend changed, the frontend style and tests must have passed.
+    # To make this step always run even if the previous `needs` were skipped,
+    # we have to use the `always()` function condition. See here for more information:
+    # https://github.community/t/semantics-of-using-job-needs-and-job-if-together/17557/3.
     needs: [changes, backend_style, frontend_style, backend_tests, frontend_tests]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      needs.changes.outputs.build == 'true' && (
+        needs.changes.outputs.backend == 'false' || (
+          needs.changes.outputs.backend == 'true' &&
+          needs.backend_style.result == 'success' &&
+          needs.backend_tests.result == 'success'
+        )
+      ) && (
+        needs.changes.outputs.frontend == 'false' || (
+          needs.changes.outputs.frontend == 'true' &&
+          needs.frontend_style.result == 'success' &&
+          needs.frontend_tests.result == 'success'
+        )
+      )
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: whoan/docker-build-with-cache-action@v5
