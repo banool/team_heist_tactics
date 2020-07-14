@@ -5,15 +5,35 @@ on:
     branches: [master]
 
 jobs:
+  # Check which files / paths have changed.
+  # We use this to inform whether we should run later jobs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      build: ${{ steps.filter.outputs.build }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2.2.0
+      id: filter
+      with:
+        filters: '.github/filters.yml'
+
+  # Ensure that the backend is styled.
   backend_style:
     name: Backend style check
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: rustup toolchain install nightly-2020-06-26 --profile minimal --component rustfmt
       - run: cargo +nightly-2020-06-26 fmt -- --check
+
+  # Ensure that the frontend is styled.
   frontend_style:
     name: Frontend style check
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,8 +45,11 @@ jobs:
           node-version: '14.4.0'
       - run: yarn install
       - run: yarn run style-check
+
+  # Run the backend tests.
   backend_tests:
     name: Backend tests
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,8 +61,11 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+
+  # Run the frontend tests.
   frontend_tests:
     name: Frontend tests
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -57,12 +83,18 @@ jobs:
       - run: ./generate_types.sh
       - run: yarn run tsc
       - run: yarn run test
+
+  # If all the previous steps pass, build and publish the image.
   build_image:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' && needs.changes.outputs.build == 'true' }}
     needs: [backend_style, frontend_style, backend_tests, frontend_tests]
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
+    - uses: marceloprado/has-changed-path@master
+      id: changed-front
+      with:
+        paths: ui
     - uses: whoan/docker-build-with-cache-action@v5
       with:
         username: ${{ github.actor }}
