@@ -3,6 +3,8 @@ name: All
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: ["**"]
 
 jobs:
   # Check which files / paths have changed.
