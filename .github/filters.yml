@@ -1,12 +1,15 @@
-backend:
+backend: &backend
   - 'src/**/*'
   - 'build.rs'
-frontend:
+
+frontend: &frontend
   - 'ui/**/*'
+
+# This should only contain additional things relevant to the build.
+# You don't need to repeat things listed in backend or frontend.
 build:
-  - 'src/**/*'
-  - 'build.rs'
-  - 'ui/**/*'
+  - *backend
+  - *frontend
   - 'prod_run.sh'
   - 'templates'
   - 'static/images/**/*'

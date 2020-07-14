@@ -23,6 +23,7 @@ jobs:
   # Ensure that the backend is styled.
   backend_style:
     name: Backend style check
+    needs: [changes]
     if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -33,6 +34,7 @@ jobs:
   # Ensure that the frontend is styled.
   frontend_style:
     name: Frontend style check
+    needs: [changes]
     if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
@@ -49,6 +51,7 @@ jobs:
   # Run the backend tests.
   backend_tests:
     name: Backend tests
+    needs: [changes]
     if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -65,6 +68,7 @@ jobs:
   # Run the frontend tests.
   frontend_tests:
     name: Frontend tests
+    needs: [changes]
     if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
