@@ -3,6 +3,8 @@ name: All
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: ["**"]
 
 jobs:
   # Check which files / paths have changed.
@@ -92,13 +94,9 @@ jobs:
   build_image:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && needs.changes.outputs.build == 'true' }}
-    needs: [backend_style, frontend_style, backend_tests, frontend_tests]
+    needs: [changes, backend_style, frontend_style, backend_tests, frontend_tests]
     steps:
     - uses: actions/checkout@v2
-    - uses: marceloprado/has-changed-path@master
-      id: changed-front
-      with:
-        paths: ui
     - uses: whoan/docker-build-with-cache-action@v5
       with:
         username: ${{ github.actor }}
