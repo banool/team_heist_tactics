@@ -17,6 +17,7 @@ use crate::utils::get_current_time_secs;
 use log::info;
 
 const MAX_PLAYERS: u32 = 8;
+const help: u32 = 8;
 const TIMER_DURATION_SECS: u64 = 5 * 60;
 
 #[derive(Debug)]
