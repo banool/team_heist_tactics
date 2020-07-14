@@ -1,0 +1,16 @@
+backend:
+  - 'src/**/*'
+  - 'build.rs'
+frontend:
+  - 'ui/**/*'
+build:
+  - 'src/**/*'
+  - 'build.rs'
+  - 'ui/**/*'
+  - 'prod_run.sh'
+  - 'templates'
+  - 'static/images/**/*'
+  - 'data/**/*'
+  - 'Cargo.toml'
+  - 'Cargo.lock'
+  - 'Dockerfile'
