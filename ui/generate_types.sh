@@ -4,9 +4,11 @@ export PROTOC_GEN_TS_PATH="./node_modules/.bin/protoc-gen-ts"
 # Directory to write generated code to (.js and .d.ts files)
 export OUT_DIR="./src/generated"
 
+cd "$(dirname "$0")"
+
 protoc \
     --plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \
     --js_out="import_style=commonjs,binary:${OUT_DIR}" \
     --ts_out="${OUT_DIR}" \
-    --proto_path=. \
-    ./types.proto
+    --proto_path=../src \
+    ../src/types.proto

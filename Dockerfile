@@ -13,9 +13,11 @@ FROM node:14 as frontend_build
 # Copy in protoc
 COPY --from=protoc_build /tmp/protoc_dl/bin/protoc /usr/bin
 
+WORKDIR /src
+COPY src/types.proto .
+
 WORKDIR /npm
 COPY ui/ .
-COPY src/types.proto .
 
 # Generate types and build UI
 RUN yarn install --frozen-lockfile
