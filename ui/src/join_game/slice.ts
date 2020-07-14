@@ -46,6 +46,7 @@ interface GameInfo {
   // A queue containing messages to display to the player.
   player_message_queue: string[];
   player_is_spectator: boolean;
+  chat_box_active: boolean;
 }
 
 const pushToPlayerMessageQueue = (queue: string[], msg: string) => {
@@ -79,6 +80,10 @@ interface RegisterPlayerNameAction {
   game_handle: string;
 }
 
+interface SetChatBoxFocusAction {
+  focused: boolean;
+}
+
 let initialState: GameInfo = {
   connection_status: ConnectionStatus.NotConnected,
   player_name: null,
@@ -88,6 +93,7 @@ let initialState: GameInfo = {
   heister_selected_keyboard: null,
   player_message_queue: [],
   player_is_spectator: true,
+  chat_box_active: false,
 };
 
 const joinGameSlice = createSlice({
@@ -112,6 +118,10 @@ const joinGameSlice = createSlice({
       } else {
         state.heister_selected_keyboard = heister_color;
       }
+    },
+    setChatBoxFocus: (state, action: PayloadAction<SetChatBoxFocusAction>) => {
+      const { focused } = action.payload;
+      state.chat_box_active = focused;
     },
   },
   extraReducers: {
@@ -187,6 +197,7 @@ const joinGameSlice = createSlice({
 export const {
   registerPlayerNameGameHandle,
   selectKeyboardHeister,
+  setChatBoxFocus,
 } = joinGameSlice.actions;
 
 export const connectionStatusSelector = (state: RootState): ConnectionStatus =>
@@ -208,5 +219,7 @@ export const gameHandleSelector = (state: RootState): string | null =>
   state.joinGame.game_handle;
 export const playerIsSpectatorSelector = (state: RootState): boolean =>
   state.joinGame.player_is_spectator;
+export const chatBoxActiveSelector = (state: RootState): boolean =>
+  state.joinGame.chat_box_active;
 
 export default joinGameSlice.reducer;

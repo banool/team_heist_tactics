@@ -1,6 +1,7 @@
 import { GameStatus, GameStatusMap } from "../generated/types_pb";
 import React, { useEffect, useState } from "react";
 import {
+  chatBoxActiveSelector,
   gameStateSelector,
   heisterSelectedSelector,
   playerIsSpectatorSelector,
@@ -26,6 +27,7 @@ const MainGame = ({}: MainGameProps) => {
   const heister_selected_keyboard = useSelector(heisterSelectedSelector);
   const connection_status = useSelector(connectionStatusSelector);
   const player_is_spectator = useSelector(playerIsSpectatorSelector);
+  const chat_box_active = useSelector(chatBoxActiveSelector);
 
   // Bind key listener on mount, and unbind on unmount.
   // See https://reactjs.org/docs/hooks-effect.html.
@@ -45,6 +47,9 @@ const MainGame = ({}: MainGameProps) => {
 
   const handleKeyDown = (event) => {
     if (player_is_spectator) {
+      return;
+    }
+    if (chat_box_active) {
       return;
     }
     dispatch(
