@@ -10,14 +10,13 @@ use crate::load_map;
 use crate::types::main_message::Body;
 use crate::types::{
     Ability, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition, Move,
-    MoveDirection, PlaceTile, PlayerName, Square, SquareType, Tile,
+    MoveDirection, PlaceTile, PlayerName, Square, SquareType, Tile, ESCAPED,
 };
 use crate::utils::get_current_time_secs;
 
 use log::info;
 
 const MAX_PLAYERS: u32 = 8;
-const TIMER_DURATION_SECS: u64 = 5 * 60;
 
 #[derive(Debug)]
 pub struct Game {
@@ -269,6 +268,9 @@ impl Game {
     fn update_possible_teleports(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
         let mut m: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
         for heister in &self.game_state.heisters {
+            if heister.has_escaped {
+                continue;
+            }
             let color = heister.heister_color;
             let pos = &heister.map_position;
             let square = grid.get(&pos).unwrap();
@@ -350,14 +352,25 @@ impl Game {
         let heister = self.game_state.get_heister_from_vec(heister_color).unwrap();
         let heister_pos = &heister.map_position;
         let dest_pos = m.position;
+        let all_items_taken = self.game_state.all_items_taken;
+        let game_started = self.game_state.game_started;
+        let timer_runs_out = self.game_state.timer_runs_out;
         let mut validity = MoveValidity::Valid;
-        let mut dest_is_timer = false;
 
         let grid = self.game_state.get_absolute_grid();
-        let dest_squaretype = Self::position_squaretype(&grid, &dest_pos);
-        match dest_squaretype {
+        let mut dest_square = Square::default();
+        match grid.get(&dest_pos) {
+            Some(square) => {
+                dest_square = *square;
+            }
+            None => {
+                let msg = format!("Position {:?} not on map", dest_pos);
+                validity = MoveValidity::Invalid(msg);
+            }
+        }
+        match dest_square.square_type {
             // Handle escalator move
-            Ok(SquareType::Escalator) => {
+            SquareType::Escalator => {
                 if !self.player_has_ability(&player_name, &Ability::UseEscalator) {
                     validity = MoveValidity::Invalid("You cannot use escalators".to_string());
                 }
@@ -368,11 +381,11 @@ impl Game {
                 };
             }
             // Handle teleport move
-            Ok(SquareType::OrangeTeleportPad)
-            | Ok(SquareType::YellowTeleportPad)
-            | Ok(SquareType::PurpleTeleportPad)
-            | Ok(SquareType::GreenTeleportPad) => {
-                if self.game_state.all_items_taken {
+            SquareType::OrangeTeleportPad
+            | SquareType::YellowTeleportPad
+            | SquareType::PurpleTeleportPad
+            | SquareType::GreenTeleportPad => {
+                if all_items_taken {
                     validity = MoveValidity::Invalid(
                         "All items have been taken, so teleports are disabled!".to_string(),
                     );
@@ -391,10 +404,7 @@ impl Game {
                     )
                 }
             }
-            Ok(SquareType::TimerFlip) => {
-                dest_is_timer = true;
-            }
-            _wildcard => {
+            _ => {
                 validity = MoveValidity::Invalid("move wasn't teleport nor escalator".to_string());
             }
         }
@@ -419,18 +429,20 @@ impl Game {
                 .game_state
                 .get_mut_heister_from_vec(heister_color.clone())
                 .unwrap();
-            heister.map_position = dest_pos;
+            let mut destination = dest_pos;
+            if dest_square.is_escape() && all_items_taken {
+                destination = *ESCAPED;
+                heister.has_escaped = true;
+            }
+            heister.map_position = destination;
 
             // If this is the first move, then let's start the game timer
-            if self.game_state.game_started == 0 {
-                // Kick off the timer.
-                let now = get_current_time_secs();
-                self.game_state.game_started = now;
-                self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
+            if game_started == 0 {
+                self.game_state.start_timer();
             }
             // If this square was a timer, we need to mark it used, and update
             // timer_runs_out to the new time limit
-            if dest_is_timer {
+            if dest_square.square_type == SquareType::TimerFlip {
                 // step 1: mark used
                 let (idx, tile) = self.game_state.get_index_and_tile(&dest_pos).unwrap();
                 let mut flipped_tile = tile.clone();
@@ -439,7 +451,7 @@ impl Game {
 
                 // step 2: update timer_runs_out
                 let now = get_current_time_secs();
-                if now > self.game_state.timer_runs_out {
+                if now > timer_runs_out {
                     self.game_state.timer_runs_out = now;
                 } else {
                     let time_left: i64 = (self.game_state.timer_runs_out - get_current_time_secs())
@@ -553,16 +565,7 @@ impl Game {
                     MoveValidity::Invalid(_) => return valid_game_state,
                     MoveValidity::Valid => {}
                 }
-                let v = self.process_move(Move::from_proto(m), &player_name);
-                // On first move, when timer_Started is set to sentinel value 0
-                // If the move is processed as valid, then let's set the game going.
-                if v == MoveValidity::Valid && self.game_state.game_started == 0 {
-                    // Kick off the timer.
-                    let now = get_current_time_secs();
-                    self.game_state.game_started = now;
-                    self.game_state.timer_runs_out = now + TIMER_DURATION_SECS;
-                }
-                v
+                self.process_move(Move::from_proto(m), &player_name)
             }
             Body::PlaceTile(pt) => {
                 let valid_game_state = self.game_is_ongoing();

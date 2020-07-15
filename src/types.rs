@@ -31,6 +31,8 @@ pub trait Internal {
     fn to_proto(&self) -> Self::P;
 }
 
+pub const TIMER_DURATION_SECS: u64 = 5 * 60;
+
 pub const DOOR_TYPES: [&'static WallType; 4] = [
     &WallType::PurpleDoor,
     &WallType::OrangeDoor,
@@ -58,6 +60,8 @@ pub const DIRECTIONS: [&'static MoveDirection; 4] = [
     &MoveDirection::South,
     &MoveDirection::West,
 ];
+
+pub static ESCAPED: &'static MapPosition = &MapPosition { x: 500, y: 500 };
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
@@ -560,6 +564,10 @@ impl Square {
             SquareType::OrangeItem => Some(HeisterColor::Orange),
             SquareType::GreenItem => Some(HeisterColor::Green),
             SquareType::YellowItem => Some(HeisterColor::Yellow),
+            SquareType::PurpleEscape => Some(HeisterColor::Purple),
+            SquareType::OrangeEscape => Some(HeisterColor::Orange),
+            SquareType::GreenEscape => Some(HeisterColor::Green),
+            SquareType::YellowEscape => Some(HeisterColor::Yellow),
             _wildcard => None,
         }
     }
@@ -580,6 +588,16 @@ impl Square {
             | SquareType::YellowTeleportPad
             | SquareType::OrangeTeleportPad
             | SquareType::GreenTeleportPad => true,
+            _wildcard => false,
+        }
+    }
+
+    pub fn is_escape(&self) -> bool {
+        match self.square_type {
+            SquareType::PurpleEscape
+            | SquareType::YellowEscape
+            | SquareType::OrangeEscape
+            | SquareType::GreenEscape => true,
             _wildcard => false,
         }
     }
