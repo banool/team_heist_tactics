@@ -268,19 +268,16 @@ impl Game {
     /// Possible teleport destinations that a Heister can reach with a Teleport move
     fn update_possible_teleports(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
         let mut m: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
-        if !self.game_state.all_items_taken {
-            // if teleports are still allowed
-            for heister in &self.game_state.heisters {
-                let color = heister.heister_color;
-                let pos = &heister.map_position;
-                let square = grid.get(&pos).unwrap();
-                if !self.game_options.teleport_only_from_portal || square.is_teleport() {
-                    match self.revealed_teleporters.get(&color) {
-                        Some(list) => {
-                            m.insert(color, list.to_vec());
-                        }
-                        None => {}
+        for heister in &self.game_state.heisters {
+            let color = heister.heister_color;
+            let pos = &heister.map_position;
+            let square = grid.get(&pos).unwrap();
+            if !self.game_options.teleport_only_from_portal || square.is_teleport() {
+                match self.revealed_teleporters.get(&color) {
+                    Some(list) => {
+                        m.insert(color, list.to_vec());
                     }
+                    None => {}
                 }
             }
         }
