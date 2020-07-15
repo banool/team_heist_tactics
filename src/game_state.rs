@@ -10,7 +10,7 @@ use std::convert::From;
 
 use crate::types::{
     proto_types, GameStatus, Heister, HeisterColor, Internal, MapPosition, MoveDirection, Player,
-    PossibleTeleportEntry, Square, SquareType, StartingTile, Tile, WallType,
+    PossibleTeleportEntry, Square, SquareType, StartingTile, Tile, WallType, TIMER_DURATION_SECS,
 };
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -203,6 +203,12 @@ impl GameState {
         false
     }
 
+    pub fn start_timer(&mut self) -> () {
+        let now = get_current_time_secs();
+        self.game_started = now;
+        self.timer_runs_out = now + TIMER_DURATION_SECS;
+    }
+
     pub fn get_absolute_grid(&self) -> HashMap<MapPosition, Square> {
         let mut grid: HashMap<MapPosition, Square> = HashMap::new();
         for tile in self.tiles.iter() {
@@ -331,6 +337,9 @@ impl GameState {
     ) -> Vec<MapPosition> {
         let mut placement_locations: Vec<MapPosition> = Vec::new();
         for heister in &self.heisters {
+            if heister.has_escaped {
+                continue;
+            }
             let color = heister.heister_color;
             let square = grid
                 .get(&heister.map_position)
@@ -404,6 +413,9 @@ impl GameState {
     pub fn update_possible_escalators(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
         let mut m: HashMap<HeisterColor, MapPosition> = HashMap::new();
         for heister in &self.heisters {
+            if heister.has_escaped {
+                continue;
+            }
             let color = heister.heister_color;
             let pos = &heister.map_position;
 
@@ -420,10 +432,15 @@ impl GameState {
     /// This will check for victory/defeat conditions as part of update_auxiliary_state.
     /// (intended to capure state changes due to timer)
     pub fn update_game_status(&mut self) -> () {
+        if self.all_items_taken && self.heisters.iter().all(|h| h.has_escaped) {
+            self.game_status = GameStatus::Victory;
+            return;
+        }
         let now = get_current_time_secs();
         if self.game_started != 0 && now > self.timer_runs_out {
             info!("Time ran out for game {:?}, you lost!", self.game_name);
             self.game_status = GameStatus::Defeat;
+            return;
         }
     }
 
