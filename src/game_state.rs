@@ -427,6 +427,22 @@ impl GameState {
         }
     }
 
+    /// This will check for each heister and update its "has_taken_item" field
+    /// This will also update the game state field "all_items_taken"
+    pub fn update_items_taken(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
+        for heister in &mut self.heisters {
+            match grid.get(&heister.map_position) {
+                Some(square) => {
+                    heister.has_taken_item = self.all_items_taken
+                        || square.is_item() && square.color().unwrap() == heister.heister_color;
+                }
+                None => {}
+            }
+        }
+        self.all_items_taken =
+            self.all_items_taken || self.heisters.iter().all(|h| h.has_taken_item);
+    }
+
     /// in order to update the door to be a clear wall, we need a few things:
     /// 1. we need a reference to the tile in self.tiles that contains the heister_square
     /// 2. we need to be able to know which wall on which square  to update

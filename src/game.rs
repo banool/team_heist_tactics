@@ -259,6 +259,7 @@ impl Game {
     fn update_auxiliary_state(&mut self) -> () {
         let grid = self.game_state.get_absolute_grid();
         self.game_state.update_game_status();
+        self.game_state.update_items_taken(&grid);
         self.game_state.update_possible_placements(&grid);
         self.game_state.update_possible_escalators(&grid);
         self.update_possible_teleports(&grid);
@@ -267,16 +268,19 @@ impl Game {
     /// Possible teleport destinations that a Heister can reach with a Teleport move
     fn update_possible_teleports(&mut self, grid: &HashMap<MapPosition, Square>) -> () {
         let mut m: HashMap<HeisterColor, Vec<MapPosition>> = HashMap::new();
-        for heister in &self.game_state.heisters {
-            let color = heister.heister_color;
-            let pos = &heister.map_position;
-            let square = grid.get(&pos).unwrap();
-            if !self.game_options.teleport_only_from_portal || square.is_teleport() {
-                match self.revealed_teleporters.get(&color) {
-                    Some(list) => {
-                        m.insert(color, list.to_vec());
+        if !self.game_state.all_items_taken {
+            // if teleports are still allowed
+            for heister in &self.game_state.heisters {
+                let color = heister.heister_color;
+                let pos = &heister.map_position;
+                let square = grid.get(&pos).unwrap();
+                if !self.game_options.teleport_only_from_portal || square.is_teleport() {
+                    match self.revealed_teleporters.get(&color) {
+                        Some(list) => {
+                            m.insert(color, list.to_vec());
+                        }
+                        None => {}
                     }
-                    None => {}
                 }
             }
         }
@@ -371,6 +375,11 @@ impl Game {
             | Ok(SquareType::YellowTeleportPad)
             | Ok(SquareType::PurpleTeleportPad)
             | Ok(SquareType::GreenTeleportPad) => {
+                if self.game_state.all_items_taken {
+                    validity = MoveValidity::Invalid(
+                        "All items have been taken, so teleports are disabled!".to_string(),
+                    );
+                }
                 if !self.player_has_ability(&player_name, &Ability::Teleport) {
                     validity = MoveValidity::Invalid("You cannot use teleporters".to_string());
                 }
