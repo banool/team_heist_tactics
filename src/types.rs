@@ -556,7 +556,21 @@ impl Square {
             SquareType::OrangeTeleportPad => Some(HeisterColor::Orange),
             SquareType::GreenTeleportPad => Some(HeisterColor::Green),
             SquareType::YellowTeleportPad => Some(HeisterColor::Yellow),
+            SquareType::PurpleItem => Some(HeisterColor::Purple),
+            SquareType::OrangeItem => Some(HeisterColor::Orange),
+            SquareType::GreenItem => Some(HeisterColor::Green),
+            SquareType::YellowItem => Some(HeisterColor::Yellow),
             _wildcard => None,
+        }
+    }
+
+    pub fn is_item(&self) -> bool {
+        match self.square_type {
+            SquareType::PurpleItem
+            | SquareType::YellowItem
+            | SquareType::OrangeItem
+            | SquareType::GreenItem => true,
+            _wildcard => false,
         }
     }
 
