@@ -1,6 +1,8 @@
 backend: &backend
   - 'src/**/*'
   - 'build.rs'
+  - 'Cargo.toml'
+  - 'Cargo.lock'
 
 frontend: &frontend
   - 'ui/**/*'
@@ -14,7 +16,5 @@ build:
   - 'templates'
   - 'static/images/**/*'
   - 'data/**/*'
-  - 'Cargo.toml'
-  - 'Cargo.lock'
   - 'Dockerfile'
   - '.github/**/*'
