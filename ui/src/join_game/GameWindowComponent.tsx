@@ -137,12 +137,7 @@ const Tile = ({
   offset,
   canvas_position,
 }: TileProps) => {
-  // TODO Consider preloading the next / all images.
-  // Probably not necessary becayse images are cached in the client, so the user
-  // only ever suffers the slow load time once.
-  console.log("tilename", tile_name);
   const url = `static/images/00${tile_name}.jpg`;
-  console.log("url", url);
   const [image, status] = useImage(url);
 
   var comp: JSX.Element;

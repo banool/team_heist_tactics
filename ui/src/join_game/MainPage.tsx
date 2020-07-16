@@ -37,6 +37,16 @@ const MainGame = ({}: MainGameProps) => {
   // key repeat kicks in after a user defined OS level delay.
   // https://stackoverflow.com/questions/41693715/react-redux-what-is-the-canonical-way-to-bind-a-keypress-action-to-kick-off-a-r
   useEffect(() => {
+    // Preload images.
+    var tile_names = ["1a", "2", "3", "4", "5", "6", "7", "8", "9"];
+    for (var i = 0; i < tile_names.length; i++) {
+      const tile_name = tile_names[i];
+      const img = (new Image().src = `static/images/00${tile_name}.jpg`);
+      window[`preload_tile_${tile_name}`] = img;
+    }
+    window["preload_tile_shadow_tile"] = new Image().src =
+      "static/images/tile_shadow.png";
+
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
     return function cleanup() {
