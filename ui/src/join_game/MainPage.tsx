@@ -78,11 +78,7 @@ const MainGame = ({}: MainGameProps) => {
   };
 
   var inner;
-  if (
-    connection_status == ConnectionStatus.Connected &&
-    game_state &&
-    game_state.getGameStatus() !== GameStatus.STAGING
-  ) {
+  if (game_state && game_state.getGameStatus() !== GameStatus.STAGING) {
     inner = <GameWindowComponent />;
   } else {
     var inner_form;
