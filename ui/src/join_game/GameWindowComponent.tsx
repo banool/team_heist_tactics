@@ -15,6 +15,7 @@ import {
   MapPosition,
   Heister as ProtoHeister,
   Tile as ProtoTile,
+  SquareType,
 } from "../generated/types_pb";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import React, { useState } from "react";
@@ -160,6 +161,45 @@ const Tile = ({
     comp = <Text text={`Loading tile ${name}...`} />;
   } else {
     comp = <Text text={`Failed to load tile ${name}!!!`} />;
+  }
+
+  return comp;
+};
+
+type CrossProps = {
+  map_position: MapPosition;
+};
+// The offset makes the center of the image be the center of the canvas element.
+const Cross = ({ map_position }: CrossProps) => {
+  const url = "static/images/cross.png";
+  const [image, status] = useImage(url);
+  const size = 48;
+  const pixel_offset = -144;
+
+  var { width, height } = useWindowDimensions();
+  const canvas_position = mapPositionToCanvasPosition(
+    map_position,
+    pixel_offset,
+    width,
+    height
+  )!;
+
+  var comp: JSX.Element;
+  if (status === "loaded") {
+    comp = (
+      <Image
+        image={image}
+        width={size}
+        height={size}
+        x={canvas_position.x}
+        y={canvas_position.y}
+        perfectDrawEnabled={false}
+      />
+    );
+  } else if (status === "loading") {
+    comp = <Text text={`Loading cross...`} />;
+  } else {
+    comp = <Text text={`Failed to load cross!!!`} />;
   }
 
   return comp;
@@ -314,6 +354,7 @@ const ShadowTiles = ({ shadow_tiles }) => (
 const ListOfPlayerAbilities = ({ player_abilities }) => (
   <>{player_abilities.map((a: any) => a)}</>
 );
+const Crosses = ({ crosses }) => <>{crosses.map((c: any) => c)}</>;
 
 const GameWindowComponent = () => {
   const game_state = useSelector(gameStateSelector);
@@ -380,6 +421,36 @@ const GameWindowComponent = () => {
       possiblePlacements.push(pp);
     }
     return possiblePlacements;
+  };
+
+  const getCrosses = () => {
+    // Get the MapPositions of each of the crosses we want to draw.
+    const cross_positions: MapPosition[] = [];
+    const tiles_list = game_state!.getTilesList();
+    for (let i = 0; i < tiles_list.length; i++) {
+      const tile = tiles_list[i];
+      const squares = tile.getSquaresList();
+      for (let j = 0; j < squares.length; j++) {
+        const square = squares[j];
+        if (square.getSquareType() == SquareType.TIMER_FLIP_USED) {
+          const tile_position = tile.getPosition()!;
+          const x = tile_position.getX() + Math.floor(j % 4);
+          const y = tile_position.getY() + Math.floor(j / 4);
+          const map_position = new MapPosition();
+          map_position.setX(x);
+          map_position.setY(y);
+          cross_positions.push(map_position);
+          console.log(`cross at ${x} ${y}`);
+        }
+      }
+    }
+    // Return the Cross components.
+    var crosses: JSX.Element[] = [];
+    for (let i = 0; i < cross_positions.length; i++) {
+      var c = <Cross key={i + 400} map_position={cross_positions[i]} />;
+      crosses.push(c);
+    }
+    return crosses;
   };
 
   const getPlayerAbilities = () => {
@@ -462,6 +533,7 @@ const GameWindowComponent = () => {
             <Layer listening={false}>
               <ShadowTiles shadow_tiles={shadow_tiles} />
               <Tiles tiles={tiles} />
+              <Crosses crosses={getCrosses()} />
             </Layer>
             <Layer listening={!player_is_spectator}>
               <Heisters heisters={getHeisters()} />
