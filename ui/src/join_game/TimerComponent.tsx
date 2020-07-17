@@ -25,6 +25,8 @@ const TimerComponent = () => {
   const getSecondsLeftString = (runs_out: Number, seconds_left: Number) => {
     if (runs_out === 0) {
       return "Not started yet!";
+    } else if (seconds_left <= -1000000) {
+      return 300;
     } else {
       if (seconds_left <= 0) {
         return "Ran out of time!";
