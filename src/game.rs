@@ -14,7 +14,7 @@ use crate::types::{
 };
 use crate::utils::get_current_time_secs;
 
-use log::info;
+use log::{debug, info};
 
 const MAX_PLAYERS: u32 = 8;
 
@@ -255,9 +255,12 @@ impl Game {
         }
     }
 
+    fn pre_update_auxilliary_state(&mut self) {
+        self.game_state.update_game_status();
+    }
+
     fn update_auxiliary_state(&mut self) -> () {
         let grid = self.game_state.get_absolute_grid();
-        self.game_state.update_game_status();
         self.game_state.update_items_taken(&grid);
         self.game_state.update_possible_placements(&grid);
         self.game_state.update_possible_escalators(&grid);
@@ -539,10 +542,10 @@ impl Game {
     fn game_is_ongoing(&self) -> MoveValidity {
         match &self.game_state.game_status {
             GameStatus::Ongoing => MoveValidity::Valid,
-            _wildcard => {
+            wildcard => {
                 let msg = format!(
                     "Game {:?} is in state {:?} and is not accepting moves",
-                    self.game_handle, self.game_state.game_status
+                    self.game_handle.0, wildcard
                 );
                 MoveValidity::Invalid(msg)
             }
@@ -555,7 +558,8 @@ impl Game {
         player_name: &PlayerName,
     ) -> MoveValidity {
         // If we receive GameState or InvalidRequest at this endpoint, panic, it should never happen.
-        info!("Received message: {:?}", message);
+        debug!("Received message: {:?}", message);
+        self.pre_update_auxilliary_state();
         let body = message.body.unwrap();
         let validity = match body {
             Body::StartGame(_) => self.start_game(),
