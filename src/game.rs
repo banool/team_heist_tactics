@@ -444,13 +444,13 @@ impl Game {
             // If this square was a timer, we need to mark it used, and update
             // timer_runs_out to the new time limit
             if dest_square.square_type == SquareType::TimerFlip {
-                // step 1: mark used
+                // Step 1: Mark this timer square as used
                 let (idx, tile) = self.game_state.get_index_and_tile(&dest_pos).unwrap();
                 let mut flipped_tile = tile.clone();
                 flipped_tile.flip_timer();
                 self.game_state.tiles[idx] = flipped_tile;
 
-                // step 2: update timer_runs_out
+                // Step 2: Update timer_runs_out
                 let now = get_current_time_secs();
                 if now > timer_runs_out {
                     self.game_state.timer_runs_out = now;
@@ -462,6 +462,11 @@ impl Game {
                         (TIMER_DURATION_SECS as i64 - time_left).try_into().unwrap();
                     self.game_state.timer_runs_out = get_current_time_secs() + new_time_left;
                 }
+
+                // Step 3: Mark that the players can speak now.
+                self.game_state.players_may_speak = true;
+            } else {
+                self.game_state.players_may_speak = false;
             }
         }
         validity
