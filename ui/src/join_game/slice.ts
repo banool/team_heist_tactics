@@ -174,7 +174,12 @@ const joinGameSlice = createSlice({
         pushToPlayerMessageQueue(state.player_message_queue, msg);
       }
       if (main_message.hasChat()) {
-        let msg = main_message.getChat()!;
+        var msg = main_message.getChat()!;
+        if (msg.endsWith(`tap ${state.player_name}`)) {
+          window["tap_audio_object"].play();
+          let tapper = msg.split(": ")[0];
+          msg = `${tapper} tapped at you!`;
+        }
         pushToPlayerMessageQueue(state.player_message_queue, msg);
       }
       state.game_state = game_state;
