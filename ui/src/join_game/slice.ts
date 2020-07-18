@@ -16,7 +16,6 @@ import {
 
 import { ConnectionStatus } from "./types";
 import { RootState } from "../common/reducers";
-import { stat } from "fs";
 
 const WEBSOCKET_BROKEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
   WEBSOCKET_BROKEN
@@ -200,7 +199,7 @@ const joinGameSlice = createSlice({
     [WEBSOCKET_SEND_FULL]: (_state, _action) => {
       console.debug("Sending message over websocket");
     },
-    [WEBSOCKET_ERROR_FULL]: (state, action) => {
+    [WEBSOCKET_ERROR_FULL]: (state, _action) => {
       let msg = `Failed to join. Is the game handle valid?`;
       pushToPlayerMessageQueue(state.player_message_queue, msg);
     },

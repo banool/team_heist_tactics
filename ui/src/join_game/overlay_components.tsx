@@ -1,9 +1,14 @@
+import { getColor, sendChat } from "./api";
+import {
+  heisterSelectedSelector,
+  playerIsSpectatorSelector,
+  playerNameSelector,
+} from "./slice";
+import { useDispatch, useSelector } from "react-redux";
+
 import { Ability } from "../generated/types_pb";
 import { Circle } from "react-konva";
 import React from "react";
-import { getColor } from "./api";
-import { heisterSelectedSelector } from "./slice";
-import { useSelector } from "react-redux";
 
 // The offset makes the center of the image be the center of the canvas element.
 type ResetMapComponentProps = {
@@ -52,6 +57,42 @@ export const ActiveHeisterKeyboardComponent = ({
   );
 };
 
+type TapButtonComponentProps = {
+  name_prefix: string;
+};
+export const TapButtonComponent = ({
+  name_prefix,
+}: TapButtonComponentProps) => {
+  const dispatch = useDispatch();
+  const player_name = useSelector(playerNameSelector);
+
+  const onClick = (_event) => {
+    let recipient = name_prefix.split("'").slice(0, -1).join("'");
+    let msg = `${player_name}: tap ${recipient}`;
+    dispatch(sendChat(msg)); // todo
+  };
+
+  const is_self = name_prefix === "Your";
+  const pointer_events = is_self ? "none" : "auto";
+  const text = is_self ? "-" : "Tap";
+  const class_name = is_self ? "invisible" : undefined;
+
+  return (
+    <button
+      className={class_name}
+      style={{
+        borderRadius: 6,
+        fontSize: 16,
+        pointerEvents: pointer_events,
+        width: 50,
+      }}
+      onClick={onClick}
+    >
+      {text}
+    </button>
+  );
+};
+
 type PlayerAbilitiesProps = {
   name_prefix: string;
   proto_abilities: number[];
@@ -60,6 +101,8 @@ export const PlayerAbilities = ({
   name_prefix,
   proto_abilities,
 }: PlayerAbilitiesProps) => {
+  const player_is_spectator = useSelector(playerIsSpectatorSelector);
+
   const getAbilityEmoji = (proto_ability): string => {
     switch (proto_ability) {
       case Ability.MOVE_NORTH:
@@ -90,10 +133,12 @@ export const PlayerAbilities = ({
     );
   }
 
-  console.log("FINDFLSKDF", abilities_string);
-
   return (
     <p>
+      {player_is_spectator ? null : (
+        <TapButtonComponent name_prefix={name_prefix} />
+      )}
+      &nbsp;&nbsp;
       {name_prefix} abilities: {abilities_string}
     </p>
   );

@@ -87,8 +87,14 @@ button {
   padding-bottom: 5px;
 }
 
+/* This means we don't render it at all. */
 .hidden {
   display: none;
+}
+
+/* This means it is still there, just invisible. */
+.invisible {
+  visibility: hidden;
 }
 
 @keyframes pulsate {
