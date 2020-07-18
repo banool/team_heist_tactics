@@ -242,5 +242,7 @@ export const gameStatusSelector = (
   state: RootState
 ): GameStatusMap[keyof GameStatusMap] =>
   state.joinGame.game_state!.getGameStatus();
+export const playersMaySpeakSelector = (state: RootState): boolean =>
+  state.joinGame.game_state!.getPlayersMaySpeak();
 
 export default joinGameSlice.reducer;
