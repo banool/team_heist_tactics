@@ -1,9 +1,9 @@
 import { getColor, sendChat } from "./api";
 import {
   heisterSelectedSelector,
-  playersMaySpeakSelector,
   playerIsSpectatorSelector,
   playerNameSelector,
+  playersMaySpeakSelector,
 } from "./slice";
 import { useDispatch, useSelector } from "react-redux";
 
