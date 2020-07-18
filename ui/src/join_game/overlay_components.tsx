@@ -1,6 +1,7 @@
 import { getColor, sendChat } from "./api";
 import {
   heisterSelectedSelector,
+  playersMaySpeakSelector,
   playerIsSpectatorSelector,
   playerNameSelector,
 } from "./slice";
@@ -18,7 +19,7 @@ export const ResetMapComponent = ({
   reset_parent_func,
 }: ResetMapComponentProps) => {
   return (
-    <button style={{ width: 100, height: 40 }} onClick={reset_parent_func}>
+    <button style={{ width: 110, height: 40 }} onClick={reset_parent_func}>
       Reset Map
     </button>
   );
@@ -141,5 +142,20 @@ export const PlayerAbilities = ({
       &nbsp;&nbsp;
       {name_prefix} abilities: {abilities_string}
     </p>
+  );
+};
+
+export const MaySpeakComponent = () => {
+  let players_may_speak = useSelector(playersMaySpeakSelector);
+
+  let msg: string;
+  if (players_may_speak) {
+    msg = "🐵 You can speak 🐵";
+  } else {
+    msg = "🙊 You cannot speak 🙊";
+  }
+
+  return (
+    <p>{msg}</p>
   );
 };

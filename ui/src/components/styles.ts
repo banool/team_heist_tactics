@@ -24,10 +24,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     bottom: 30,
   },
   connectionStatusOverlay: {
+<<<<<<< HEAD
     zIndex: -1,
     position: "relative",
+=======
+    zIndex: 2,
+    position: "absolute",
+    bottom: 80,
+    right: 28,
+>>>>>>> Add UI element for whether players can speak
     fontSize: 16,
     textAlign: "center",
+    lineHeight: 0.5,
   },
   // CSS for the second canvas we put on top of the first canvas.
   // This makes clicks "pass through" so we can just use it to display stuff.
@@ -72,6 +80,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     left: 20,
     top: 0,
     fontSize: 18,
+  },
+  maySpeakOverlay: {
+    zIndex: 5,
+    position: "relative",
+    fontSize: 18,
+    textAlign: "center",
   },
   pulse: {
     WebkitAnimation: "pulsate 2s ease-in",

@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 const ConnectionStatusComponent = () => {
   const connection_status = useSelector(connectionStatusSelector);
 
-  return <p>Connection Status: {ConnectionStatus[connection_status]}</p>;
+  return <div><p>Connection Status</p><p>{ConnectionStatus[connection_status]}</p></div>;
 };
 
 export default ConnectionStatusComponent;

@@ -2,6 +2,7 @@ import {
   ActiveHeisterKeyboardComponent,
   PlayerAbilities,
   ResetMapComponent,
+  MaySpeakComponent,
 } from "./overlay_components";
 import { Circle, Layer, Rect, Stage, Text } from "react-konva";
 import {
@@ -638,6 +639,9 @@ const GameWindowComponent = () => {
       </div>
       <div style={styles.timerOverlay}>
         <TimerComponent />
+      </div>
+      <div style={styles.maySpeakOverlay}>
+        <MaySpeakComponent />
       </div>
       <div style={styles.playerAbilitiesOverlay}>
         <ListOfPlayerAbilities player_abilities={getPlayerAbilities()} />
