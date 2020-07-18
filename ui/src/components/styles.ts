@@ -24,7 +24,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     bottom: 30,
   },
   connectionStatusOverlay: {
-    zIndex: 5,
+    zIndex: -1,
     position: "relative",
     fontSize: 16,
     textAlign: "center",
