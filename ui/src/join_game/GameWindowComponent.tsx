@@ -1,8 +1,8 @@
 import {
   ActiveHeisterKeyboardComponent,
+  MaySpeakComponent,
   PlayerAbilities,
   ResetMapComponent,
-  MaySpeakComponent,
 } from "./overlay_components";
 import { Circle, Layer, Rect, Stage, Text } from "react-konva";
 import {
