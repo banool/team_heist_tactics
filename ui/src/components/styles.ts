@@ -24,15 +24,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     bottom: 30,
   },
   connectionStatusOverlay: {
-<<<<<<< HEAD
-    zIndex: -1,
-    position: "relative",
-=======
     zIndex: 2,
     position: "absolute",
     bottom: 80,
     right: 28,
->>>>>>> Add UI element for whether players can speak
     fontSize: 16,
     textAlign: "center",
     lineHeight: 0.5,

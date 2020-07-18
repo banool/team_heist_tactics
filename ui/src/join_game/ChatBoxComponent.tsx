@@ -93,8 +93,7 @@ const ChatBoxComponent = () => {
           onBlur={onBlur}
           placeholder="Press Enter to focus"
           size={40}
-          readOnly={!players_may_speak}
-          // TODO Prevent mouse press from highlighting chatbox too.
+          disabled={!players_may_speak}
         />
         <button style={{ marginLeft: 5 }} type="submit" onClick={onSubmit}>
           Send
