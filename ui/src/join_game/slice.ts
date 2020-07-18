@@ -1,4 +1,9 @@
-import { GameState, MainMessage } from "../generated/types_pb";
+import {
+  GameState,
+  GameStatus,
+  GameStatusMap,
+  MainMessage,
+} from "../generated/types_pb";
 import {
   MAX_PLAYER_MESSAGES,
   WEBSOCKET_ACTION_PREFIX_FULL,
@@ -233,5 +238,9 @@ export const playerIsSpectatorSelector = (state: RootState): boolean =>
   state.joinGame.player_is_spectator;
 export const chatBoxActiveSelector = (state: RootState): boolean =>
   state.joinGame.chat_box_active;
+export const gameStatusSelector = (
+  state: RootState
+): GameStatusMap[keyof GameStatusMap] =>
+  state.joinGame.game_state!.getGameStatus();
 
 export default joinGameSlice.reducer;

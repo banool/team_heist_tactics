@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { gameStatusSelector, timerRunsOutSelector } from "./slice";
 
-import { timerRunsOutSelector } from "./slice";
+import { GameStatus } from "../generated/types_pb";
 import { useSelector } from "react-redux";
 
 const TimerComponent = () => {
   const timer_runs_out = useSelector(timerRunsOutSelector);
+  const game_status = useSelector(gameStatusSelector);
 
   const [seconds_left, set_seconds_left] = useState(300);
 
@@ -19,30 +21,38 @@ const TimerComponent = () => {
   });
 
   const recalculateTimer = () => {
+    if (timer_runs_out === 0) {
+      return;
+    }
     set_seconds_left(timer_runs_out - Math.floor(Date.now() / 1000));
   };
 
-  const getSecondsLeftString = (runs_out: Number, seconds_left: Number) => {
-    if (runs_out === 0) {
-      return "Not started yet!";
-    } else if (seconds_left <= -1000000) {
-      return 300;
-    } else {
-      if (seconds_left <= 0) {
-        return "Ran out of time!";
-      } else {
-        return seconds_left;
-      }
+  const getMessage = (): string => {
+    let defeat_message = "Defeat! You ran out of time!";
+    // We do this check because when the game enters a terminal state,
+    // it isn't guaranteed that the server will push this state to
+    // the client right now.
+    if (seconds_left < 0) {
+      return defeat_message;
     }
+    switch (+game_status) {
+      case GameStatus.STAGING:
+        throw "Shouldn't see this component while STAGING";
+      case GameStatus.PRE_FIRST_MOVE:
+        return "Waiting to make first move";
+      case GameStatus.ONGOING:
+        return `Seconds left: ${seconds_left}`;
+      case GameStatus.VICTORY:
+        return "Victory! You made it out with ${seconds_left} to spare, congrats!";
+      case GameStatus.DEFEAT:
+        return defeat_message;
+    }
+    throw "Should not be able to get here";
   };
-  const seconds_left_string = getSecondsLeftString(
-    timer_runs_out,
-    seconds_left
-  );
 
   return (
     <div>
-      <p>Seconds left: {seconds_left_string}</p>
+      <p>{getMessage()}</p>
     </div>
   );
 };

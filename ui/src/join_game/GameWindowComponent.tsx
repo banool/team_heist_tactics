@@ -5,18 +5,19 @@ import {
 } from "./overlay_components";
 import { Circle, Layer, Rect, Stage, Text } from "react-konva";
 import {
-  HEISTER_SIZE,
-  INTERNAL_SQUARE_SIZE,
-  INTERNAL_TILE_OFFSET,
-  TILE_SIZE,
-} from "../constants/other";
-import {
+  GameStatus,
   HeisterColor,
   MapPosition,
   Heister as ProtoHeister,
   Tile as ProtoTile,
   SquareType,
 } from "../generated/types_pb";
+import {
+  HEISTER_SIZE,
+  INTERNAL_SQUARE_SIZE,
+  INTERNAL_TILE_OFFSET,
+  TILE_SIZE,
+} from "../constants/other";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import React, { useState } from "react";
 import {
