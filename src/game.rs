@@ -10,7 +10,7 @@ use crate::load_map;
 use crate::types::main_message::Body;
 use crate::types::{
     Ability, GameStatus, Heister, HeisterColor, Internal, MainMessage, MapPosition, Move,
-    MoveDirection, PlaceTile, PlayerName, Square, SquareType, Tile, ESCAPED,
+    MoveDirection, PlaceTile, PlayerName, Square, SquareType, Tile, ESCAPED, TIMER_DURATION_SECS,
 };
 use crate::utils::get_current_time_secs;
 
@@ -106,7 +106,7 @@ impl Game {
         }
 
         // Set the game status to ONGOING.
-        self.game_state.game_status = GameStatus::Ongoing;
+        self.game_state.game_status = GameStatus::PreFirstMove;
 
         // TODO Add this later, it would be too annoying for now for testing.
         /*
@@ -354,7 +354,6 @@ impl Game {
         let heister_pos = &heister.map_position;
         let dest_pos = m.position;
         let all_items_taken = self.game_state.all_items_taken;
-        let game_started = self.game_state.game_started;
         let timer_runs_out = self.game_state.timer_runs_out;
         let mut validity = MoveValidity::Valid;
 
@@ -438,8 +437,9 @@ impl Game {
             heister.map_position = destination;
 
             // If this is the first move, then let's start the game timer
-            if game_started == 0 {
+            if self.game_state.game_status == GameStatus::PreFirstMove {
                 self.game_state.start_timer();
+                self.game_state.game_status = GameStatus::Ongoing;
             }
             // If this square was a timer, we need to mark it used, and update
             // timer_runs_out to the new time limit
@@ -458,7 +458,8 @@ impl Game {
                     let time_left: i64 = (self.game_state.timer_runs_out - get_current_time_secs())
                         .try_into()
                         .unwrap();
-                    let new_time_left: u64 = (300 - time_left).try_into().unwrap();
+                    let new_time_left: u64 =
+                        (TIMER_DURATION_SECS as i64 - time_left).try_into().unwrap();
                     self.game_state.timer_runs_out = get_current_time_secs() + new_time_left;
                 }
             }
@@ -539,7 +540,7 @@ impl Game {
 
     fn game_is_ongoing(&self) -> MoveValidity {
         match &self.game_state.game_status {
-            GameStatus::Ongoing => MoveValidity::Valid,
+            GameStatus::Ongoing | GameStatus::PreFirstMove => MoveValidity::Valid,
             wildcard => {
                 let msg = format!(
                     "Game {:?} is in state {:?} and is not accepting moves",

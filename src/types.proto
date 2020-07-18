@@ -127,9 +127,10 @@ message Player {
 // Whether the game is ongoing or has been won / lost.
 enum GameStatus {
   STAGING = 0;
-  ONGOING = 1;
-  VICTORY = 2;
-  DEFEAT = 3;
+  PRE_FIRST_MOVE = 1;
+  ONGOING = 2;
+  VICTORY = 3;
+  DEFEAT = 4;
 }
 
 // We can't have maps of lists in protobuf, so instead we'll have a list of these,

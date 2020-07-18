@@ -1,4 +1,9 @@
-import { GameState, MainMessage } from "../generated/types_pb";
+import {
+  GameState,
+  GameStatus,
+  GameStatusMap,
+  MainMessage,
+} from "../generated/types_pb";
 import {
   MAX_PLAYER_MESSAGES,
   WEBSOCKET_ACTION_PREFIX_FULL,
@@ -16,7 +21,6 @@ import {
 
 import { ConnectionStatus } from "./types";
 import { RootState } from "../common/reducers";
-import { stat } from "fs";
 
 const WEBSOCKET_BROKEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
   WEBSOCKET_BROKEN
@@ -234,5 +238,9 @@ export const playerIsSpectatorSelector = (state: RootState): boolean =>
   state.joinGame.player_is_spectator;
 export const chatBoxActiveSelector = (state: RootState): boolean =>
   state.joinGame.chat_box_active;
+export const gameStatusSelector = (
+  state: RootState
+): GameStatusMap[keyof GameStatusMap] =>
+  state.joinGame.game_state!.getGameStatus();
 
 export default joinGameSlice.reducer;
