@@ -46,7 +46,7 @@ const MainGame = ({}: MainGameProps) => {
     }
     window["preload_tile_shadow_tile"] = new Image().src =
       "static/images/tile_shadow.png";
-    window["tap_audio_object"] = new Audio("static/tap01-soft-wood.mp3");
+    window["tap_audio_object"] = new Audio("static/audio/tap01-soft-wood.mp3");
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);

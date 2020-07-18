@@ -58,6 +58,7 @@ COPY --from=backend_build /tht/target/release/team_heist_tactics /
 COPY templates templates
 COPY data data
 COPY static/images static/images
+COPY static/audio static/audio
 COPY prod_run.sh .
 COPY ui/src/components/main.css static/main.css
 
