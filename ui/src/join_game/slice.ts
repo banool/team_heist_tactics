@@ -16,6 +16,7 @@ import {
 
 import { ConnectionStatus } from "./types";
 import { RootState } from "../common/reducers";
+import { stat } from "fs";
 
 const WEBSOCKET_BROKEN_FULL = WEBSOCKET_ACTION_PREFIX_FULL.concat(
   WEBSOCKET_BROKEN
@@ -175,10 +176,17 @@ const joinGameSlice = createSlice({
       }
       if (main_message.hasChat()) {
         var msg = main_message.getChat()!;
-        if (msg.endsWith(`tap ${state.player_name}`)) {
+        if (msg.includes("tap ")) {
+          let sender = msg.split(": ")[0];
+          if (sender === state.player_name) {
+            sender = "You";
+          }
+          var recipient = msg.split("tap ").slice(-1)[0];
+          if (recipient === state.player_name) {
+            recipient = "you";
+          }
+          msg = `${sender} tapped at ${recipient}!`;
           window["tap_audio_object"].play();
-          let tapper = msg.split(": ")[0];
-          msg = `${tapper} tapped at you!`;
         }
         pushToPlayerMessageQueue(state.player_message_queue, msg);
       }
