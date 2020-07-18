@@ -150,12 +150,10 @@ export const MaySpeakComponent = () => {
 
   let msg: string;
   if (players_may_speak) {
-    msg = "🐵 You can speak 🐵";
+    msg = "🐵 You may speak 🐵";
   } else {
-    msg = "🙊 You cannot speak 🙊";
+    msg = "🙊 You may not speak 🙊";
   }
 
-  return (
-    <p>{msg}</p>
-  );
+  return <p>{msg}</p>;
 };
