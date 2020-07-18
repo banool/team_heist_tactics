@@ -13,6 +13,7 @@ use crate::types::{
     PossibleTeleportEntry, Square, SquareType, StartingTile, Tile, WallType, TIMER_DURATION_SECS,
 };
 
+const MAX_PLAYERS: usize = 8;
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct GameState {
     pub game_name: GameHandle,
@@ -183,8 +184,9 @@ impl GameState {
     }
 
     pub fn add_player(&mut self, name: String) -> Result<()> {
-        if self.game_status != GameStatus::Staging {
-            // If the game is already in progress, don't actually register the player.
+        if self.game_status != GameStatus::Staging || self.players.len() >= MAX_PLAYERS {
+            // If the game is already in progress or there are already MAX_PLAYERS,
+            // don't actually register the player.
             return Ok(());
         }
         self.players.push(Player {

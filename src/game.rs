@@ -16,8 +16,6 @@ use crate::utils::get_current_time_secs;
 
 use log::{debug, info};
 
-const MAX_PLAYERS: u32 = 8;
-
 #[derive(Debug)]
 pub struct Game {
     pub game_handle: GameHandle,
