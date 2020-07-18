@@ -28,6 +28,7 @@ pub struct GameState {
     pub possible_placements: Vec<MapPosition>,
     pub possible_escalators: HashMap<HeisterColor, MapPosition>,
     pub possible_teleports: HashMap<HeisterColor, Vec<MapPosition>>,
+    pub players_may_speak: bool,
 }
 
 impl Internal for GameState {
@@ -95,6 +96,7 @@ impl Internal for GameState {
             possible_placements,
             possible_escalators,
             possible_teleports,
+            players_may_speak: proto.players_may_speak,
         }
     }
 
@@ -137,6 +139,7 @@ impl Internal for GameState {
             possible_placements,
             possible_escalators,
             possible_teleports,
+            players_may_speak: self.players_may_speak,
         }
     }
 }
@@ -180,6 +183,7 @@ impl GameState {
             possible_placements: vec![],
             possible_escalators,
             possible_teleports,
+            players_may_speak: true,
         }
     }
 

@@ -178,6 +178,9 @@ message GameState {
   // Map of possible locations a heister can teleport to
   repeated PossibleTeleportEntry possible_teleports = 12;
 
+  // Whether players are allowed to speak right now or not.
+  bool players_may_speak = 13;
+
 }
 
 message StartGame {
