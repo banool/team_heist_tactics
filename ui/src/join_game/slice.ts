@@ -126,7 +126,17 @@ const joinGameSlice = createSlice({
     },
     setChatBoxFocus: (state, action: PayloadAction<SetChatBoxFocusAction>) => {
       const { focused } = action.payload;
-      state.chat_box_active = focused;
+      if (!state.game_state!.getPlayersMaySpeak()) {
+        if (focused) {
+          pushToPlayerMessageQueue(
+            state.player_message_queue,
+            "You cannot speak right now!"
+          );
+        }
+        state.chat_box_active = false;
+      } else {
+        state.chat_box_active = focused;
+      }
     },
   },
   extraReducers: {

@@ -26,6 +26,7 @@ export const useFocus = () => {
 const ChatBoxComponent = () => {
   const dispatch = useDispatch();
   const player_name = useSelector(playerNameSelector);
+  const players_may_speak = useSelector(playersMaySpeakSelector);
   const chat_box_active = useSelector(chatBoxActiveSelector);
   const [box_content, set_box_content] = useState("");
   const [inputRef, setInputFocus] = useFocus();
@@ -92,6 +93,8 @@ const ChatBoxComponent = () => {
           onBlur={onBlur}
           placeholder="Press Enter to focus"
           size={40}
+          readOnly={!players_may_speak}
+          // TODO Prevent mouse press from highlighting chatbox too.
         />
         <button style={{ marginLeft: 5 }} type="submit" onClick={onSubmit}>
           Send
