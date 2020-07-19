@@ -370,6 +370,19 @@ const GameWindowComponent = () => {
 
   var { width, height } = useWindowDimensions();
 
+  const [stage_scale, set_stage_scale] = useState(1.0);
+
+  const onWheel = (event) => {
+    event.evt.preventDefault();
+
+    const scale_by = 1.02;
+    const stage = event.target.getStage();
+    const old_scale = stage.scaleX();
+    const new_scale =
+      event.evt.deltaY < 0 ? old_scale * scale_by : old_scale / scale_by;
+    set_stage_scale(new_scale);
+  };
+
   // https://reactjs.org/docs/lists-and-keys.html#keys
   const getTiles = () => {
     var proto_tiles = game_state!.getTilesList();
@@ -490,13 +503,13 @@ const GameWindowComponent = () => {
     return player_abilities;
   };
 
-  const [stageX, setStageX] = useState(0);
-  const [stageY, setStageY] = useState(0);
+  const [stageX, setStageX] = useState(width / 2);
+  const [stageY, setStageY] = useState(height / 2);
 
   // Force the map to re-render in the middle by making the X and Y slightly different.
   const resetMap = () => {
-    setStageX(Math.random() * 0.001 + 0.001);
-    setStageY(Math.random() * 0.001 + 0.001);
+    setStageX(width / 2 + Math.random() * 0.001 + 0.001);
+    setStageY(height / 2 + Math.random() * 0.001 + 0.001);
   };
 
   const KEYBOARD_ITEM_Y = 50;
@@ -529,8 +542,12 @@ const GameWindowComponent = () => {
             y={stageY}
             width={width}
             height={height}
+            scaleX={stage_scale}
+            scaleY={stage_scale}
             draggable={true}
-            transformsEnabled={"position"}
+            onWheel={onWheel}
+            offsetX={width / 2}
+            offsetY={height / 2}
           >
             <Layer listening={false}>
               <ShadowTiles shadow_tiles={shadow_tiles} />
