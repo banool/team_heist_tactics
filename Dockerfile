@@ -26,7 +26,7 @@ RUN yarn run prodbuild
 
 # Server stage of the build
 # FROM rust:1.44-alpine3.11 as build
-FROM rust:1.44 as backend_build
+FROM rust:1.45.0 as backend_build
 
 ENV app=tht
 WORKDIR /${app}
