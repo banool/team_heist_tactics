@@ -63,6 +63,16 @@ pub const DIRECTIONS: [&'static MoveDirection; 4] = [
 
 pub static ESCAPED: &'static MapPosition = &MapPosition { x: 500, y: 500 };
 
+pub fn get_wall_color(wall: proto_types::WallType) -> Option<HeisterColor> {
+    match wall {
+        WallType::PurpleDoor => Some(HeisterColor::Purple),
+        WallType::OrangeDoor => Some(HeisterColor::Orange),
+        WallType::GreenDoor => Some(HeisterColor::Green),
+        WallType::YellowDoor => Some(HeisterColor::Yellow),
+        _wildcard => None,
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TilePosition {
     x: u32,

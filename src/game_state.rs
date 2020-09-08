@@ -9,8 +9,9 @@ use std::collections::HashMap;
 use std::convert::From;
 
 use crate::types::{
-    proto_types, GameStatus, Heister, HeisterColor, Internal, MapPosition, MoveDirection, Player,
-    PossibleTeleportEntry, Square, SquareType, StartingTile, Tile, WallType, TIMER_DURATION_SECS,
+    get_wall_color, proto_types, GameStatus, Heister, HeisterColor, Internal, MapPosition,
+    MoveDirection, Player, PossibleTeleportEntry, Square, SquareType, StartingTile, Tile, WallType,
+    TIMER_DURATION_SECS,
 };
 
 const MAX_PLAYERS: usize = 8;
@@ -355,29 +356,13 @@ impl GameState {
                 Some(d) => d,
                 None => continue,
             };
-            // TODO: put this in a helper?
-            match door {
-                WallType::PurpleDoor => {
-                    if color == HeisterColor::Purple {
+            match get_wall_color(door) {
+                Some(door_color) => {
+                    if door_color == color {
                         placement_locations.push(heister.map_position.clone());
                     }
                 }
-                WallType::OrangeDoor => {
-                    if color == HeisterColor::Orange {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                WallType::GreenDoor => {
-                    if color == HeisterColor::Green {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                WallType::YellowDoor => {
-                    if color == HeisterColor::Yellow {
-                        placement_locations.push(heister.map_position.clone());
-                    }
-                }
-                _wildcard => (),
+                None => continue,
             }
         }
         placement_locations
