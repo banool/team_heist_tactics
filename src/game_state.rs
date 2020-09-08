@@ -436,17 +436,19 @@ impl GameState {
     }
 
     /// This will check for victory/defeat conditions as part of update_auxiliary_state.
-    /// (intended to capure state changes due to timer)
+    /// (intended to capture state changes due to timer)
     pub fn update_game_status(&mut self) -> () {
-        if self.all_items_taken && self.heisters.iter().all(|h| h.has_escaped) {
-            self.game_status = GameStatus::Victory;
-            return;
-        }
-        let now = get_current_time_secs();
-        if self.game_started != 0 && now > self.timer_runs_out {
-            info!("Time ran out for game {:?}, you lost!", self.game_name);
-            self.game_status = GameStatus::Defeat;
-            return;
+        if self.game_status == GameStatus::Ongoing {
+            if self.all_items_taken && self.heisters.iter().all(|h| h.has_escaped) {
+                self.game_status = GameStatus::Victory;
+                return;
+            }
+            let now = get_current_time_secs();
+            if self.game_started != 0 && now > self.timer_runs_out {
+                info!("Time ran out for game {:?}, you lost!", self.game_name);
+                self.game_status = GameStatus::Defeat;
+                return;
+            }
         }
     }
 

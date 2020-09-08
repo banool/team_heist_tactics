@@ -28,13 +28,6 @@ const TimerComponent = () => {
   };
 
   const getMessage = (): string => {
-    let defeat_message = "Defeat! You ran out of time!";
-    // We do this check because when the game enters a terminal state,
-    // it isn't guaranteed that the server will push this state to
-    // the client right now.
-    if (seconds_left < 0) {
-      return defeat_message;
-    }
     switch (+game_status) {
       case GameStatus.STAGING:
         throw "Shouldn't see this component while STAGING";
@@ -43,9 +36,11 @@ const TimerComponent = () => {
       case GameStatus.ONGOING:
         return `Seconds left: ${seconds_left}`;
       case GameStatus.VICTORY:
-        return "Victory! You made it out with ${seconds_left} to spare, congrats!";
+        // TODO: we should include ${seconds_left} here - however, the timer
+        // continues to update after the game is in Victory state
+        return "Victory!";
       case GameStatus.DEFEAT:
-        return defeat_message;
+        return "Defeat! You ran out of time!";
     }
     throw "Should not be able to get here";
   };
