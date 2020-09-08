@@ -275,7 +275,7 @@ impl GameState {
         None
     }
 
-    pub fn move_blocked_by_wall(
+    pub fn adjacent_move_blocked_by_wall(
         &self,
         grid: &HashMap<MapPosition, Square>,
         heister_pos: &MapPosition,
@@ -291,11 +291,16 @@ impl GameState {
                 ))
             }
         };
-        let blocking_wall = match heister_pos.adjacent_move_direction(dest_pos) {
-            MoveDirection::North => heister_square.north_wall,
-            MoveDirection::East => heister_square.east_wall,
-            MoveDirection::South => heister_square.south_wall,
-            MoveDirection::West => heister_square.west_wall,
+        let blocking_wall = match heister_pos.get_move_direction(dest_pos) {
+            Some(MoveDirection::North) => heister_square.north_wall,
+            Some(MoveDirection::East) => heister_square.east_wall,
+            Some(MoveDirection::South) => heister_square.south_wall,
+            Some(MoveDirection::West) => heister_square.west_wall,
+            None => {
+                return MoveValidity::Invalid(format!(
+                    "Cannot compute blocking walls for non-cardinal move"
+                ))
+            }
         };
 
         let invalid_msg = format!("Wall {:?} cannot be passed through", blocking_wall);
@@ -328,10 +333,105 @@ impl GameState {
         heister_pos: &MapPosition,
         dest_pos: &MapPosition,
     ) -> MoveValidity {
-        let validity = self.move_blocked_by_wall(&grid, &heister_pos, &dest_pos);
+        let validity = self.adjacent_move_blocked_by_wall(&grid, &heister_pos, &dest_pos);
         match validity {
             MoveValidity::Invalid(_) => return validity,
             _ => (),
+        }
+        self.position_is_occupied(&dest_pos)
+    }
+
+    /// Get a Vec<MapPosition> from heister_pos to dest_pos.
+    /// Does not include heister_pos - the reason is that when checking for
+    /// collisions, we don't want to disallow moves if a heister would "collide"
+    /// with itself.
+    /// Also, you can't create a range from a larger number to a smaller number.
+    /// That's why for negative-oriented directions (North, West) we go from dest to
+    /// heister rather than the more intuitive heister-to-dest.
+    fn get_positions_on_path(
+        &self,
+        heister_pos: &MapPosition,
+        dest_pos: &MapPosition,
+        direction: &MoveDirection,
+    ) -> Vec<MapPosition> {
+        let mut positions: Vec<MapPosition> = Vec::new();
+        match direction {
+            MoveDirection::North => {
+                for y in dest_pos.y..heister_pos.y {
+                    positions.push(MapPosition {
+                        x: heister_pos.x,
+                        y,
+                    });
+                }
+            }
+            MoveDirection::South => {
+                for y in (heister_pos.y + 1)..=dest_pos.y {
+                    positions.push(MapPosition {
+                        x: heister_pos.x,
+                        y,
+                    });
+                }
+            }
+            MoveDirection::East => {
+                for x in (heister_pos.x + 1)..=dest_pos.x {
+                    positions.push(MapPosition {
+                        x,
+                        y: heister_pos.y,
+                    });
+                }
+            }
+            MoveDirection::West => {
+                for x in dest_pos.x..heister_pos.x {
+                    positions.push(MapPosition {
+                        x,
+                        y: heister_pos.y,
+                    });
+                }
+            }
+        }
+        positions
+    }
+
+    /// Validate multispace move - for mouse-based click and drag across
+    /// multiple spaces in a single move.
+    /// Very similar to validate_adjacent_move, except we check whether any two
+    /// adjacent squares on the path are blocked by a wall.
+    /// We also check for map existence and collisions.
+    pub fn validate_multispace_move(
+        &self,
+        grid: &HashMap<MapPosition, Square>,
+        heister_pos: &MapPosition,
+        dest_pos: &MapPosition,
+    ) -> MoveValidity {
+        // This is very similar to validate_adjacent_move, except!
+        // We must check if ANY wall is blocked from heister_pos to dest_pos
+
+        // Assume direction is valid, because we had to check it higher in the stack
+        let direction = heister_pos.get_move_direction(dest_pos).unwrap();
+        let path: Vec<MapPosition> = self.get_positions_on_path(heister_pos, dest_pos, &direction);
+        // validate that all positions on path exist in grid & check for collisions
+        for pos in &path {
+            match grid.get(&pos) {
+                Some(_) => (),
+                None => {
+                    return MoveValidity::Invalid(format!(
+                        "Cannot move through position {:?} because it does not exist.",
+                        pos
+                    ));
+                }
+            }
+            let collision = self.position_is_occupied(&pos);
+            if collision != MoveValidity::Valid {
+                return collision;
+            }
+        }
+        // Do a pairwise-sliding check for if any pair of squares are blocked
+        for pair in path.windows(2) {
+            let validity = self.adjacent_move_blocked_by_wall(&grid, &pair[0], &pair[1]);
+            match validity {
+                MoveValidity::Invalid(_) => return validity,
+                _ => (),
+            }
         }
         self.position_is_occupied(&dest_pos)
     }

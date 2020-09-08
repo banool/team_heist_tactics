@@ -318,27 +318,32 @@ impl Game {
         dest_pos: &MapPosition,
         player_name: &PlayerName,
     ) -> MoveValidity {
-        let direction = current_pos.adjacent_move_direction(&dest_pos);
+        let direction = current_pos.get_move_direction(&dest_pos);
         match direction {
-            MoveDirection::North => {
+            Some(MoveDirection::North) => {
                 if !self.player_has_ability(&player_name, &Ability::MoveNorth) {
                     return MoveValidity::Invalid("You cannot move heisters North".to_string());
                 }
             }
-            MoveDirection::East => {
+            Some(MoveDirection::East) => {
                 if !self.player_has_ability(&player_name, &Ability::MoveEast) {
                     return MoveValidity::Invalid("You cannot move heisters East".to_string());
                 }
             }
-            MoveDirection::South => {
+            Some(MoveDirection::South) => {
                 if !self.player_has_ability(&player_name, &Ability::MoveSouth) {
                     return MoveValidity::Invalid("You cannot move heisters South".to_string());
                 }
             }
-            MoveDirection::West => {
+            Some(MoveDirection::West) => {
                 if !self.player_has_ability(&player_name, &Ability::MoveWest) {
                     return MoveValidity::Invalid("You cannot move heisters West".to_string());
                 }
+            }
+            None => {
+                return MoveValidity::Invalid(format!(
+                    "Move in non-cardinal direction cannot be completed."
+                ))
             }
         }
         MoveValidity::Valid
@@ -370,7 +375,7 @@ impl Game {
             }
             None => {
                 let msg = format!("Position {:?} not on map", dest_pos);
-                validity = MoveValidity::Invalid(msg);
+                return MoveValidity::Invalid(msg);
             }
         }
         match dest_square.square_type {
@@ -414,21 +419,38 @@ impl Game {
             }
         }
 
-        if heister_pos.is_adjacent(&dest_pos) && validity.is_invalid() {
-            validity = self.validate_player_has_move_direction_ability(
-                &heister_pos,
-                &dest_pos,
-                &player_name,
-            );
-            validity = if validity.is_invalid() {
-                validity
+        if validity.is_invalid() {
+            if heister_pos.is_adjacent(&dest_pos) {
+                validity = self.validate_player_has_move_direction_ability(
+                    &heister_pos,
+                    &dest_pos,
+                    &player_name,
+                );
+                validity = if validity.is_invalid() {
+                    validity
+                } else {
+                    self.game_state
+                        .validate_adjacent_move(&grid, heister_pos, &dest_pos)
+                };
             } else {
-                self.game_state
-                    .validate_adjacent_move(&grid, heister_pos, &dest_pos)
-            };
+                // The move is not adjacent, not escalator, not teleport - is it a
+                // multi-square click and drag?
+                validity = self.validate_player_has_move_direction_ability(
+                    &heister_pos,
+                    &dest_pos,
+                    &player_name,
+                );
+                validity = if validity.is_invalid() {
+                    validity
+                } else {
+                    self.game_state
+                        .validate_multispace_move(&grid, &heister_pos, &dest_pos)
+                }
+            }
         }
 
         // Regardless of the move type, if the move is valid, we execute it
+        // TODO: refactor this (move execution) into its own function
         if validity == MoveValidity::Valid {
             let heister = self
                 .game_state

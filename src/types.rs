@@ -134,17 +134,27 @@ impl MapPosition {
         }
     }
 
-    pub fn adjacent_move_direction(&self, pos: &MapPosition) -> MoveDirection {
-        // NOTE: I assume that the two positions are adjacent. Might not be relevant
-        // Also suffers from NO VALIDATION AT ALL illness
-        if self.x > pos.x {
-            return MoveDirection::West;
-        } else if self.x < pos.x {
-            return MoveDirection::East;
-        } else if self.y > pos.y {
-            return MoveDirection::North;
+    /// Returns None in two cases:
+    /// 1. move is not in a single cardinal direction (ie. nw, sse)
+    /// 2. pos == self
+    pub fn get_move_direction(&self, pos: &MapPosition) -> Option<MoveDirection> {
+        if self.x == pos.x {
+            // Then we suppose it's a move in the y direction
+            if self.y == pos.y {
+                return None; // (2) pos == self
+            } else if self.y > pos.y {
+                return Some(MoveDirection::North);
+            } else {
+                return Some(MoveDirection::South);
+            }
         } else {
-            return MoveDirection::South;
+            if self.y != pos.y {
+                return None; // (1) non-cardinal direction
+            } else if self.x > pos.x {
+                return Some(MoveDirection::West);
+            } else {
+                return Some(MoveDirection::East);
+            }
         }
     }
 
