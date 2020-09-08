@@ -253,8 +253,12 @@ impl Game {
         }
     }
 
-    fn pre_update_auxilliary_state(&mut self) {
+    fn update_game_status(&mut self) {
         self.game_state.update_game_status();
+    }
+
+    fn pre_update_auxilliary_state(&mut self) {
+        self.update_game_status();
     }
 
     fn update_auxiliary_state(&mut self) -> () {
@@ -263,6 +267,7 @@ impl Game {
         self.game_state.update_possible_placements(&grid);
         self.game_state.update_possible_escalators(&grid);
         self.update_possible_teleports(&grid);
+        self.update_game_status();
     }
 
     /// Possible teleport destinations that a Heister can reach with a Teleport move
