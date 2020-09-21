@@ -48,7 +48,7 @@
     "webpack-merge": "^5.0.9"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.3",
+    "@types/jest": "^26.0.14",
     "@types/node": "^14.0.14",
     "import-sort-cli": "^6.0.0",
     "jest": "^26.1.0",
