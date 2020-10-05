@@ -963,10 +963,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@giantmachines/redux-websocket@^1.2.1":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@giantmachines/redux-websocket/-/redux-websocket-1.2.3.tgz#0ca69a8cefd3dce6797a6be13745e132e7a262fb"
-  integrity sha512-ydc5Fa1wqnCuJ/IgbZw8KcMsICLWwNSMsnu9qxvMnRCSkklH5KGY70EAv+Wd23NxT7m59mMzYLB/VHsn1q9ojg==
+"@giantmachines/redux-websocket@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@giantmachines/redux-websocket/-/redux-websocket-1.3.0.tgz#14d0fddd4c72a417d67b891c828aa7b0a0390a01"
+  integrity sha512-CJDFFmq7Mk3GSWn23DYrPeNOs29/GzDb0iac1okf8IGu+LFnb9+2LKDZIdp9uLKX+vsMcaLd9aSM0/xEPg0iow==
   dependencies:
     redux "~4"
 
