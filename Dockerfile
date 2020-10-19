@@ -1,5 +1,5 @@
 # Get pre-compiled binary for protoc separately
-FROM curlimages/curl:7.71.1 as protoc_build
+FROM curlimages/curl:7.73.0 as protoc_build
 
 WORKDIR /tmp
 ENV protocversion=3.12.3
