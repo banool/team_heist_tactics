@@ -8,7 +8,7 @@ RUN mkdir protoc_dl
 RUN unzip protoc.zip -d protoc_dl
 
 # UI stage of the build
-FROM node:14 as frontend_build
+FROM node:15 as frontend_build
 
 # Copy in protoc
 COPY --from=protoc_build /tmp/protoc_dl/bin/protoc /usr/bin
