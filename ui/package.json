@@ -24,7 +24,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
     "@babel/plugin-transform-react-jsx": "^7.10.4",
     "@babel/preset-typescript": "^7.10.1",
-    "@giantmachines/redux-websocket": "^1.2.1",
+    "@giantmachines/redux-websocket": "^1.4.0",
     "@reduxjs/toolkit": "^1.4.0",
     "@types/google-protobuf": "^3.7.2",
     "@types/react": "^16.9.41",
