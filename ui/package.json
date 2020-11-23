@@ -27,7 +27,7 @@
     "@giantmachines/redux-websocket": "^1.2.1",
     "@reduxjs/toolkit": "^1.4.0",
     "@types/google-protobuf": "^3.7.2",
-    "@types/react": "^16.9.41",
+    "@types/react": "^17.0.0",
     "@types/react-redux": "^7.1.9",
     "@types/webpack-env": "^1.15.2",
     "babel-loader": "^8.1.0",
