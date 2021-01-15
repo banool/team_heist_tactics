@@ -1,14 +1,14 @@
 # Get pre-compiled binary for protoc separately
-FROM curlimages/curl:7.71.1 as protoc_build
+FROM curlimages/curl:7.74.0 as protoc_build
 
 WORKDIR /tmp
-ENV protocversion=3.12.3
+ENV protocversion=3.14.0
 RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v${protocversion}/protoc-${protocversion}-linux-x86_64.zip --output protoc.zip
 RUN mkdir protoc_dl
 RUN unzip protoc.zip -d protoc_dl
 
 # UI stage of the build
-FROM node:14 as frontend_build
+FROM node:15 as frontend_build
 
 # Copy in protoc
 COPY --from=protoc_build /tmp/protoc_dl/bin/protoc /usr/bin
