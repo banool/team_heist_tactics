@@ -26,13 +26,10 @@ RUN yarn run prodbuild
 
 # Server stage of the build
 # FROM rust:1.44-alpine3.11 as build
-FROM rust:1.44 as backend_build
+FROM rust:1.49 as backend_build
 
 ENV app=tht
 WORKDIR /${app}
-
-# Use nightly
-RUN rustup default nightly-2020-07-12 
 
 # Files listing dependencies
 COPY Cargo.toml Cargo.lock ./

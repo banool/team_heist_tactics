@@ -13,7 +13,7 @@ echo "Doing $DEV_MODE build"
 cd ui
 rm -rf dist
 ./generate_types.sh
-echo 'Note: Not running yarn install'
+echo 'Note: Not running yarn install, you must do that yourself'
 if [ "$DEV_MODE" = "dev" ]; then
     yarn run devbuild
 elif [ "$DEV_MODE" = "prod" ]; then

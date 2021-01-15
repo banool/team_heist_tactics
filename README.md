@@ -20,7 +20,7 @@ First, make sure you have all this stuff:
 - Node (>= v14, use nvm to help with this)
 - Yarn (https://classic.yarnpkg.com/en/docs/install/)
 - Cargo (https://rustup.rs/)
-- Rust nightly-2020-07-12 (try `rustup default nightly-2020-07-12`)
+- Rust >=1.49
 - Protoc (http://google.github.io/proto-lens/installing-protoc.html)
 
 Getting all the JS dependencies:
