@@ -126,9 +126,8 @@ export function teleport(
       return;
     }
 
-    let possible_teleports: PossibleTeleports = getPossibleTeleportsMap(
-      game_state
-    );
+    let possible_teleports: PossibleTeleports =
+      getPossibleTeleportsMap(game_state);
     // This does not need a guard because tile 1 will always populate possible teleports with at least
     // one teleport per color.
     let teleports: MapPosition[] =

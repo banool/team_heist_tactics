@@ -17,10 +17,10 @@ This makes sure that you format your code before you commit.
 
 First, make sure you have all this stuff:
 
-- Node (>= v14, use nvm to help with this)
+- Node (>= v16, use nvm to help with this)
 - Yarn (https://classic.yarnpkg.com/en/docs/install/)
 - Cargo (https://rustup.rs/)
-- Rust >=1.49
+- Rust >=1.53
 - Protoc (http://google.github.io/proto-lens/installing-protoc.html)
 
 Getting all the JS dependencies:
