@@ -5406,10 +5406,10 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
-react-konva@^17.0.2-4:
-  version "17.0.2-4"
-  resolved "https://registry.yarnpkg.com/react-konva/-/react-konva-17.0.2-4.tgz#afd0968e1295b624bf2a7a154ba294e0d5be55cd"
-  integrity sha512-YvRVPT81y8sMQV1SY1/tIDetGxBK+7Rk86u4LmiyDBLLE17vD78F01b8EC3AuP3nI3hUaTblfBugUF35cm6Etg==
+react-konva@^17.0.2-5:
+  version "17.0.2-5"
+  resolved "https://registry.yarnpkg.com/react-konva/-/react-konva-17.0.2-5.tgz#e70b0acf323402de0a540f27b300fbe7ed151849"
+  integrity sha512-IyzdfqRDK8r1ulp/jbLPX18AuO+n5yNtL0+4T0QEUsgArRqIl/VRCG1imA5mYJBk0cBNC5+fWDHN+HWEW62ZEQ==
   dependencies:
     react-reconciler "~0.26.2"
     scheduler "^0.20.2"
