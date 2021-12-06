@@ -25,7 +25,7 @@ RUN ./generate_types.sh
 RUN yarn run prodbuild
 
 # Server stage of the build
-FROM rust:1.53 as backend_build
+FROM rust:1.57.0 as backend_build
 
 ENV app=tht
 WORKDIR /${app}
