@@ -17,7 +17,7 @@ jobs:
       build: ${{ steps.filter.outputs.build }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.1.0
     - uses: dorny/paths-filter@v2.2.0
       id: filter
       with:
@@ -36,7 +36,7 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - run: rustup toolchain install stable --profile minimal --component rustfmt
       - run: cargo fmt -- --check
 
@@ -50,7 +50,7 @@ jobs:
         working-directory: ui
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-node@v2.1.1
         with:
           node-version: '15.6.0'
@@ -64,7 +64,7 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -84,7 +84,7 @@ jobs:
         working-directory: ui
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-node@v2.1.1
         with:
           node-version: '15.6.0'
@@ -127,7 +127,7 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.1.0
     - uses: whoan/docker-build-with-cache-action@v5
       with:
         username: ${{ github.actor }}
